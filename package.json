@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/adv0cat/quench-store/issues"
   },
-  "homepage": "https://github.com/adv0cat/quench-store#readme"
+  "homepage": "https://github.com/adv0cat/quench-store#readme",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.4",
+    "vite": "^4.2.2"
+  }
 }
