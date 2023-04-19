@@ -1,0 +1,24 @@
+{
+  "name": "quench-store",
+  "version": "0.1.0",
+  "description": "Simple store library with actions for reactive store changes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adv0cat/quench-store.git"
+  },
+  "keywords": [
+    "store",
+    "reactive",
+    "action"
+  ],
+  "author": "adv0cat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adv0cat/quench-store/issues"
+  },
+  "homepage": "https://github.com/adv0cat/quench-store#readme"
+}
