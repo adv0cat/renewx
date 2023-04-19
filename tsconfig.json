@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "ES2015",
+    "module": "ES2015",
+    "outDir": "build",
+    "rootDir": "src",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+  },
+  "exclude": ["node_modules", "build"]
+}
