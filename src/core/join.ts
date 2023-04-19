@@ -1,7 +1,7 @@
 import type { AnyStore, JoinStoreID, Listener, Store, StoreTypes } from "../interfaces/store";
 import type { ActionInfo } from "../interfaces/action";
 import type { Unsubscribe } from "../interfaces/core";
-import { concat } from "../utils/concat";
+import { concatStores } from "../utils/concat-stores";
 import { Freeze, freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getJoinStoreID } from "../utils/get-join-store-id";
@@ -9,7 +9,7 @@ import { getInnerSetActionID } from "../utils/get-inner-set-action-id";
 import { ACTION } from "../inner/counters";
 
 export const join = <Store1 extends AnyStore, Store2 extends AnyStore, Stores extends AnyStore[], R extends [...StoreTypes<[Store1, Store2, ...Stores]>]>(store1: Store1, store2: Store2, ...otherStores: Stores): Store<R> => {
-    const stores = concat(store1, store2, otherStores)
+    const stores = concatStores(store1, store2, otherStores)
     const storeID = getJoinStoreID(stores)
     const listeners = [] as Listener<R>[]
 
