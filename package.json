@@ -4,7 +4,7 @@
   "description": "Simple store library with actions for reactive store changes",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build --mode=production"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^18.15.11",
     "typescript": "^5.0.4",
-    "vite": "^4.2.2"
+    "vite": "^4.2.2",
+    "vite-plugin-dts": "^2.3.0"
   }
 }

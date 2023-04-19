@@ -9,9 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
-    "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
   },
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build", "vite.config.ts"]
 }
