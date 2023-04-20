@@ -18,10 +18,10 @@ jobs:
       - name: Build NPM package
         run: npm run build
 
-      - name: Save build artifacts
+      - name: Save package artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
+          name: package-artifacts
           path: |
             build
             package.json
@@ -45,7 +45,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-artifacts
+          name: package-artifacts
 
       - name: Publish NPM package
         run: npm publish
