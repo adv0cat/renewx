@@ -1,49 +1,39 @@
-import type { ActionInfo } from "../interfaces/action";
 import type { Listener, Store, StoreID, StoreOptions } from "../interfaces/store";
-import { Freeze, freeze } from "../utils/freeze";
+import { type Freeze, freeze } from "../utils/freeze";
+import { ACTION } from "./action";
 import { getArgsForLog } from "../utils/get-args-for-log";
-import { getStoreId } from "../utils/get-store-id";
-import { ACTION, STORE } from "../inner/counters";
+import { getIDCounter } from "../utils/get-id-counter";
+import { getCoreFnList } from "../utils/get-core-fn-list";
+
+const STORE = getIDCounter()
 
 export const store = <State>(initState: State, { name }: StoreOptions = {}): Store<State> => {
-    const storeID = getStoreId(name ?? STORE.newID())
-    const listeners = [] as Listener<State>[]
-
     let state = freeze(initState)
+
+    const [listen, notify] = getCoreFnList([] as Listener<State>[])
+    const storeID: StoreID = `[${ name ?? STORE.newID() }]`
 
     console.info(`[${ storeID }] created`)
 
-    const notify = (info: ActionInfo) => {
-        const _state = state
-        listeners.forEach((listener) => listener(_state, info))
-    }
-
     return {
+        listen,
+        id: (): StoreID => storeID,
         get: (): Freeze<State> => state,
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
                 console.group(`[${ storeID }] ${ actionID }(${ getArgsForLog(args) })`)
                 const newState = action(state, ...args)
-                let isChanged = state !== newState
-                isChanged
-                    ? console.info("%c changed:", "color: #BDFF66", state, "->", newState)
-                    : console.info("%c not changed", "color: #FF5E5B")
-                if (isChanged) {
+                if (state !== newState) {
+                    console.info("%c changed:", "color: #BDFF66", state, "->", newState)
                     state = freeze(newState)
+                    notify(state, { actionID })
+                    console.groupEnd()
+                    return true
                 }
+                console.info("%c not changed", "color: #FF5E5B")
                 console.groupEnd()
-
-                isChanged && notify({ actionID })
-                return isChanged
             }
         },
-        listen: (listener: Listener<State>) => {
-            listeners.push(listener)
-            return () => {
-                listeners.splice(listeners.indexOf(listener), 1)
-            }
-        },
-        id: (): StoreID => storeID
     } as Store<State>
 }

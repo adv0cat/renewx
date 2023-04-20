@@ -2,8 +2,8 @@ import type { ActionFn, ActionInfo, ActionOptions } from "./action";
 import type { IsChanged, OmitFirstArg, Unsubscribe } from "./core";
 import type { Freeze } from "../utils/freeze";
 
-export type StoreID = `store-${ number }` | `${ string }Store`
-export type JoinStoreID = `<${ string }>JoinStore`
+export type StoreID = `[${ number | string }]`
+export type JoinStoreID = `<${ string }>`
 
 export type Listener<State> = (state: Freeze<State>, info: ActionInfo) => void
 export type StoreOptions = Partial<{ name: string }>

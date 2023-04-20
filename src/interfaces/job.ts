@@ -1,5 +1,6 @@
-export type JobID = `job-${ number }` | `${ string }Job`
+import type { AsyncFnResult, AsyncFn } from "./core";
 
-export type JobFn = (...args: any[]) => Promise<unknown>
-export type Job<NewJobFn extends JobFn> = (...args: Parameters<NewJobFn>) => ReturnType<NewJobFn>
+export type JobID = `{${ number | string }}`
+
+export type Job<NewJobFn extends AsyncFn> = (...args: Parameters<NewJobFn>) => Promise<AsyncFnResult<NewJobFn>>
 export type JobOptions = Partial<{ name: string }>

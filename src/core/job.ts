@@ -1,36 +1,35 @@
-import type { Job, JobFn, JobOptions } from "../interfaces/job";
+import type { Job, JobID, JobOptions } from "../interfaces/job";
+import type { AsyncFn } from "../interfaces/core";
 import { getArgsForLog } from "../utils/get-args-for-log";
-import { getJobId } from "../utils/get-job-id";
-import { JOB } from "../inner/counters";
+import { getIDCounter } from "../utils/get-id-counter";
 
-const runningJobs = [] as Promise<unknown>[]
+const JOB = getIDCounter()
+const RUNNING_JOBS = [] as Promise<unknown>[]
 
-export const job = <NewJobFn extends JobFn>(jobFn: NewJobFn, { name }: JobOptions = {}): Job<NewJobFn> => {
-    const jobID = getJobId(name ?? JOB.newID())
+export const job = <NewJobFn extends AsyncFn>(jobFn: NewJobFn, { name }: JobOptions = {}): Job<NewJobFn> => {
+    const jobID: JobID = `{${ name ?? JOB.newID() }}`
 
     console.info(`[${ jobID }] created`)
 
     return (...args) => {
-        const argsLog = `(${ getArgsForLog(args) })`
-        console.log(`[${ jobID }] run${ argsLog }`)
-        const runningJob = jobFn(...args) as ReturnType<NewJobFn>
-        runningJobs.push(runningJob)
+        console.log(`[${ jobID }] run(${ getArgsForLog(args) })`)
+        const runningJob = jobFn(...args)
+        RUNNING_JOBS.push(runningJob)
 
         const removeJob = () => {
-            console.log(`[${ jobID }] before removeJob`, "->", "runningJobs:", runningJobs)
-            runningJobs.splice(runningJobs.indexOf(runningJob), 1)
-            console.log(`[${ jobID }] after removeJob`, "->", "runningJobs:", runningJobs)
+            RUNNING_JOBS.splice(RUNNING_JOBS.indexOf(runningJob), 1)
         }
-        runningJob.then((result) => {
-            console.group(`[${ jobID }]%c resolve${ argsLog }`, "color: #BDFF66", "->", result)
+        return runningJob.then((result) => {
+            console.group(`[${ jobID }]%c resolve(${ getArgsForLog(args) })`, "color: #BDFF66", "->", result)
             removeJob()
             console.groupEnd()
+            return result
         }, (reason) => {
-            console.group(`[${ jobID }]%c reject${ argsLog }`, "color: #FF5E5B")
+            console.group(`[${ jobID }]%c reject(${ getArgsForLog(args) })`, "color: #FF5E5B")
             console.error(reason)
             removeJob()
             console.groupEnd()
+            return reason
         })
-        return runningJob
     }
 }
