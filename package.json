@@ -2,7 +2,7 @@
   "name": "@adv0cat/quench-store",
   "version": "0.1.0",
   "description": "Simple store library with actions for reactive store changes",
-  "main": "index.js",
+  "main": "build/lib.js",
   "type": "module",
   "sideEffects": false,
   "scripts": {

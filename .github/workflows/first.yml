@@ -1,18 +1,51 @@
-name: First GitHub Actions
-on: [workflow_dispatch]
+name: Build and Publish NPM Package with GitHub Actions
+on: [ workflow_dispatch ]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Print MY_SECRET
-        run: echo MY_SECRET ${{ secrets.MY_SECRET }}
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: NPM Install
+
+      - name: NPM install
         run: npm ci
-      - name: Build package
+
+      - name: Build NPM package
         run: npm run build
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            build
+            package.json
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Publish NPM package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
