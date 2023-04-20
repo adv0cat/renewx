@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "description": "Simple store library with actions for reactive store changes",
   "main": "index.js",
+  "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "rm -rf build; npm run build:esm:base -- --analyze=verbose --metafile=build/meta.json; tsc --emitDeclarationOnly",
+    "build": "rm -rf build; npm run build:base -- --analyze=verbose --metafile=build/meta.json; tsc --emitDeclarationOnly",
     "build:base": "esbuild src/lib.ts --bundle --platform=neutral --outdir=build --drop:console --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm",
-    "build:watch": "npm run build:esm:base -- --watch"
+    "build:watch": "npm run build:base -- --watch",
   },
   "repository": {
     "type": "git",
