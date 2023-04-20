@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "description": "Simple store library with actions for reactive store changes",
   "main": "index.js",
+  "sideEffects": false,
   "scripts": {
-    "build": "vite build --mode=production"
+    "build": "rm -rf build; npm run build:esm:base -- --analyze=verbose --metafile=build/meta.json; tsc --emitDeclarationOnly",
+    "build:base": "esbuild src/lib.ts --bundle --platform=neutral --outdir=build --drop:console --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm",
+    "build:watch": "npm run build:esm:base -- --watch"
   },
   "repository": {
     "type": "git",
@@ -12,6 +15,8 @@
   },
   "keywords": [
     "store",
+    "state",
+    "state manager",
     "reactive",
     "action"
   ],
@@ -22,9 +27,7 @@
   },
   "homepage": "https://github.com/adv0cat/quench-store#readme",
   "devDependencies": {
-    "@types/node": "^18.15.11",
-    "typescript": "^5.0.4",
-    "vite": "^4.2.2",
-    "vite-plugin-dts": "^2.3.0"
+    "esbuild": "0.17.17",
+    "typescript": "^5.0.4"
   }
 }
