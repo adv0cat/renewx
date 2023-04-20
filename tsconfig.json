@@ -10,5 +10,5 @@
     "esModuleInterop": true,
     "declaration": true,
   },
-  "exclude": ["node_modules", "build", "src/lib.run.ts"]
+  "exclude": ["node_modules", "build"]
 }
