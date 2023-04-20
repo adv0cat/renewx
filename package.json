@@ -1,5 +1,5 @@
 {
-  "name": "quench-store",
+  "name": "@adv0cat/quench-store",
   "version": "0.1.0",
   "description": "Simple store library with actions for reactive store changes",
   "main": "index.js",
