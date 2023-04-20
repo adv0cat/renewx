@@ -1,10 +1,16 @@
 # Quench Store
 
+## Install
+
+```shell
+npm i @adv0cat/quench-store
+```
+
 ## Usage
 
 Simple urls store:
 ```ts
-import { atom } from "quench-store"
+import { store } from "@adv0cat/quench-store"
 
 // create store
 const urlsStore = store<string[]>([], { name: "urls" });
