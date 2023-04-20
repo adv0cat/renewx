@@ -1,12 +1,13 @@
 {
   "name": "@adv0cat/quench-store",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Simple store library with actions for reactive store changes",
-  "main": "build/lib.js",
+  "main": "./build/lib.js",
+  "types": "./build/lib.d.ts",
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "rm -rf build; npm run build:base -- --analyze=verbose --metafile=build/meta.json; tsc --emitDeclarationOnly",
+    "build": "rm -rf build; npm run build:base -- --analyze=verbose; tsc --emitDeclarationOnly",
     "build:base": "esbuild src/lib.ts --bundle --platform=neutral --outdir=build --drop:console --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm",
     "build:watch": "npm run build:base -- --watch"
   },
@@ -30,5 +31,8 @@
   "devDependencies": {
     "esbuild": "0.17.17",
     "typescript": "^5.0.4"
-  }
+  },
+  "files": [
+    "./build"
+  ]
 }
