@@ -25,6 +25,8 @@ jobs:
           path: |
             build
             package.json
+            LICENSE
+            README.md
 
   publish:
     needs: build
