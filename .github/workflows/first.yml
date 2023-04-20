@@ -1,0 +1,18 @@
+name: First GitHub Actions
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print MY_SECRET
+        run: echo MY_SECRET ${{ secrets.MY_SECRET }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: NPM Install
+        run: npm ci
+      - name: Build package
+        run: npm build
