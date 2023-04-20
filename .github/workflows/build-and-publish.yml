@@ -1,4 +1,4 @@
-name: Build and Publish NPM Package with GitHub Actions
+name: Build and Publish NPM Package
 on: [ workflow_dispatch ]
 jobs:
   build:
