@@ -8,81 +8,106 @@ npm i @adv0cat/quench-store
 
 ## Usage
 
-Example of urls store:
-```ts
-import { store } from "@adv0cat/quench-store"
+### Store
 
-// create store
+#### urls store:
+
+```ts
+import { store } from "@adv0cat/quench-store";
+
 const urlsStore = store<string[]>([], { name: "urls" });
 
-// listen store changes
 urlsStore.listen((urls) => {
-    // TODO: something with state changes
-    console.log("[index] urls:", urls)
-})
+    console.log("urls:", urls);
+});
 
-// create action for change store
 const addUrl = urlsStore.action((urls, url: string) => {
-    return urls.concat(url)
-}, { id: "addUrl" })
+    return urls.concat(url);
+}, { id: "addUrl" });
 
-// use action for change store
-addUrl("https://npmjs.com")
+addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 ```
 
-Example of isLoading and urls stores:
+#### isLoading store:
+
 ```ts
-import { store } from "@adv0cat/quench-store"
+import { store } from "@adv0cat/quench-store";
 
-// create stores
 const isLoadingStore = store(false, { name: "isLoading" });
-const urlsStore = store<string[]>([], { name: "urls" });
 
-// listen stores changes
-urlsStore.listen((urls) => {
-    // TODO: something with urls state changes
-    console.log("[index] urls:", urls)
-})
 isLoadingStore.listen((isLoading) => {
-    // TODO: something with isLoading state changes
-    console.log("[index] isLoading:", isLoading)
-})
+    console.log("isLoading:", isLoading);
+});
 
-// create actions for change stores
-const addUrl = urlsStore.action((urls, url: string) => urls.concat(url), { id: "addUrl" })
-const startLoading = isLoadingStore.action(() => true, { id: "startLoading" })
-const endLoading = isLoadingStore.action(() => false, { id: "endLoading" })
+const startLoading = isLoadingStore.action(() => true);
+const endLoading = isLoadingStore.action(() => false);
 
-// use actions for change stores
-startLoading()
-addUrl("https://npmjs.com")
-endLoading()
+startLoading(); // isLoading: true
+endLoading();   // isLoading: false
 ```
 
-Example of join store:
-```ts
-import { store, join } from "@adv0cat/quench-store"
+### Join
 
-// create stores
+#### loading store:
+
+```ts
+import { store, join } from "@adv0cat/quench-store";
+
 const isLoadingStore = store(false, { name: "isLoading" });
 const urlsStore = store<string[]>([], { name: "urls" });
-const loadingStore = join(isLoadingStore, urlsStore)
+const loadingStore = join(isLoadingStore, urlsStore);
 
-// listen store changes
 loadingStore.listen(([urls, isLoading]) => {
-    // TODO: something with state changes
-    console.log("[index] urls:", urls, "isLoading:", isLoading)
-})
+    console.log("urls:", urls, "isLoading:", isLoading);
+});
 
-// create actions for change stores
 const addUrl = loadingStore.action((state, url: string) => {
-    const [urls, isLoading] = state
-    return isLoading ? state : [urls.concat(url), true]
-}, { id: "addUrl" })
-const endLoading = isLoadingStore.action(() => false, { id: "endLoading" })
+    const [urls, isLoading] = state;
+    return isLoading ? state : [urls.concat(url), true];
+});
+const endLoading = isLoadingStore.action(() => false);
 
-// use actions for change stores
-addUrl("https://npmjs.com") // this url will be added
-addUrl("https://google.com") // this url will not be added
-endLoading()
+addUrl("https://npmjs.com");    // urls: ["https://npmjs.com"] isLoading: true
+addUrl("https://google.com");   // urls: ["https://npmjs.com"] isLoading: true
+endLoading();                   // urls: ["https://npmjs.com"] isLoading: false
+addUrl("https://google.com");   // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
+```
+
+### Job
+
+#### loading store:
+
+```ts
+import { store, join } from "@adv0cat/quench-store";
+
+const isLoadingStore = store(false, { name: "isLoading" });
+const urlStore = store("", { name: "url" });
+const loadingStore = join(isLoadingStore, urlStore);
+
+loadingStore.listen(([url, isLoading]) => {
+    console.log("url:", url, "isLoading:", isLoading);
+});
+
+const startLoading = isLoadingStore.action(() => true);
+const endLoading = isLoadingStore.action(() => false);
+
+const setUrl = urlStore.action((state, url: string) => {
+    return state.length === 0 ? url : state;
+});
+
+const loadData = job(async (url: string): Promise<unknown> => {
+    setUrl(url);
+    startLoading();
+    const storeUrl = urlStore.get();
+    const response = await fetch(storeUrl);
+    const data = await response.json();
+    endLoading();
+
+    return data;
+});
+
+loadData("https://npmjs.com")
+    .then((data) => {
+        console.log("data:", data);
+    });
 ```
