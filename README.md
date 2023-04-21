@@ -46,6 +46,22 @@ startLoading(); // isLoading: true
 endLoading();   // isLoading: false
 ```
 
+#### div store:
+
+```ts
+import { store } from "quench-store";
+
+const divStore = store(document.createElement('div'), { name: "div" });
+
+divStore.watch((div) => {
+    const onClick = () => console.log("click")
+    div.addEventListener("click", onClick);
+    return () => {
+        div.removeEventListener("click", onClick)
+    }
+});
+```
+
 ### Join
 
 #### loading store:
