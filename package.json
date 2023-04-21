@@ -1,7 +1,7 @@
 {
   "name": "@adv0cat/quench-store",
   "version": "0.0.3",
-  "description": "Simple store library with actions for reactive store changes",
+  "description": "Lightweight state management library with support for asynchronous jobs and simple change subscription",
   "main": "./build/lib.js",
   "types": "./build/lib.d.ts",
   "type": "module",
