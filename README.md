@@ -106,7 +106,7 @@ const loadData = job(async (url: string): Promise<unknown> => {
     return data;
 });
 
-loadData("https://npmjs.com")
+loadData("https://example.com/api")
     .then((data) => {
         console.log("data:", data);
     });
