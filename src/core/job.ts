@@ -6,6 +6,15 @@ import { getIDCounter } from "../utils/get-id-counter";
 const JOB = getIDCounter()
 const RUNNING_JOBS = [] as Promise<unknown>[]
 
+export const allJobs = async (): Promise<void> => {
+    if (RUNNING_JOBS.length === 0) {
+        return Promise.resolve()
+    } else {
+        await Promise.all(RUNNING_JOBS);
+        return allJobs()
+    }
+}
+
 export const job = <NewJobFn extends AsyncFn>(jobFn: NewJobFn, { name }: JobOptions = {}): Job<NewJobFn> => {
     const jobID: JobID = `{${ name ?? JOB.newID() }}`
 
