@@ -10,7 +10,7 @@ export const join = <Store1 extends AnyStore, Store2 extends AnyStore, Stores ex
     const stores = ([store1, store2] as AnyStore[]).concat(otherStores)
     let states = freeze(stores.map((store) => store.get()) as R)
 
-    const [listen, notify] = getCoreFnList([] as Listener<R>[])
+    const [watch, notify] = getCoreFnList([] as Listener<R>[])
     const storeID: JoinStoreID = `<${ stores
         .map((store) => store.id())
         .join(";") }>`
@@ -21,13 +21,13 @@ export const join = <Store1 extends AnyStore, Store2 extends AnyStore, Stores ex
     const actions = stores.map((store) => {
         const actionID: ActionID = `${ store.id() }.#set`
         if (actionID in unsubscribes) {
-            unsubscribes[actionID] = store.listen((_, info) => info.actionID !== actionID && notify(states, info))
+            unsubscribes[actionID] = store.watch((_, info) => info.actionID !== actionID && notify(states, info))
         }
         return store.action((_, value) => value, { id: actionID })
     })
 
     return {
-        listen,
+        watch,
         id: (): JoinStoreID => storeID,
         get: (): Freeze<R> => states,
         action: (action, { id } = {}) => {

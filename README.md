@@ -17,7 +17,7 @@ import { store } from "@adv0cat/quench-store";
 
 const urlsStore = store<string[]>([], { name: "urls" });
 
-urlsStore.listen((urls) => {
+urlsStore.watch((urls) => {
     console.log("urls:", urls);
 });
 
@@ -35,7 +35,7 @@ import { store } from "@adv0cat/quench-store";
 
 const isLoadingStore = store(false, { name: "isLoading" });
 
-isLoadingStore.listen((isLoading) => {
+isLoadingStore.watch((isLoading) => {
     console.log("isLoading:", isLoading);
 });
 
@@ -57,7 +57,7 @@ const isLoadingStore = store(false, { name: "isLoading" });
 const urlsStore = store<string[]>([], { name: "urls" });
 const loadingStore = join(isLoadingStore, urlsStore);
 
-loadingStore.listen(([urls, isLoading]) => {
+loadingStore.watch(([urls, isLoading]) => {
     console.log("urls:", urls, "isLoading:", isLoading);
 });
 
@@ -84,7 +84,7 @@ const isLoadingStore = store(false, { name: "isLoading" });
 const urlStore = store("", { name: "url" });
 const loadingStore = join(isLoadingStore, urlStore);
 
-loadingStore.listen(([url, isLoading]) => {
+loadingStore.watch(([url, isLoading]) => {
     console.log("url:", url, "isLoading:", isLoading);
 });
 

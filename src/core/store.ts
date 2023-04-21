@@ -10,13 +10,13 @@ const STORE = getIDCounter()
 export const store = <State>(initState: State, { name }: StoreOptions = {}): Store<State> => {
     let state = freeze(initState)
 
-    const [listen, notify] = getCoreFnList([] as Listener<State>[])
+    const [watch, notify] = getCoreFnList([] as Listener<State>[])
     const storeID: StoreID = `[${ name ?? STORE.newID() }]`
 
     console.info(`[${ storeID }] created`)
 
     return {
-        listen,
+        watch,
         id: (): StoreID => storeID,
         get: (): Freeze<State> => state,
         action: (action, { id } = {}) => {

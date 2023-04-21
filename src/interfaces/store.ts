@@ -10,7 +10,7 @@ export type StoreOptions = Partial<{ name: string }>
 export type Store<State> = {
     get<FreezeState extends Freeze<State>>(): FreezeState,
     action<NewActionFn extends ActionFn<State>>(action: NewActionFn, options?: ActionOptions): (...args: OmitFirstArg<NewActionFn>) => IsChanged,
-    listen<FreezeState extends Freeze<State>>(cb: (state: FreezeState, info: ActionInfo) => void): Unsubscribe
+    watch<FreezeState extends Freeze<State>>(cb: (state: FreezeState, info: ActionInfo) => void): Unsubscribe
     id(): StoreID | JoinStoreID
 }
 export type AnyStore<State = any> = Store<State>
