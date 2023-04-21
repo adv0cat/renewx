@@ -3,7 +3,7 @@
 ## Install
 
 ```shell
-npm i @adv0cat/quench-store
+npm i quench-store
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm i @adv0cat/quench-store
 #### urls store:
 
 ```ts
-import { store } from "@adv0cat/quench-store";
+import { store } from "quench-store";
 
 const urlsStore = store<string[]>([], { name: "urls" });
 
@@ -31,7 +31,7 @@ addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 #### isLoading store:
 
 ```ts
-import { store } from "@adv0cat/quench-store";
+import { store } from "quench-store";
 
 const isLoadingStore = store(false, { name: "isLoading" });
 
@@ -51,7 +51,7 @@ endLoading();   // isLoading: false
 #### loading store:
 
 ```ts
-import { store, join } from "@adv0cat/quench-store";
+import { store, join } from "quench-store";
 
 const isLoadingStore = store(false, { name: "isLoading" });
 const urlsStore = store<string[]>([], { name: "urls" });
@@ -78,7 +78,7 @@ addUrl("https://google.com");   // urls: ["https://npmjs.com", "https://google.c
 #### loading store:
 
 ```ts
-import { store, join } from "@adv0cat/quench-store";
+import { store, join, job } from "quench-store";
 
 const isLoadingStore = store(false, { name: "isLoading" });
 const urlStore = store("", { name: "url" });
@@ -110,4 +110,13 @@ loadData("https://example.com/api")
     .then((data) => {
         console.log("data:", data);
     });
+```
+
+#### wait all jobs:
+
+```ts
+import { allJobs } from "quench-store";
+
+// ...
+await allJobs();
 ```
