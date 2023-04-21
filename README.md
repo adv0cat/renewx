@@ -84,8 +84,8 @@ const isLoadingStore = store(false, { name: "isLoading" });
 const urlStore = store("", { name: "url" });
 const loadingStore = join(isLoadingStore, urlStore);
 
-loadingStore.watch(([url, isLoading]) => {
-    console.log("url:", url, "isLoading:", isLoading);
+loadingStore.watch(([isLoading, url]) => {
+    console.log("isLoading:", isLoading, "url:", url);
 });
 
 const startLoading = isLoadingStore.action(() => true);
