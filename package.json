@@ -1,5 +1,5 @@
 {
-  "name": "@adv0cat/quench-store",
+  "name": "quench-store",
   "version": "0.0.4",
   "description": "Lightweight state management library with support for asynchronous jobs and simple change subscription",
   "main": "./build/lib.js",
