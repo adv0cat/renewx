@@ -1,6 +1,6 @@
-import type { Listener, Store, StoreID, StoreOptions } from "../interfaces/store";
-import { type Freeze, freeze } from "../utils/freeze";
+import type { Store, StoreID, StoreOptions } from "../interfaces/store";
 import { ACTION } from "./action";
+import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getIDCounter } from "../utils/get-id-counter";
 import { getCoreFnList } from "../utils/get-core-fn-list";
@@ -9,16 +9,19 @@ const STORE = getIDCounter()
 
 export const store = <State>(initState: State, { name }: StoreOptions = {}): Store<State> => {
     let state = freeze(initState)
-
-    const [watch, notify] = getCoreFnList([] as Listener<State>[])
     const storeID: StoreID = `[${ name ?? STORE.newID() }]`
+
+    const [get, id, watch, notify] = getCoreFnList(
+        () => state,
+        () => storeID
+    )
 
     console.info(`[${ storeID }] created`)
 
     return {
         watch,
-        id: (): StoreID => storeID,
-        get: (): Freeze<State> => state,
+        id,
+        get,
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
