@@ -1,4 +1,5 @@
 # Quench Store
+[![npm version](https://img.shields.io/npm/v/quench-store.svg?style=flat)](https://www.npmjs.com/package/quench-store) [![npm version](https://deno.bundlejs.com/?q=quench-store&treeshake=[{+store,join,job,allJobs+}]&badge=)](https://www.npmjs.com/package/quench-store) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/quench-store/blob/main/LICENSE)
 
 ## Install
 
