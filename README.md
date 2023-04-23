@@ -1,5 +1,5 @@
 # Quench Store
-[![npm version](https://img.shields.io/npm/v/quench-store.svg?style=flat)](https://www.npmjs.com/package/quench-store) [![npm version](https://deno.bundlejs.com/?q=quench-store&treeshake=[{+store,join,job,allJobs+}]&badge=)](https://www.npmjs.com/package/quench-store) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/quench-store/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/quench-store.svg?style=flat)](https://www.npmjs.com/package/quench-store) [![npm version](https://deno.bundlejs.com/?q=quench-store&treeshake=[{+store,adapter,join,job,allJobs+}]&badge=)](https://www.npmjs.com/package/quench-store) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/quench-store/blob/main/LICENSE)
 
 ## Install
 
@@ -11,113 +11,131 @@ npm i quench-store
 
 ### Store
 
-#### urls store:
+#### Managing an array of URLs:
 
 ```ts
 import { store } from "quench-store";
 
-const urlsStore = store<string[]>([], { name: "urls" });
+const urls = store<string[]>([]);
 
-urlsStore.watch((urls) => {
-    console.log("urls:", urls);
+urls.watch((state) => {
+    console.log("urls:", state);
 });
 
-const addUrl = urlsStore.action((urls, url: string) => {
-    return urls.concat(url);
-}, { id: "addUrl" });
+const addUrl = urls.action((state, url: string) => {
+    return state.concat(url);
+});
 
 addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 ```
 
-#### isLoading store:
+#### Managing DOM state and event handling:
 
 ```ts
 import { store } from "quench-store";
 
-const isLoadingStore = store(false, { name: "isLoading" });
+const div = store(document.createElement('div'));
 
-isLoadingStore.watch((isLoading) => {
-    console.log("isLoading:", isLoading);
+div.watch((state) => {
+    const onClick = () => console.log("click");
+    state.addEventListener("click", onClick);
+    return () => {
+        state.removeEventListener("click", onClick);
+    };
 });
-
-const startLoading = isLoadingStore.action(() => true);
-const endLoading = isLoadingStore.action(() => false);
-
-startLoading(); // isLoading: true
-endLoading();   // isLoading: false
 ```
 
-#### div store:
+### Adapter
+
+#### Converting page-based pagination to API pagination format:
 
 ```ts
-import { store } from "quench-store";
+import { store, adapter } from "quench-store";
 
-const divStore = store(document.createElement('div'), { name: "div" });
+interface PagePagination {
+    pageSize: number
+    page: number
+}
+interface ApiPagination {
+    offset: number
+    limit: number
+}
 
-divStore.watch((div) => {
-    const onClick = () => console.log("click")
-    div.addEventListener("click", onClick);
-    return () => {
-        div.removeEventListener("click", onClick)
-    }
+const pagePagination = store<PagePagination>({
+    pageSize: 10,
+    page: 1,
 });
+
+const apiPagination = adapter(pagePagination, ({ pageSize, page }) => {
+    const limit = page * pageSize;
+    return {
+        offset: limit - pageSize,
+        limit,
+    } as ApiPagination;
+});
+
+console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 0, limit: 10 }
 ```
 
 ### Join
 
-#### loading store:
+#### Joining multiple stores for convenient use:
 
 ```ts
 import { store, join } from "quench-store";
 
-const isLoadingStore = store(false, { name: "isLoading" });
-const urlsStore = store<string[]>([], { name: "urls" });
-const loadingStore = join(isLoadingStore, urlsStore);
+const isLoading = store(false);
+const urls = store<string[]>([]);
+const loading = join({ isLoading, urls });
 
-loadingStore.watch(([urls, isLoading]) => {
+loading.watch(({ isLoading, urls }) => {
     console.log("urls:", urls, "isLoading:", isLoading);
 });
 
-const addUrl = loadingStore.action((state, url: string) => {
-    const [urls, isLoading] = state;
-    return isLoading ? state : [urls.concat(url), true];
-});
-const endLoading = isLoadingStore.action(() => false);
+const startLoading = isLoading.action(() => true);
+const endLoading = isLoading.action(() => false);
 
-addUrl("https://npmjs.com");    // urls: ["https://npmjs.com"] isLoading: true
-addUrl("https://google.com");   // urls: ["https://npmjs.com"] isLoading: true
-endLoading();                   // urls: ["https://npmjs.com"] isLoading: false
-addUrl("https://google.com");   // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
+const addUrl = loading.action(({ isLoading, urls }, url: string) => {
+    if (!isLoading) {
+        return { urls: urls.concat(url) };
+    }
+});
+
+startLoading();               // urls: [] isLoading: true
+addUrl("https://npmjs.com");  // urls: ["https://npmjs.com"] isLoading: true
+addUrl("https://google.com"); // urls: ["https://npmjs.com"] isLoading: true
+endLoading();                 // urls: ["https://npmjs.com"] isLoading: false
+addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
 ```
 
 ### Job
 
-#### loading store:
+#### Asynchronous data modification using library job:
 
 ```ts
 import { store, join, job } from "quench-store";
 
-const isLoadingStore = store(false, { name: "isLoading" });
-const urlStore = store("", { name: "url" });
-const loadingStore = join(isLoadingStore, urlStore);
+const isLoading = store(false);
+const url = store("");
+const loading = join({ isLoading, url });
 
-loadingStore.watch(([isLoading, url]) => {
+loading.watch(({ isLoading, url }) => {
     console.log("isLoading:", isLoading, "url:", url);
 });
 
-const startLoading = isLoadingStore.action(() => true);
-const endLoading = isLoadingStore.action(() => false);
+const startLoading = isLoading.action(() => true);
+const endLoading = isLoading.action(() => false);
 
-const setUrl = urlStore.action((state, url: string) => {
+const setUrl = url.action((state, url: string) => {
     return state.length === 0 ? url : state;
 });
 
-const loadData = job(async (url: string): Promise<unknown> => {
-    setUrl(url);
+type ResponseData = { status: string };
+const loadData = job(async (newUrl: string) => {
     startLoading();
-    const storeUrl = urlStore.get();
-    const response = await fetch(storeUrl);
-    const data = await response.json();
+    setUrl(newUrl);
+    const response = await fetch(newUrl);
+    const data = await response.json() as ResponseData;
     endLoading();
 
     return data;
@@ -129,11 +147,12 @@ loadData("https://example.com/api")
     });
 ```
 
-#### wait all jobs:
+#### Waiting for completion of all jobs asynchronously:
 
 ```ts
 import { allJobs } from "quench-store";
 
-// ...
+// Waiting for all jobs to complete before continuing execution
 await allJobs();
+// All jobs have completed, continuing execution...
 ```
