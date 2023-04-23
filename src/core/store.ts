@@ -16,7 +16,7 @@ export const store = <State>(initState: State, { name }: StoreOptions = {}): Sto
         () => storeID
     )
 
-    console.info(`[${ storeID }] created`)
+    console.info(`${ storeID } created`)
 
     return {
         isReadOnly: false,
@@ -26,7 +26,7 @@ export const store = <State>(initState: State, { name }: StoreOptions = {}): Sto
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
-                console.group(`[${ storeID }] ${ actionID }(${ getArgsForLog(args) })`)
+                console.group(`${ storeID } ${ actionID }(${ getArgsForLog(args) })`)
                 const newState = action(state, ...args)
                 if (state !== newState) {
                     console.info("%c changed:", "color: #BDFF66", state, "->", newState)

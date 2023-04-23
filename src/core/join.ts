@@ -41,7 +41,7 @@ export const join = <
         () => storeID
     )
 
-    console.info(`[${ storeID }] created`)
+    console.info(`${ storeID } created`)
 
     const unsubscribes: Record<string, Unsubscribe> = {}
     const actions = storesNameList.reduce((result, storeName) => {
@@ -69,7 +69,7 @@ export const join = <
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
-                console.group(`[${ storeID }] ${ actionID }(${ getArgsForLog(args) })`)
+                console.group(`${ storeID } ${ actionID }(${ getArgsForLog(args) })`)
                 const actionStates = action(states, ...args)
                 if (states !== actionStates) {
                     if (actionsNameList.some((storeName) => storeName in actionStates
