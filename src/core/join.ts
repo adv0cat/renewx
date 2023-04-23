@@ -1,22 +1,40 @@
-import type { AnyStore, JoinStoreID, Store, StoreType, StoreTypes } from "../interfaces/store";
+import type {
+    AnyStores,
+    JoinStoreID,
+    Store,
+    StoresType,
+    StoresActions,
+} from "../interfaces/store";
 import type { Unsubscribe } from "../interfaces/core";
-import type { ActionID } from "../interfaces/action";
+import type { ActionID, ActionOptions } from "../interfaces/action";
 import { ACTION } from "./action";
 import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFnList } from "../utils/get-core-fn-list";
+import { isNotReadOnlyStore } from "../utils/is-not-read-only-store";
 
 export const join = <
-    Store1 extends AnyStore,
-    Store2 extends AnyStore,
-    Stores extends AnyStore[],
-    R extends [StoreType<Store1>, StoreType<Store2>, ...StoreTypes<Stores>]
->(store1: Store1, store2: Store2, ...otherStores: Stores): Store<R> => {
-    const stores = ([store1, store2] as AnyStore[]).concat(otherStores) as [Store1, Store2, ...Stores]
-    let states = freeze(stores.map((store) => store.get()) as R)
-    const storeID: JoinStoreID = `<${ stores
-        .map((store) => store.id())
-        .join(";") }>`
+    Stores extends AnyStores,
+    R extends StoresType<Stores>
+>(stores: Stores): Store<R> => {
+    const storesNameList = Object.keys(stores) as (keyof Stores)[]
+    const storesNameListLength = storesNameList.length
+    const getStates = () => {
+        const states = {} as R
+        for (let i = 0; i < storesNameListLength; i++) {
+            const storeName = storesNameList[i]
+            states[storeName] = stores[storeName].get()
+        }
+        return freeze<R>(states)
+    }
+    let states = getStates()
+
+    const storeID: JoinStoreID = `{${ storesNameList.reduce<string>(
+        (resultName, storeName, i) => i > 0
+            ? `${ resultName };${ stores[storeName].id() }`
+            : stores[storeName].id(),
+        ""
+    ) }}`
 
     const [get, id, watch, notify] = getCoreFnList(
         () => states,
@@ -26,29 +44,41 @@ export const join = <
     console.info(`[${ storeID }] created`)
 
     const unsubscribes: Record<string, Unsubscribe> = {}
-    const actions = stores.map((store) => {
+    const actions = storesNameList.reduce((result, storeName) => {
+        const store = stores[storeName]
         const actionID: ActionID = `${ store.id() }.#set`
+        const options: ActionOptions = { id: actionID }
         if (!(actionID in unsubscribes)) {
             unsubscribes[actionID] = store.watch((_, info) => {
                 info.actionID !== actionID && notify(states, info)
             })
+            if (isNotReadOnlyStore(store)) {
+                result[storeName as keyof StoresActions<Stores>] = store
+                    .action((_, value) => value, options) as StoresActions<Stores>[keyof StoresActions<Stores>]
+            }
         }
-        return store.action((_, value) => value, { id: actionID })
-    })
+        return result
+    }, {} as StoresActions<Stores>)
+    const actionsNameList = storesNameList.filter((key) => key in actions) as (keyof StoresActions<Stores>)[]
 
     return {
-        watch,
+        isReadOnly: false,
         id,
         get,
+        watch,
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
                 console.group(`[${ storeID }] ${ actionID }(${ getArgsForLog(args) })`)
-                const newStates = action(states, ...args)
-                if (states !== newStates) {
-                    if ((newStates as R).some((newState, index) => actions[index]?.(newState))) {
+                const actionStates = action(states, ...args)
+                if (states !== actionStates) {
+                    if (actionsNameList.some((storeName) => storeName in actionStates
+                        ? actions[storeName](actionStates[storeName])
+                        : false
+                    )) {
+                        const newStates = getStates()
                         console.info("%c changed:", "color: #BDFF66", states, "->", newStates)
-                        states = freeze(newStates)
+                        states = newStates
                         notify(states, { actionID })
                         console.groupEnd()
                         return true

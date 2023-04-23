@@ -19,9 +19,10 @@ export const store = <State>(initState: State, { name }: StoreOptions = {}): Sto
     console.info(`[${ storeID }] created`)
 
     return {
-        watch,
+        isReadOnly: false,
         id,
         get,
+        watch,
         action: (action, { id } = {}) => {
             const actionID = id ?? ACTION.newID()
             return (...args) => {
