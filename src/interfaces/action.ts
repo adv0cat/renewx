@@ -15,5 +15,7 @@ export type ActionFnReturn<State> = State extends StoresType<infer SomeStores ex
         : Partial<Pick<State, KeysOfStores<SomeStores>>>
     : never
 
+export type AdapterAction<FromState, ToState> = (state: Freeze<FromState>) => ToState
+
 export type ActionOptions = Partial<{ id: string | number }>
 export type ActionInfo = { actionID: string | number }

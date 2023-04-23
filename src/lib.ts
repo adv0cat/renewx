@@ -1,5 +1,6 @@
 export { store } from "./core/store"
 export { join } from "./core/join"
+export { adapter } from "./core/adapter"
 export { job, allJobs } from "./core/job"
 
 export { freeze } from "./utils/freeze"
