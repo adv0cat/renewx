@@ -29,12 +29,9 @@ export const join = <
     }
     let states = getStates()
 
-    const storeID: JoinStoreID = `{${ storesNameList.reduce<string>(
-        (resultName, storeName, i) => i > 0
-            ? `${ resultName };${ stores[storeName].id() }`
-            : stores[storeName].id(),
-        ""
-    ) }}`
+    const storeID: JoinStoreID = `{${ storesNameList
+        .map((storeName) => stores[storeName].id())
+        .join(";") }}`
 
     const [get, id, watch, notify] = getCoreFnList(
         () => states,
