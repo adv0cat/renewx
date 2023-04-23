@@ -68,21 +68,22 @@ export const join = <
             return (...args) => {
                 console.group(`${ storeID } ${ actionID }(${ getArgsForLog(args) })`)
                 const actionStates = action(states, ...args)
-                if (states !== actionStates) {
-                    if (actionsNameList.some((storeName) => storeName in actionStates
-                        ? actions[storeName](actionStates[storeName])
-                        : false
-                    )) {
-                        const newStates = getStates()
-                        console.info("%c changed:", "color: #BDFF66", states, "->", newStates)
-                        states = newStates
-                        notify(states, { actionID })
-                        console.groupEnd()
-                        return true
-                    }
+                if (actionStates == null || states === actionStates) {
+                    console.info("%c not changed", "color: #FF5E5B")
+                    console.groupEnd()
                 }
-                console.info("%c not changed", "color: #FF5E5B")
-                console.groupEnd()
+
+                if (actionsNameList.some((storeName) => storeName in actionStates
+                    ? actions[storeName](actionStates[storeName])
+                    : false
+                )) {
+                    const newStates = getStates()
+                    console.info("%c changed:", "color: #BDFF66", states, "->", newStates)
+                    states = newStates
+                    notify(states, { actionID })
+                    console.groupEnd()
+                    return true
+                }
             }
         },
     } as Store<R>

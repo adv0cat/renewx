@@ -12,7 +12,7 @@ export type ActionFn<State> = (
 export type ActionFnReturn<State> = State extends StoresType<infer SomeStores extends AnyStores>
     ? KeysOfStores<SomeStores> extends never
         ? State | Freeze<State>
-        : Partial<Pick<State, KeysOfStores<SomeStores>>>
+        : Partial<Pick<State, KeysOfStores<SomeStores>>> | undefined
     : State | Freeze<State>
 
 export type AdapterAction<FromState, ToState> = (state: Freeze<FromState>) => ToState
