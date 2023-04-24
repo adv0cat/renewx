@@ -30,7 +30,7 @@
   "homepage": "https://github.com/adv0cat/quench-store#readme",
   "devDependencies": {
     "esbuild": "0.17.17",
-    "prettier": "2.8.8",
+    "prettier": "^2.8.8",
     "typescript": "^5.0.4"
   },
   "files": [
