@@ -1,5 +1,8 @@
 name: Build and Publish Public NPM Package
-on: [workflow_dispatch]
+on:
+  push:
+    tags:
+      - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
