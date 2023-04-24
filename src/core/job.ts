@@ -1,9 +1,9 @@
-import type { Job, JobID, JobOptions } from "../interfaces/job";
+import type { Job, JobOptions } from "../interfaces/job";
 import type { AsyncFn } from "../interfaces/core";
+import type { JobID } from "../interfaces/id";
+import { nextJobId } from "../utils/id";
 import { getArgsForLog } from "../utils/get-args-for-log";
-import { getIDCounter } from "../utils/get-id-counter";
 
-const JOB = getIDCounter()
 const RUNNING_JOBS = [] as Promise<unknown>[]
 
 export const allJobs = async (): Promise<void> => {
@@ -16,7 +16,7 @@ export const allJobs = async (): Promise<void> => {
 }
 
 export const job = <NewJobFn extends AsyncFn>(jobFn: NewJobFn, { name }: JobOptions = {}): Job<NewJobFn> => {
-    const jobID: JobID = `{${ name ?? JOB.newID() }}`
+    const jobID: JobID = `{${ nextJobId(name) }}`
 
     console.info(`[${ jobID }] created`)
 

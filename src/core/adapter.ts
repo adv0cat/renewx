@@ -1,10 +1,9 @@
-import type { AdapterStoreID, Store, StoreOptions, ReadOnlyStore } from "../interfaces/store";
+import type { Store, StoreOptions, ReadOnlyStore } from "../interfaces/store";
 import type { AdapterAction } from "../interfaces/action";
+import type { AdapterStoreID } from "../interfaces/id";
+import { nextStoreId } from "../utils/id";
 import { freeze } from "../utils/freeze";
-import { getIDCounter } from "../utils/get-id-counter";
-import { getCoreFnList } from "../utils/get-core-fn-list";
-
-const ADAPTER_STORE = getIDCounter()
+import { getCoreFn } from "../utils/get-core-fn";
 
 export const adapter = <FromState, ToState>(
     store: Store<FromState> | ReadOnlyStore<FromState>,
@@ -13,9 +12,9 @@ export const adapter = <FromState, ToState>(
 ): ReadOnlyStore<ToState> => {
     let fromState = store.get()
     let state = freeze(adapterAction(fromState))
-    const storeID: AdapterStoreID = `(${ store.id() }=>${ name ?? ADAPTER_STORE.newID() })`
+    const storeID: AdapterStoreID = `(${ store.id() }=>${ nextStoreId(name) })`
 
-    const [get, id, watch, notify] = getCoreFnList(
+    const [get, id, watch, notify] = getCoreFn(
         () => state,
         () => storeID
     )

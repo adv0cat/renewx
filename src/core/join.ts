@@ -1,17 +1,17 @@
 import type {
     AnyStores,
-    JoinStoreID,
     Store,
     StoresType,
     StoresActions,
 } from "../interfaces/store";
 import type { Unsubscribe } from "../interfaces/core";
-import type { ActionID, ActionOptions } from "../interfaces/action";
-import { ACTION } from "./action";
+import type { ActionOptions } from "../interfaces/action";
+import type { ActionID, JoinStoreID } from "../interfaces/id";
+import { nextActionId } from "../utils/id";
 import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
-import { getCoreFnList } from "../utils/get-core-fn-list";
-import { isNotReadOnlyStore } from "../utils/is-not-read-only-store";
+import { getCoreFn } from "../utils/get-core-fn";
+import { isNotReadOnlyStore } from "../utils/is";
 
 export const join = <
     Stores extends AnyStores,
@@ -33,7 +33,7 @@ export const join = <
         .map((storeName) => stores[storeName].id())
         .join(";") }}`
 
-    const [get, id, watch, notify] = getCoreFnList(
+    const [get, id, watch, notify] = getCoreFn(
         () => states,
         () => storeID
     )
@@ -64,7 +64,7 @@ export const join = <
         get,
         watch,
         action: (action, { id } = {}) => {
-            const actionID = id ?? ACTION.newID()
+            const actionID: ActionID = nextActionId(id)
             return (...args) => {
                 console.group(`${ storeID } ${ actionID }(${ getArgsForLog(args) })`)
                 const actionStates = action(states, ...args)

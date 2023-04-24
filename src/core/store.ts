@@ -1,17 +1,15 @@
-import type { Store, StoreID, StoreOptions } from "../interfaces/store";
-import { ACTION } from "./action";
+import type { Store, StoreOptions } from "../interfaces/store";
+import type { ActionID, StoreID } from "../interfaces/id";
+import { nextActionId, nextStoreId } from "../utils/id";
 import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
-import { getIDCounter } from "../utils/get-id-counter";
-import { getCoreFnList } from "../utils/get-core-fn-list";
-
-const STORE = getIDCounter()
+import { getCoreFn } from "../utils/get-core-fn";
 
 export const store = <State>(initState: State, { name }: StoreOptions = {}): Store<State> => {
     let state = freeze(initState)
-    const storeID: StoreID = `[${ name ?? STORE.newID() }]`
+    const storeID: StoreID = `[${ nextStoreId(name) }]`
 
-    const [get, id, watch, notify] = getCoreFnList(
+    const [get, id, watch, notify] = getCoreFn(
         () => state,
         () => storeID
     )
@@ -24,7 +22,7 @@ export const store = <State>(initState: State, { name }: StoreOptions = {}): Sto
         get,
         watch,
         action: (action, { id } = {}) => {
-            const actionID = id ?? ACTION.newID()
+            const actionID: ActionID = nextActionId(id)
             return (...args) => {
                 console.group(`${ storeID } ${ actionID }(${ getArgsForLog(args) })`)
                 const newState = action(state, ...args)

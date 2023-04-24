@@ -1,10 +1,7 @@
 import type { ActionFn, ActionInfo, ActionOptions } from "./action";
 import type { IsChanged, KeysOfStores, OmitFirstArg, Unsubscribe } from "./core";
 import type { Freeze } from "../utils/freeze";
-
-export type StoreID = `[${ number | string }]`
-export type AdapterStoreID = `(${ string }=>${ string | number })`
-export type JoinStoreID = `{${ string }}`
+import type { AdapterStoreID, JoinStoreID, StoreID } from "./id";
 
 export interface ReadOnlyStore<State> {
     get(): Freeze<State>
