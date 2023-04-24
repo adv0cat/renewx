@@ -9,7 +9,8 @@
   "scripts": {
     "build": "rm -rf build; npm run build:base -- --analyze=verbose; tsc --emitDeclarationOnly",
     "build:base": "esbuild src/lib.ts --bundle --platform=neutral --outdir=build --drop:console --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm",
-    "build:watch": "npm run build:base -- --watch"
+    "build:watch": "npm run build:base -- --watch",
+    "postversion": "git push && git push origin --tags"
   },
   "repository": {
     "type": "git",
