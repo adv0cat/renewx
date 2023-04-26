@@ -4,6 +4,8 @@ import { nextActionId, nextStoreId } from "../utils/id";
 import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
+import { getValidationFn } from "../utils/get-validation-fn";
+import { isNewStateChanged } from "../utils/is";
 
 export const store = <State>(
   initState: State,
@@ -12,6 +14,7 @@ export const store = <State>(
   let state = freeze(initState);
   const storeID: StoreID = `[${nextStoreId(name)}]`;
 
+  const [validation, isValid] = getValidationFn();
   const [get, id, watch, notify] = getCoreFn(
     () => state,
     () => storeID
@@ -24,20 +27,25 @@ export const store = <State>(
     id,
     get,
     watch,
+    isValid,
+    validation,
     action: (action, { id } = {}) => {
       const actionID: ActionID = nextActionId(id);
       return (...args) => {
         console.group(`${storeID} ${actionID}(${getArgsForLog(args)})`);
+
         const newState = action(state, ...args);
-        if (state !== newState) {
-          console.info("%c changed:", "color: #BDFF66", state, "->", newState);
-          state = freeze(newState);
-          notify(state, { actionID });
+        if (!isNewStateChanged(state, newState) || !isValid(state, newState)) {
+          console.info("%c~not changed", "color: #FF5E5B");
           console.groupEnd();
-          return true;
+          return false;
         }
-        console.info("%c not changed", "color: #FF5E5B");
+
+        console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
+        state = freeze(newState);
+        notify(state, { actionID });
         console.groupEnd();
+        return true;
       };
     },
   } as Store<State>;

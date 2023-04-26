@@ -2,28 +2,28 @@ import type {
   AnyStores,
   Store,
   StoresType,
-  StoresActions,
+  StoresAction,
+  StoresIsValid,
 } from "../interfaces/store";
 import type { Unsubscribe } from "../interfaces/core";
-import type { ActionOptions } from "../interfaces/action";
+import type { ActionFnReturn } from "../interfaces/action";
 import type { ActionID, JoinStoreID } from "../interfaces/id";
 import { nextActionId } from "../utils/id";
 import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
-import { isNotReadOnlyStore } from "../utils/is";
+import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
+import { getValidationFn } from "../utils/get-validation-fn";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores
 ): Store<R> => {
   const storesNameList = Object.keys(stores) as (keyof Stores)[];
-  const storesNameListLength = storesNameList.length;
   const getStates = () => {
     const states = {} as R;
-    for (let i = 0; i < storesNameListLength; i++) {
-      const storeName = storesNameList[i];
-      states[storeName] = stores[storeName].get();
-    }
+    storesNameList.forEach(
+      (storeName) => (states[storeName] = stores[storeName].get())
+    );
     return freeze<R>(states);
   };
   let states = getStates();
@@ -32,6 +32,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     .map((storeName) => stores[storeName].id())
     .join(";")}}`;
 
+  const [validation, isCurrentStoreValid] = getValidationFn();
   const [get, id, watch, notify] = getCoreFn(
     () => states,
     () => storeID
@@ -39,63 +40,114 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   console.info(`${storeID} created`);
 
+  let isNotifyEnabled = false;
+
+  // TODO: maybe concat actions and isValidStores
   const unsubscribes: Record<string, Unsubscribe> = {};
   const actions = storesNameList.reduce((result, storeName) => {
     const store = stores[storeName];
-    const actionID: ActionID = `${store.id()}.#set`;
-    const options: ActionOptions = { id: actionID };
-    if (!(actionID in unsubscribes)) {
-      unsubscribes[actionID] = store.watch((_, info) => {
-        info.actionID !== actionID && notify(states, info);
+    const storeNameStr = String(storeName);
+    if (!(storeNameStr in unsubscribes)) {
+      unsubscribes[storeNameStr] = store.watch((state, info) => {
+        if (!isNotifyEnabled) {
+          return;
+        }
+        console.group(
+          `${storeID} ${storeNameStr}.#set(${JSON.stringify(state)})`
+        );
+        const newStates = getStates();
+        if (
+          !isNewStateChanged(states, newStates) ||
+          !isValid(states, newStates as ActionFnReturn<R>)
+        ) {
+          console.info("%c~not changed", "color: #FF5E5B");
+          console.groupEnd();
+          return;
+        }
+        console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
+        states = newStates;
+        notify(states, info);
+        console.groupEnd();
       });
+
       if (isNotReadOnlyStore(store)) {
-        result[storeName as keyof StoresActions<Stores>] = store.action(
+        result[storeName as keyof StoresAction<Stores>] = store.action(
           (_, value) => value,
-          options
-        ) as StoresActions<Stores>[keyof StoresActions<Stores>];
+          { id: `${storeNameStr}.#set` as ActionID }
+        ) as StoresAction<Stores>[keyof StoresAction<Stores>];
       }
     }
     return result;
-  }, {} as StoresActions<Stores>);
-  const actionsNameList = storesNameList.filter(
-    (key) => key in actions
-  ) as (keyof StoresActions<Stores>)[];
+  }, {} as StoresAction<Stores>);
+  const actionsNameList = Object.keys(
+    actions
+  ) as (keyof StoresAction<Stores>)[];
+
+  const isValidStores = storesNameList.reduce((result, storeName) => {
+    const store = stores[storeName];
+    const resultStoreName = storeName as keyof StoresIsValid<Stores>;
+    if (!(resultStoreName in result) && isNotReadOnlyStore(store)) {
+      result[resultStoreName] =
+        store.isValid as StoresIsValid<Stores>[keyof StoresIsValid<Stores>];
+    }
+    return result;
+  }, {} as StoresIsValid<Stores>);
+  const isValidNameList = Object.keys(
+    isValidStores
+  ) as (keyof StoresIsValid<Stores>)[];
+
+  const isValid: Store<R>["isValid"] = (oldState, newState) =>
+    isValidNameList.every((storeName) =>
+      storeName in newState
+        ? isValidStores[storeName](oldState[storeName], newState[storeName])
+        : true
+    ) && isCurrentStoreValid(oldState, newState);
+
+  isNotifyEnabled = true;
 
   return {
     isReadOnly: false,
     id,
     get,
     watch,
+    isValid,
+    validation,
     action: (action, { id } = {}) => {
       const actionID: ActionID = nextActionId(id);
       return (...args) => {
         console.group(`${storeID} ${actionID}(${getArgsForLog(args)})`);
+
         const actionStates = action(states, ...args);
-        if (actionStates == null || states === actionStates) {
-          console.info("%c not changed", "color: #FF5E5B");
+        if (
+          actionStates == null ||
+          !isNewStateChanged(states, actionStates) ||
+          !isValid(states, actionStates)
+        ) {
+          console.info("%c~not changed", "color: #FF5E5B");
           console.groupEnd();
+          return false;
         }
 
-        if (
-          actionsNameList.some((storeName) =>
-            storeName in actionStates
+        isNotifyEnabled = false;
+        const isChanged = actionsNameList.reduce(
+          (isChanged, storeName) =>
+            (storeName in actionStates
               ? actions[storeName](actionStates[storeName])
-              : false
-          )
-        ) {
-          const newStates = getStates();
-          console.info(
-            "%c changed:",
-            "color: #BDFF66",
-            states,
-            "->",
-            newStates
-          );
-          states = newStates;
-          notify(states, { actionID });
-          console.groupEnd();
-          return true;
+              : false) || isChanged,
+          false
+        );
+        isNotifyEnabled = true;
+
+        if (!isChanged) {
+          return false;
         }
+
+        const newStates = getStates();
+        console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
+        states = newStates;
+        notify(states, { actionID });
+        console.groupEnd();
+        return true;
       };
     },
   } as Store<R>;
