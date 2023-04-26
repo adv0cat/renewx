@@ -12,7 +12,7 @@ export const adapter = <FromState, ToState>(
 ): ReadOnlyStore<ToState> => {
   let fromState = store.get();
   let state = freeze(adapterAction(fromState));
-  const storeID: AdapterStoreID = `(${store.id()}=>${nextStoreId(name)})`;
+  const storeID: AdapterStoreID = `(${store.id()}=>'${nextStoreId(name)}')`;
 
   const [get, id, watch, notify] = getCoreFn(
     () => state,
