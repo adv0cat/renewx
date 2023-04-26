@@ -109,6 +109,53 @@ endLoading(); // urls: ["https://npmjs.com"] isLoading: false
 addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
 ```
 
+### Validation
+
+#### Validation of different stores with multiple levels
+
+```ts
+import { store, join } from "quench-store";
+
+interface Pagination {
+  pageSize: number;
+  page: number;
+}
+
+const pagination = store<Pagination>({
+  pageSize: 10,
+  page: 1,
+});
+const isLoading = store(false);
+const pageLoading = join({ pagination, isLoading });
+
+pagination.validation((old, state) => state.page > 0);
+pageLoading.validation((old, state) => {
+  const isLoadingTurnOn = !old.isLoading && !!state?.isLoading;
+  const isPageChanged = old.pagination.page != state?.pagination?.page;
+  return isLoadingTurnOn ? isPageChanged : false;
+});
+
+const endLoading = isLoading.action(() => false);
+const loadPrevPage = pageLoading.action(
+  ({ pagination: { page, pageSize } }) => {
+    return { isLoading: true, pagination: { page: page - 1, pageSize } };
+  }
+);
+const loadNextPage = pageLoading.action(
+  ({ pagination: { page, pageSize } }) => {
+    return { isLoading: true, pagination: { page: page + 1, pageSize } };
+  }
+);
+
+pageLoading.watch(({ pagination: { page } }) => console.log("page:", page));
+
+loadPrevPage(); // not changed, because state.page === 0 in pagination validation
+loadNextPage(); // page: 2
+loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading validation
+endLoading(); // page: 2, because isLoading state changed
+loadPrevPage(); // page: 1
+```
+
 ### Job
 
 #### Asynchronous data modification using library job:
