@@ -1,6 +1,7 @@
-import { AnyStores, Store } from "./store";
+import type { AnyStores, Store } from "./store";
 
 export type IsChanged = boolean;
+export type IsValid = boolean;
 export type Unsubscribe = () => void;
 export type Fn<Result = any> = (...args: any[]) => Result;
 export type AsyncFn<Result = any> = (...args: any[]) => Promise<Result>;
