@@ -5,7 +5,7 @@ import type {
   StoresAction,
   StoresIsValid,
 } from "../interfaces/store";
-import type { Unsubscribe } from "../interfaces/core";
+import type { Unsubscribe, KeysOfStores } from "../interfaces/core";
 import type { ActionFnReturn } from "../interfaces/action";
 import type { ActionID, JoinStoreID } from "../interfaces/id";
 import { nextActionId } from "../utils/id";
@@ -14,8 +14,6 @@ import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
-import { ValidationFn } from "../interfaces/validation";
-import { KeysOfStores } from "../interfaces/core";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores
@@ -44,61 +42,49 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   let isNotifyEnabled = false;
 
-  // TODO: maybe concat actions and isValidStores
-  const unsubscribes: Record<string, Unsubscribe> = {};
-  const actions = storesNameList.reduce((result, storeName) => {
-    const store = stores[storeName];
-    const storeNameStr = String(storeName);
-    if (!(storeNameStr in unsubscribes)) {
-      unsubscribes[storeNameStr] = store.watch((state, info) => {
-        if (!isNotifyEnabled) {
-          return;
-        }
-        console.group(
-          `${storeID} ${storeNameStr}.#set(${JSON.stringify(state)})`
-        );
-        const newStates = getStates();
-        if (
-          !isNewStateChanged(states, newStates) ||
-          !isChildrenValid(states, newStates as ActionFnReturn<R>)
-        ) {
-          console.info("%c~not changed", "color: #FF5E5B");
-          console.groupEnd();
-          return;
-        }
-        console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
-        states = newStates;
-        notify(states, info);
-        console.groupEnd();
-      });
+  const unsubscribes = {} as Record<keyof Stores, Unsubscribe>;
+  const storesAction = {} as StoresAction<Stores>;
+  const storesIsValid = {} as StoresIsValid<Stores>;
 
-      if (isNotReadOnlyStore(store)) {
-        result[storeName as keyof StoresAction<Stores>] = store.action(
-          (_, value) => value,
-          { id: `${storeNameStr}.#set` as ActionID }
-        ) as StoresAction<Stores>[keyof StoresAction<Stores>];
+  for (const storeName of storesNameList) {
+    const store = stores[storeName];
+    const actionID = `${storeID}.${store.id()}.#set` as ActionID;
+
+    unsubscribes[storeName] = store.watch((state, info) => {
+      if (!isNotifyEnabled) {
+        return;
       }
-    }
-    return result;
-  }, {} as StoresAction<Stores>);
-  const actionsNameList = Object.keys(
-    actions
-  ) as (keyof StoresAction<Stores>)[];
+      console.group(`${actionID}(${JSON.stringify(state)})`);
+      const newStates = getStates();
+      if (
+        !isNewStateChanged(states, newStates) ||
+        !isChildrenValid(states, newStates as ActionFnReturn<R>)
+      ) {
+        console.info("%c~not changed", "color: #FF5E5B");
+        console.groupEnd();
+        return;
+      }
+      console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
+      states = newStates;
+      notify(states, info);
+      console.groupEnd();
+    });
 
-  const isValidStores = {} as StoresIsValid<Stores>;
-  storesNameList.forEach((storeName) => {
-    const store = stores[storeName];
     if (isNotReadOnlyStore(store)) {
-      isValidStores[storeName as KeysOfStores<Stores>] = store.isValid;
+      storesAction[storeName as KeysOfStores<Stores>] = store.action(
+        (_, value) => value,
+        { id: actionID }
+      );
+      storesIsValid[storeName as KeysOfStores<Stores>] = store.isValid;
     }
-  });
-  const isValidNameList = Object.keys(isValidStores) as KeysOfStores<Stores>[];
+  }
+  const isValidNameList = Object.keys(storesIsValid) as KeysOfStores<Stores>[];
 
   const isChildrenValid: Store<R>["isValid"] = (oldState, newState) =>
-    isValidNameList.every((storeName) =>
-      storeName in newState
-        ? isValidStores[storeName](oldState[storeName], newState[storeName])
-        : true
+    isValidNameList.every(
+      (storeName) =>
+        storeName in newState &&
+        storesIsValid[storeName](oldState[storeName], newState[storeName])
     );
   const isValid: Store<R>["isValid"] = (oldState, newState) =>
     isChildrenValid(oldState, newState) &&
@@ -130,13 +116,16 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         }
 
         isNotifyEnabled = false;
-        const isChanged = actionsNameList.reduce(
-          (isChanged, storeName) =>
-            (storeName in actionStates
-              ? actions[storeName](actionStates[storeName])
-              : false) || isChanged,
-          false
-        );
+        let isChanged = false;
+        for (const actionState of Object.keys(actionStates)) {
+          if (
+            storesAction[actionState as KeysOfStores<Stores>]?.(
+              actionStates[actionState]
+            )
+          ) {
+            isChanged = true;
+          }
+        }
         isNotifyEnabled = true;
 
         if (!isChanged) {

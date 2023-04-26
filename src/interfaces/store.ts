@@ -49,14 +49,9 @@ export type StoresType<SomeStores extends AnyStores> = {
   [Name in keyof SomeStores]: StoreType<SomeStores[Name]>;
 };
 
-export type StoreActionType<SomeStore extends AnyStore> =
-  SomeStore extends Store<any> ? ReturnType<SomeStore["action"]> : never;
-export type StoresActionType<SomeStores extends AnyStores> = {
-  [Name in keyof SomeStores]: StoreActionType<SomeStores[Name]>;
-};
-export type StoresAction<SomeStores extends AnyStores> = Pick<
-  StoresActionType<SomeStores>,
-  KeysOfStores<SomeStores>
+export type StoresAction<SomeStores extends AnyStores> = Record<
+  KeysOfStores<SomeStores>,
+  ReturnType<Store<any>["action"]>
 >;
 
 export type StoresIsValid<SomeStores extends AnyStores> = Record<
