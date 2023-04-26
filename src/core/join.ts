@@ -14,6 +14,7 @@ import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
+import { ValidationFn } from "../interfaces/validation";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores
@@ -58,7 +59,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         const newStates = getStates();
         if (
           !isNewStateChanged(states, newStates) ||
-          !isValid(states, newStates as ActionFnReturn<R>)
+          !isChildrenValid(states, newStates as ActionFnReturn<R>)
         ) {
           console.info("%c~not changed", "color: #FF5E5B");
           console.groupEnd();
@@ -96,12 +97,15 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isValidStores
   ) as (keyof StoresIsValid<Stores>)[];
 
-  const isValid: Store<R>["isValid"] = (oldState, newState) =>
+  const isChildrenValid: Store<R>["isValid"] = (oldState, newState) =>
     isValidNameList.every((storeName) =>
       storeName in newState
         ? isValidStores[storeName](oldState[storeName], newState[storeName])
         : true
-    ) && isCurrentStoreValid(oldState, newState);
+    );
+  const isValid: Store<R>["isValid"] = (oldState, newState) =>
+    isChildrenValid(oldState, newState) &&
+    isCurrentStoreValid(oldState, newState);
 
   isNotifyEnabled = true;
 
