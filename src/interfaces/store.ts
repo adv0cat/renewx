@@ -59,12 +59,7 @@ export type StoresAction<SomeStores extends AnyStores> = Pick<
   KeysOfStores<SomeStores>
 >;
 
-export type StoreIsValidType<SomeStore extends AnyStore> =
-  SomeStore extends Store<any> ? SomeStore["isValid"] : never;
-export type StoresIsValidType<SomeStores extends AnyStores> = {
-  [Name in keyof SomeStores]: StoreIsValidType<SomeStores[Name]>;
-};
-export type StoresIsValid<SomeStores extends AnyStores> = Pick<
-  StoresIsValidType<SomeStores>,
-  KeysOfStores<SomeStores>
+export type StoresIsValid<SomeStores extends AnyStores> = Record<
+  KeysOfStores<SomeStores>,
+  Store<any>["isValid"]
 >;

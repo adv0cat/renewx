@@ -15,6 +15,7 @@ import { getCoreFn } from "../utils/get-core-fn";
 import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
 import { ValidationFn } from "../interfaces/validation";
+import { KeysOfStores } from "../interfaces/core";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores
@@ -84,18 +85,14 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     actions
   ) as (keyof StoresAction<Stores>)[];
 
-  const isValidStores = storesNameList.reduce((result, storeName) => {
+  const isValidStores = {} as StoresIsValid<Stores>;
+  storesNameList.forEach((storeName) => {
     const store = stores[storeName];
-    const resultStoreName = storeName as keyof StoresIsValid<Stores>;
-    if (!(resultStoreName in result) && isNotReadOnlyStore(store)) {
-      result[resultStoreName] =
-        store.isValid as StoresIsValid<Stores>[keyof StoresIsValid<Stores>];
+    if (isNotReadOnlyStore(store)) {
+      isValidStores[storeName as KeysOfStores<Stores>] = store.isValid;
     }
-    return result;
-  }, {} as StoresIsValid<Stores>);
-  const isValidNameList = Object.keys(
-    isValidStores
-  ) as (keyof StoresIsValid<Stores>)[];
+  });
+  const isValidNameList = Object.keys(isValidStores) as KeysOfStores<Stores>[];
 
   const isChildrenValid: Store<R>["isValid"] = (oldState, newState) =>
     isValidNameList.every((storeName) =>
