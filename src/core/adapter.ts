@@ -1,4 +1,8 @@
-import type { Store, StoreOptions, ReadOnlyStore } from "../interfaces/store";
+import type {
+  StoreOptions,
+  ReadOnlyStore,
+  AnyStore,
+} from "../interfaces/store";
 import type { AdapterAction } from "../interfaces/action";
 import type { AdapterStoreID } from "../interfaces/id";
 import { nextStoreId } from "../utils/id";
@@ -6,7 +10,7 @@ import { freeze } from "../utils/freeze";
 import { getCoreFn } from "../utils/get-core-fn";
 
 export const adapter = <FromState, ToState>(
-  store: Store<FromState> | ReadOnlyStore<FromState>,
+  store: AnyStore<FromState>,
   adapterAction: AdapterAction<FromState, ToState>,
   { name }: StoreOptions = {}
 ): ReadOnlyStore<ToState> => {
