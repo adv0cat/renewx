@@ -3,6 +3,28 @@ import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
 
+let isQueueRunning = false;
+let queue = [] as [any, ActionInfo, Map<Listener<any>, Unsubscribe | void>][];
+
+const runQueue = (start = 0) => {
+  isQueueRunning = true;
+  const currentQueue = queue.slice(start);
+  for (let i = currentQueue.length - 1; i >= 0; --i) {
+    const [state, info, unsubscribes] = currentQueue[i];
+    for (const [listener, unsubscribe] of unsubscribes) {
+      unsubscribe?.();
+      unsubscribes.set(listener, listener(state, info));
+    }
+  }
+  const newStart = start + currentQueue.length;
+  if (queue.length - newStart > 0) {
+    runQueue(newStart);
+    return;
+  }
+  queue = [];
+  isQueueRunning = false;
+};
+
 export const getCoreFn = <State>(
   get: ReadOnlyStore<State>["get"],
   id: ReadOnlyStore<State>["id"]
@@ -24,9 +46,9 @@ export const getCoreFn = <State>(
       };
     },
     (state: Freeze<State>, info: ActionInfo): void => {
-      for (const [listener, unsubscribe] of unsubscribes) {
-        unsubscribe?.();
-        unsubscribes.set(listener, listener(state, info));
+      queue.push([state, info, unsubscribes]);
+      if (!isQueueRunning) {
+        runQueue();
       }
     },
   ];
