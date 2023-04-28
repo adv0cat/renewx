@@ -8,8 +8,8 @@ import type {
 import type { Unsubscribe, KeysOfStores } from "../interfaces/core";
 import type { ActionFnReturn } from "../interfaces/action";
 import type { ActionID, JoinStoreID } from "../interfaces/id";
+import type { Freeze } from "../utils/freeze";
 import { nextActionId } from "../utils/id";
-import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
@@ -24,7 +24,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     storesNameList.forEach(
       (storeName) => (states[storeName] = stores[storeName].get())
     );
-    return freeze<R>(states);
+    return states as Freeze<R>;
   };
   let states = getStates();
 

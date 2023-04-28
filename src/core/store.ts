@@ -1,7 +1,7 @@
 import type { Store, StoreOptions } from "../interfaces/store";
 import type { ActionID, StoreID } from "../interfaces/id";
+import type { Freeze } from "../utils/freeze";
 import { nextActionId, nextStoreId } from "../utils/id";
-import { freeze } from "../utils/freeze";
 import { getArgsForLog } from "../utils/get-args-for-log";
 import { getCoreFn } from "../utils/get-core-fn";
 import { getValidationFn } from "../utils/get-validation-fn";
@@ -11,7 +11,7 @@ export const store = <State>(
   initState: State,
   { name }: StoreOptions = {}
 ): Store<State> => {
-  let state = freeze(initState);
+  let state = initState as Freeze<State>;
   const storeID: StoreID = `[${nextStoreId(name)}]`;
 
   const [validation, isValid] = getValidationFn();
@@ -42,7 +42,7 @@ export const store = <State>(
         }
 
         console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
-        state = freeze(newState);
+        state = newState as Freeze<State>;
         notify(state, { actionID });
         console.groupEnd();
         return true;
