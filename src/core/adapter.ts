@@ -3,20 +3,33 @@ import type {
   ReadOnlyStore,
   AnyStore,
 } from "../interfaces/store";
-import type { AdapterAction } from "../interfaces/action";
 import type { AdapterStoreID } from "../interfaces/id";
+import type { Freeze } from "../utils/freeze";
+import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { nextStoreId } from "../utils/id";
-import { freeze } from "../utils/freeze";
 import { getCoreFn } from "../utils/get-core-fn";
+import { isNewStateChanged } from "../utils/is";
 
-export const adapter = <FromState, ToState>(
-  store: AnyStore<FromState>,
-  adapterAction: AdapterAction<FromState, ToState>,
+export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
+  stores: Stores,
+  adapterAction: AdapterAction<ToState, Stores>,
   { name }: StoreOptions = {}
 ): ReadOnlyStore<ToState> => {
-  let fromState = store.get();
-  let state = freeze(adapterAction(fromState));
-  const storeID: AdapterStoreID = `(${store.id()}=>'${nextStoreId(name)}')`;
+  let fromStates = Array.isArray(stores)
+    ? stores.map((store) => store.get())
+    : stores.get();
+
+  let state = (
+    Array.isArray(stores)
+      ? (adapterAction as AdapterAction<ToState>)(...fromStates)
+      : adapterAction(fromStates)
+  ) as Freeze<ToState>;
+
+  const storeID: AdapterStoreID = `(${
+    Array.isArray(stores)
+      ? stores.map((store) => store.id()).join(";")
+      : stores.id()
+  }>${nextStoreId(name)})`;
 
   const [get, id, watch, notify] = getCoreFn(
     () => state,
@@ -25,11 +38,51 @@ export const adapter = <FromState, ToState>(
 
   console.info(`${storeID} created`);
 
-  const unsubscribe = store.watch((_fromState, info) => {
-    fromState = _fromState;
-    state = freeze(adapterAction(fromState));
-    notify(state, info);
-  });
+  let isNotifyEnabled = false;
+
+  const unsubscribes = Array.isArray(stores)
+    ? stores.map((store, index) =>
+        store.watch((storeNewState, info) => {
+          if (!isNotifyEnabled) {
+            return;
+          }
+
+          console.group(
+            `${storeID}.${store.id()}.#set(${JSON.stringify(storeNewState)})`
+          );
+
+          if (!isNewStateChanged(fromStates[index], storeNewState)) {
+            console.info("%c~not changed", "color: #FF5E5B");
+            console.groupEnd();
+            return;
+          }
+
+          fromStates = stores.map((store) => store.get());
+          const newState = (adapterAction as AdapterAction<ToState>)(
+            ...fromStates
+          );
+          console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
+          state = newState as Freeze<ToState>;
+          notify(state, info);
+          console.groupEnd();
+        })
+      )
+    : stores.watch((newFromState, info) => {
+        if (!isNotifyEnabled) {
+          return;
+        }
+
+        console.group(`${storeID}.#set(${JSON.stringify(newFromState)})`);
+        fromStates = newFromState;
+        // const newState = freeze(adapterAction(fromStates));
+        const newState = adapterAction(fromStates);
+        console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
+        state = newState as Freeze<ToState>;
+        notify(state, info);
+        console.groupEnd();
+      });
+
+  isNotifyEnabled = true;
 
   return {
     isReadOnly: true,

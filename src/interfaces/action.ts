@@ -16,9 +16,5 @@ export type ActionFnReturn<State> = State extends StoresType<
     : Partial<Pick<State, KeysOfStores<SomeStores>>> | undefined
   : State | Freeze<State>;
 
-export type AdapterAction<FromState, ToState> = (
-  state: Freeze<FromState>
-) => ToState;
-
 export type ActionOptions = Partial<{ id: string | number }>;
 export type ActionInfo = { actionID: ActionID };

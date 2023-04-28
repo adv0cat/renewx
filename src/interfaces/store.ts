@@ -40,6 +40,12 @@ export type Notify<State> = (state: Freeze<State>, info: ActionInfo) => void;
 export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
 export type AnyStores = Record<string, AnyStore>;
 
+export type FreezeStoreType<SomeStore extends AnyStore> =
+  SomeStore extends AnyStore<infer Type> ? Freeze<Type> : never;
+export type FreezeStoreListType<SomeStoreList extends AnyStore[]> = {
+  [Index in keyof SomeStoreList]: FreezeStoreType<SomeStoreList[Index]>;
+};
+
 export type StoreType<SomeStore extends AnyStore> = SomeStore extends AnyStore<
   infer Type
 >
