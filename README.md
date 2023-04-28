@@ -78,6 +78,30 @@ const apiPagination = adapter(pagePagination, ({ pageSize, page }) => {
 console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 0, limit: 10 }
 ```
 
+#### Combined stores for use in an adapter:
+
+```ts
+const pageSize = store(10);
+const page = store(1);
+const pagination = adapter([pageSize, page], (pageSize, page) => {
+  const limit = page * pageSize;
+  return {
+    offset: limit - pageSize,
+    limit,
+  };
+});
+
+const nextPage = page.action((state) => state + 1);
+
+pagination.watch((state) => {
+  console.log("pagination:", state);
+});
+
+// pagination: { offset: 0, limit: 10 }
+nextPage(); // pagination: { offset: 10, limit: 20 }
+nextPage(); // pagination: { offset: 20, limit: 30 }
+```
+
 ### Join
 
 #### Joining multiple stores for convenient use:
