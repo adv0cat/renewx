@@ -2,23 +2,29 @@ import type {
   AnyStores,
   Store,
   StoresType,
-  StoresAction,
+  StoresSet,
   StoresIsValid,
+  StoreOptions,
+  InnerStore,
 } from "../interfaces/store";
 import type { Unsubscribe, KeysOfStores } from "../interfaces/core";
-import type { ActionFnReturn } from "../interfaces/action";
-import type { ActionID, JoinStoreID } from "../interfaces/id";
+import type { ActionFnReturn, ActionInfo } from "../interfaces/action";
+import type { ActionID, JoinStoreName, StoreID } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
-import { nextActionId } from "../utils/id";
-import { getArgsForLog } from "../utils/get-args-for-log";
+import { nextActionId, nextStoreId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
-import { isNotReadOnlyStore, isNewStateChanged } from "../utils/is";
+import {
+  isNotReadOnlyStore,
+  isNewStateChanged,
+  isInnerStore,
+} from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
-  stores: Stores
+  stores: Stores,
+  options: StoreOptions = {}
 ): Store<R> => {
-  const storesNameList = Object.keys(stores) as (keyof Stores)[];
+  const storesNameList = Object.keys(stores) as (string & keyof Stores)[];
   const getStates = () => {
     const states = {} as R;
     storesNameList.forEach(
@@ -28,33 +34,34 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   };
   let states = getStates();
 
-  const storeID: JoinStoreID = `{${storesNameList
-    .map((storeName) => stores[storeName].id())
-    .join(";")}}`;
+  const storeID: StoreID = nextStoreId();
+  const storeName =
+    options.name ??
+    (`${storeID}:{${storesNameList
+      .map((storeName) => stores[storeName].id())
+      .join(",")}}` as JoinStoreName);
 
   const [validation, isCurrentStoreValid] = getValidationFn();
-  const [get, id, watch, notify] = getCoreFn(
-    () => states,
-    () => storeID
+  const [id, name, get, watch, notify] = getCoreFn(
+    () => storeID,
+    () => storeName,
+    () => states
   );
-
-  console.info(`${storeID} created`);
 
   let isNotifyEnabled = false;
 
-  const unsubscribes = {} as Record<keyof Stores, Unsubscribe>;
-  const storesAction = {} as StoresAction<Stores>;
+  const unsubscribes = {} as Record<string, Unsubscribe>;
+  const storesSet = {} as StoresSet<Stores>;
   const storesIsValid = {} as StoresIsValid<Stores>;
 
-  for (const storeName of storesNameList) {
-    const store = stores[storeName];
-    const actionID = `${storeID}.${store.id()}.#set` as ActionID;
+  for (const _storeName of storesNameList) {
+    const store = stores[_storeName];
 
-    unsubscribes[storeName] = store.watch((state, info) => {
+    unsubscribes[_storeName] = store.watch((state, { actionID, from }) => {
       if (!isNotifyEnabled) {
         return;
       }
-      console.group(`${actionID}(${JSON.stringify(state)})`);
+      console.group(`${_storeName}.#up(${JSON.stringify(state)})`);
       const newStates = getStates();
       if (
         !isNewStateChanged(states, newStates) ||
@@ -66,16 +73,15 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
       }
       console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
       states = newStates;
-      notify(states, info);
+      notify(states, { actionID, from: from.concat(storeID) });
       console.groupEnd();
     });
 
+    if (isInnerStore(store)) {
+      storesSet[_storeName as KeysOfStores<Stores>] = store.set;
+    }
     if (isNotReadOnlyStore(store)) {
-      storesAction[storeName as KeysOfStores<Stores>] = store.action(
-        (_, value) => value,
-        { id: actionID }
-      );
-      storesIsValid[storeName as KeysOfStores<Stores>] = store.isValid;
+      storesIsValid[_storeName as KeysOfStores<Stores>] = store.isValid;
     }
   }
   const isValidNameList = Object.keys(storesIsValid) as KeysOfStores<Stores>[];
@@ -91,54 +97,66 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isCurrentStoreValid(oldState, newState);
 
   isNotifyEnabled = true;
+  const set: InnerStore<R>["set"] = (
+    actionStates,
+    { actionID, from }
+  ): boolean => {
+    console.group(
+      `${storeName}.${from.length === 0 ? actionID : "#set"} ->`,
+      actionStates
+    );
+
+    if (
+      actionStates == null ||
+      !isNewStateChanged(states, actionStates) ||
+      !isValid(states, actionStates)
+    ) {
+      console.info("%c~not changed", "color: #FF5E5B");
+      console.groupEnd();
+      return false;
+    }
+
+    isNotifyEnabled = false;
+    let isChanged = false;
+    const info = { actionID, from: from.concat(storeID) } as ActionInfo;
+    for (const actionState of Object.keys(actionStates)) {
+      if (
+        storesSet[actionState as KeysOfStores<Stores>]?.(
+          actionStates[actionState],
+          info
+        )
+      ) {
+        isChanged = true;
+      }
+    }
+    isNotifyEnabled = true;
+
+    if (!isChanged) {
+      return false;
+    }
+
+    const newStates = getStates();
+    console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
+    states = newStates;
+    notify(states, info);
+    console.groupEnd();
+    return true;
+  };
+
+  console.info(`${storeID} as "${storeName}" created`);
 
   return {
     isReadOnly: false,
     id,
+    name,
     get,
     watch,
     isValid,
     validation,
-    action: (action, { id } = {}) => {
-      const actionID: ActionID = nextActionId(id);
-      return (...args) => {
-        console.group(`${storeID} ${actionID}(${getArgsForLog(args)})`);
-
-        const actionStates = action(states, ...args);
-        if (
-          actionStates == null ||
-          !isNewStateChanged(states, actionStates) ||
-          !isValid(states, actionStates)
-        ) {
-          console.info("%c~not changed", "color: #FF5E5B");
-          console.groupEnd();
-          return false;
-        }
-
-        isNotifyEnabled = false;
-        let isChanged = false;
-        for (const actionState of Object.keys(actionStates)) {
-          if (
-            storesAction[actionState as KeysOfStores<Stores>]?.(
-              actionStates[actionState]
-            )
-          ) {
-            isChanged = true;
-          }
-        }
-        isNotifyEnabled = true;
-
-        if (!isChanged) {
-          return false;
-        }
-
-        const newStates = getStates();
-        console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
-        states = newStates;
-        notify(states, { actionID });
-        console.groupEnd();
-        return true;
-      };
+    set,
+    action: (action, { name } = {}) => {
+      const actionID: ActionID = nextActionId();
+      return (...args) => set(action(states, ...args), { actionID, from: [] });
     },
-  } as Store<R>;
+  } as InnerStore<R>;
 };

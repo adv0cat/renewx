@@ -1,5 +1,12 @@
-export type StoreID = `[${number | string}]`;
-export type AdapterStoreID = `(${string}>${string | number})`;
-export type JoinStoreID = `{${string}}`;
-export type ActionID = string | number | "init" | `${string}.#${"set" | "off"}`;
+export type StoreID = number; // 42
+export type StoreName = `${StoreID}`; // "42"
+export type AdapterStoreName = `${StoreID}:[${string}]`; // "42:[2,13]"
+export type JoinStoreName = `${StoreID}:{${string}}`; // "42:{2,13}"
+export type AnyStoreName =
+  | StoreName
+  | AdapterStoreName
+  | JoinStoreName
+  | string;
+
+export type ActionID = number | `#${"init" | "set" | "up"}`;
 export type JobID = `{${number | string}}`;

@@ -13,12 +13,13 @@ import type {
 } from "./action";
 import type { ValidationFn } from "./validation";
 import type { Freeze } from "../utils/freeze";
-import type { AdapterStoreID, JoinStoreID, StoreID } from "./id";
+import type { StoreID, AnyStoreName } from "./id";
 
 export interface ReadOnlyStore<State> {
   get(): Freeze<State>;
   watch(fn: Listener<State>): Unsubscribe;
-  id(): StoreID | JoinStoreID | AdapterStoreID;
+  id(): StoreID;
+  name(): AnyStoreName;
   isReadOnly: boolean;
 }
 export interface Store<State> extends ReadOnlyStore<State> {
@@ -28,6 +29,10 @@ export interface Store<State> extends ReadOnlyStore<State> {
     action: NewActionFn,
     options?: ActionOptions
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
+}
+
+export interface InnerStore<State> extends Store<State> {
+  set(newState: ActionFnReturn<State>, info: ActionInfo): IsChanged;
 }
 
 export type StoreOptions = Partial<{ name: string }>;
@@ -55,9 +60,9 @@ export type StoresType<SomeStores extends AnyStores> = {
   [Name in keyof SomeStores]: StoreType<SomeStores[Name]>;
 };
 
-export type StoresAction<SomeStores extends AnyStores> = Record<
+export type StoresSet<SomeStores extends AnyStores> = Record<
   KeysOfStores<SomeStores>,
-  ReturnType<Store<any>["action"]>
+  InnerStore<any>["set"]
 >;
 
 export type StoresIsValid<SomeStores extends AnyStores> = Record<

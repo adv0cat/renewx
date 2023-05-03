@@ -1,4 +1,4 @@
-import type { ActionID } from "./id";
+import type { ActionID, StoreID } from "./id";
 import type { Freeze } from "../utils/freeze";
 import type { AnyStores, StoresType } from "./store";
 import type { KeysOfStores } from "./core";
@@ -16,5 +16,8 @@ export type ActionFnReturn<State> = State extends StoresType<
     : Partial<Pick<State, KeysOfStores<SomeStores>>> | undefined
   : State | Freeze<State>;
 
-export type ActionOptions = Partial<{ id: string | number }>;
-export type ActionInfo = { actionID: ActionID };
+export type ActionOptions = Partial<{ name: string | number }>;
+export type ActionInfo = {
+  actionID: ActionID;
+  from: StoreID[];
+};

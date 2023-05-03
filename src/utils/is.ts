@@ -1,7 +1,10 @@
-import type { AnyStore, Store } from "../interfaces/store";
+import type { AnyStore, InnerStore, Store } from "../interfaces/store";
 
 export const isNotReadOnlyStore = (store: AnyStore): store is Store<any> =>
   !store.isReadOnly;
+
+export const isInnerStore = (store: AnyStore): store is InnerStore<any> =>
+  isNotReadOnlyStore(store);
 
 const OBJECT = "object";
 export const isNewStateChanged = (oldState: any, newState: any) => {

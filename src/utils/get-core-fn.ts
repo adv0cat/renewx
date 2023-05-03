@@ -26,20 +26,27 @@ const runQueue = (start = 0) => {
 };
 
 export const getCoreFn = <State>(
-  get: ReadOnlyStore<State>["get"],
-  id: ReadOnlyStore<State>["id"]
+  id: ReadOnlyStore<State>["id"],
+  name: ReadOnlyStore<State>["name"],
+  get: ReadOnlyStore<State>["get"]
 ): [
-  ReadOnlyStore<State>["get"],
   ReadOnlyStore<State>["id"],
+  ReadOnlyStore<State>["name"],
+  ReadOnlyStore<State>["get"],
   ReadOnlyStore<State>["watch"],
   Notify<State>
 ] => {
+  const storeID = id();
   const unsubscribes = new Map<Listener<State>, Unsubscribe | void>();
   return [
-    get,
     id,
+    name,
+    get,
     (listener): Unsubscribe => {
-      unsubscribes.set(listener, listener(get(), { actionID: "init" }));
+      unsubscribes.set(
+        listener,
+        listener(get(), { actionID: "#init", from: [storeID] })
+      );
       return () => {
         unsubscribes.get(listener)?.();
         unsubscribes.delete(listener);
