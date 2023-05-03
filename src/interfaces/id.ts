@@ -9,4 +9,4 @@ export type AnyStoreName =
   | string;
 
 export type ActionID = number | `#${"init" | "set" | "up"}`;
-export type JobID = `{${number | string}}`;
+export type JobID = number;

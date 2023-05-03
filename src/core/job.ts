@@ -17,14 +17,16 @@ export const allJobs = async (): Promise<void> => {
 
 export const job = <NewJobFn extends AsyncFn>(
   jobFn: NewJobFn,
-  { name }: JobOptions = {}
+  options: JobOptions = {}
 ): Job<NewJobFn> => {
-  const jobID: JobID = `{${nextJobId(name)}}`;
+  const jobID: JobID = nextJobId();
+  const jobName =
+    options.name != null ? `${jobID}-"${options.name}"` : `${jobID}`;
 
-  console.info(`[${jobID}] created`);
+  console.info(`[${jobName}] created`);
 
   return (...args) => {
-    console.log(`[${jobID}] run(${getArgsForLog(args)})`);
+    console.log(`${jobName}.run(${getArgsForLog(args)})`);
     const runningJob = jobFn(...args);
     RUNNING_JOBS.push(runningJob);
 
@@ -34,7 +36,7 @@ export const job = <NewJobFn extends AsyncFn>(
     return runningJob.then(
       (result) => {
         console.group(
-          `[${jobID}]%c resolve(${getArgsForLog(args)})`,
+          `${jobID}%c resolve(${getArgsForLog(args)})`,
           "color: #BDFF66",
           "->",
           result
@@ -45,7 +47,7 @@ export const job = <NewJobFn extends AsyncFn>(
       },
       (reason) => {
         console.group(
-          `[${jobID}]%c reject(${getArgsForLog(args)})`,
+          `${jobID}%c reject(${getArgsForLog(args)})`,
           "color: #FF5E5B"
         );
         console.error(reason);

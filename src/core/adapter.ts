@@ -3,7 +3,7 @@ import type {
   ReadOnlyStore,
   AnyStore,
 } from "../interfaces/store";
-import type { ActionID, AdapterStoreName, StoreID } from "../interfaces/id";
+import type { AdapterStoreName, StoreID } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { nextStoreId } from "../utils/id";
