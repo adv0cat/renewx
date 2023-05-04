@@ -20,6 +20,7 @@ import {
 } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
 import { StoreInnerAPI } from "./store-api";
+import { ActionInnerAPI } from "./action-api";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores,
@@ -167,13 +168,11 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isValid,
     validation,
     set,
-    action: (action, { name } = {}) => {
-      const actionID: ActionID = nextActionId();
-      return (...args) =>
-        set(
-          action(states, ...args),
-          StoreInnerAPI.addActionInfo ? { actionID, from: [] } : undefined
-        );
+    action: (action, options) => {
+      const _info = StoreInnerAPI.addActionInfo
+        ? { actionID: ActionInnerAPI.add(nextActionId(), options), from: [] }
+        : undefined;
+      return (...args) => set(action(states, ...args), _info);
     },
   } as InnerStore<R>);
 };

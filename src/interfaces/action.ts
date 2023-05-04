@@ -16,7 +16,7 @@ export type ActionFnReturn<State> = State extends StoresType<
     : Partial<Pick<State, KeysOfStores<SomeStores>>> | undefined
   : State | Freeze<State>;
 
-export type ActionOptions = Partial<{ name: string | number }>;
+export type ActionOptions = Partial<{ name: string }>;
 export type ActionInfo = {
   actionID: ActionID;
   from: StoreID[];

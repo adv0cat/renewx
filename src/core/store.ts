@@ -6,6 +6,7 @@ import { getCoreFn } from "../utils/get-core-fn";
 import { getValidationFn } from "../utils/get-validation-fn";
 import { isNewStateChanged } from "../utils/is";
 import { StoreInnerAPI } from "./store-api";
+import { ActionInnerAPI } from "./action-api";
 
 export const store = <State>(
   initState: State,
@@ -57,13 +58,11 @@ export const store = <State>(
     isValid,
     validation,
     set,
-    action: (action, { name } = {}) => {
-      const actionID: ActionID = nextActionId();
-      return (...args) =>
-        set(
-          action(state, ...args),
-          StoreInnerAPI.addActionInfo ? { actionID, from: [] } : undefined
-        );
+    action: (action, options) => {
+      const _info = StoreInnerAPI.addActionInfo
+        ? { actionID: ActionInnerAPI.add(nextActionId(), options), from: [] }
+        : undefined;
+      return (...args) => set(action(state, ...args), _info);
     },
   } as InnerStore<State>);
 };
