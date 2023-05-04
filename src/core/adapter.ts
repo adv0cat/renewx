@@ -41,13 +41,11 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     () => state
   );
 
-  console.info(`${storeID} as "${storeName}" created`);
-
   let isNotifyEnabled = false;
 
   const unsubscribes = Array.isArray(stores)
     ? stores.map((store, index) =>
-        store.watch((storeNewState, { actionID, from }) => {
+        store.watch((storeNewState, info) => {
           if (!isNotifyEnabled) {
             return;
           }
@@ -66,11 +64,17 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           );
           console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
           state = newState as Freeze<ToState>;
-          notify(state, { actionID, from: from.concat(storeID) });
+
+          info === undefined
+            ? notify(state)
+            : notify(state, {
+                actionID: info.actionID,
+                from: info.from.concat(storeID),
+              });
           console.groupEnd();
         })
       )
-    : stores.watch((newFromState, { actionID, from }) => {
+    : stores.watch((newFromState, info) => {
         if (!isNotifyEnabled) {
           return;
         }
@@ -81,11 +85,19 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
         const newState = adapterAction(fromStates);
         console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
         state = newState as Freeze<ToState>;
-        notify(state, { actionID, from: from.concat(storeID) });
+
+        info === undefined
+          ? notify(state)
+          : notify(state, {
+              actionID: info.actionID,
+              from: info.from.concat(storeID),
+            });
         console.groupEnd();
       });
 
   isNotifyEnabled = true;
+
+  console.info(`${storeID} as "${storeName}" created`);
 
   return StoreInnerAPI.add({
     isReadOnly: true,

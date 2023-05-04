@@ -22,12 +22,9 @@ export const store = <State>(
     () => state
   );
 
-  const set: InnerStore<State>["set"] = (
-    newState,
-    { actionID, from }
-  ): boolean => {
+  const set: InnerStore<State>["set"] = (newState, info): boolean => {
     console.group(
-      `${storeName}.${from.length === 0 ? actionID : "#set"} ->`,
+      `${storeName}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
       newState
     );
 
@@ -39,7 +36,12 @@ export const store = <State>(
 
     console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
     state = newState as Freeze<State>;
-    notify(state, { actionID, from: from.concat(storeID) });
+    info === undefined
+      ? notify(state)
+      : notify(state, {
+          actionID: info.actionID,
+          from: info.from.concat(storeID),
+        });
     console.groupEnd();
     return true;
   };
@@ -57,7 +59,11 @@ export const store = <State>(
     set,
     action: (action, { name } = {}) => {
       const actionID: ActionID = nextActionId();
-      return (...args) => set(action(state, ...args), { actionID, from: [] });
+      return (...args) =>
+        set(
+          action(state, ...args),
+          StoreInnerAPI.addActionInfo ? { actionID, from: [] } : undefined
+        );
     },
   } as InnerStore<State>);
 };

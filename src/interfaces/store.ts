@@ -32,15 +32,15 @@ export interface Store<State> extends ReadOnlyStore<State> {
 }
 
 export interface InnerStore<State> extends Store<State> {
-  set(newState: ActionFnReturn<State>, info: ActionInfo): IsChanged;
+  set(newState: ActionFnReturn<State>, info?: ActionInfo): IsChanged;
 }
 
 export type StoreOptions = Partial<{ name: string }>;
 export type Listener<State> = (
   state: Freeze<State>,
-  info: ActionInfo
+  info?: ActionInfo
 ) => Unsubscribe | void;
-export type Notify<State> = (state: Freeze<State>, info: ActionInfo) => void;
+export type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
 
 export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
 export type AnyStores = Record<string, AnyStore>;
