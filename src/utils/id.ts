@@ -1,6 +1,6 @@
 const idCounter = (): (() => number) => {
   let id = 0;
-  return () => ++id;
+  return () => id++;
 };
 
 export const nextStoreId = idCounter();
