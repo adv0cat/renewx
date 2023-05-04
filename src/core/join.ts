@@ -19,6 +19,7 @@ import {
   isInnerStore,
 } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
+import { StoreInnerAPI } from "./store-api";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores,
@@ -132,6 +133,8 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isNotifyEnabled = true;
 
     if (!isChanged) {
+      console.info("%c~not changed", "color: #FF5E5B");
+      console.groupEnd();
       return false;
     }
 
@@ -145,7 +148,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   console.info(`${storeID} as "${storeName}" created`);
 
-  return {
+  return StoreInnerAPI.add({
     isReadOnly: false,
     id,
     name,
@@ -158,5 +161,5 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
       const actionID: ActionID = nextActionId();
       return (...args) => set(action(states, ...args), { actionID, from: [] });
     },
-  } as InnerStore<R>;
+  } as InnerStore<R>);
 };

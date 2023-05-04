@@ -9,6 +9,7 @@ import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { nextStoreId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNewStateChanged } from "../utils/is";
+import { StoreInnerAPI } from "./store-api";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -86,11 +87,11 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   isNotifyEnabled = true;
 
-  return {
+  return StoreInnerAPI.add({
     isReadOnly: true,
     id,
     name,
     get,
     watch,
-  } as ReadOnlyStore<ToState>;
+  } as ReadOnlyStore<ToState>);
 };

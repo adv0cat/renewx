@@ -5,6 +5,7 @@ import { nextActionId, nextStoreId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
 import { getValidationFn } from "../utils/get-validation-fn";
 import { isNewStateChanged } from "../utils/is";
+import { StoreInnerAPI } from "./store-api";
 
 export const store = <State>(
   initState: State,
@@ -45,7 +46,7 @@ export const store = <State>(
 
   console.info(`${storeID} as "${storeName}" created`);
 
-  return {
+  return StoreInnerAPI.add({
     isReadOnly: false,
     id,
     name,
@@ -58,5 +59,5 @@ export const store = <State>(
       const actionID: ActionID = nextActionId();
       return (...args) => set(action(state, ...args), { actionID, from: [] });
     },
-  } as InnerStore<State>;
+  } as InnerStore<State>);
 };
