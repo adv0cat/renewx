@@ -13,19 +13,20 @@ export const store = <State>(
   options: StoreOptions = {}
 ): Store<State> => {
   let state = initState as Freeze<State>;
+
   const storeID: StoreID = nextStoreId();
-  const storeName = options.name ?? (`${storeID}` as StoreName);
 
   const [validation, isValid] = getValidationFn();
-  const [id, name, get, watch, notify] = getCoreFn(
+  const [id, get, name, watch, notify] = getCoreFn(
     () => storeID,
-    () => storeName,
-    () => state
+    () => state,
+    () => `${storeID}` as StoreName,
+    options
   );
 
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
     console.group(
-      `${storeName}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
+      `${storeID}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
       newState
     );
 
@@ -47,13 +48,13 @@ export const store = <State>(
     return true;
   };
 
-  console.info(`${storeID} as "${storeName}" created`);
+  console.info(`${storeID} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: false,
     id,
-    name,
     get,
+    name,
     watch,
     isValid,
     validation,

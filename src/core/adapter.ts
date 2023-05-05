@@ -6,10 +6,10 @@ import type {
 import type { AdapterStoreName, StoreID } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
+import { StoreInnerAPI } from "./store-api";
 import { nextStoreId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNewStateChanged } from "../utils/is";
-import { StoreInnerAPI } from "./store-api";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -27,18 +27,17 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   ) as Freeze<ToState>;
 
   const storeID: StoreID = nextStoreId();
-  const storeName =
-    options.name ??
-    (`${storeID}:[${
-      Array.isArray(stores)
-        ? stores.map((store) => store.id()).join(",")
-        : stores.id()
-    }]` as AdapterStoreName);
 
-  const [id, name, get, watch, notify] = getCoreFn(
+  const [id, get, name, watch, notify] = getCoreFn(
     () => storeID,
-    () => storeName,
-    () => state
+    () => state,
+    () =>
+      `${storeID}:[${
+        Array.isArray(stores)
+          ? stores.map((store) => store.id()).join(",")
+          : stores.id()
+      }]` as AdapterStoreName,
+    options
   );
 
   let isNotifyEnabled = false;
@@ -50,7 +49,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             return;
           }
 
-          console.group(`${storeName}.#up(${JSON.stringify(storeNewState)})`);
+          console.group(`${storeID}.#up(${JSON.stringify(storeNewState)})`);
 
           if (!isNewStateChanged(fromStates[index], storeNewState)) {
             console.info("%c~not changed", "color: #FF5E5B");
@@ -79,7 +78,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           return;
         }
 
-        console.group(`${storeName}.#up(${JSON.stringify(newFromState)})`);
+        console.group(`${storeID}.#up(${JSON.stringify(newFromState)})`);
 
         fromStates = newFromState;
         const newState = adapterAction(fromStates);
@@ -97,13 +96,13 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   isNotifyEnabled = true;
 
-  console.info(`${storeID} as "${storeName}" created`);
+  console.info(`${storeID} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: true,
     id,
-    name,
     get,
+    name,
     watch,
   } as ReadOnlyStore<ToState>);
 };
