@@ -3,11 +3,10 @@ import type {
   ReadOnlyStore,
   AnyStore,
 } from "../interfaces/store";
-import type { AdapterStoreName, StoreID } from "../interfaces/id";
+import type { AdapterStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { StoreInnerAPI } from "./store-api";
-import { nextStoreId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
 import { isNewStateChanged } from "../utils/is";
 
@@ -26,16 +25,13 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
       : adapterAction(fromStates)
   ) as Freeze<ToState>;
 
-  const storeID: StoreID = nextStoreId();
-
   const [id, get, name, watch, notify] = getCoreFn(
-    () => storeID,
     () => state,
-    () =>
+    (storeID) =>
       `${storeID}:[${
         Array.isArray(stores)
-          ? stores.map((store) => store.id()).join(",")
-          : stores.id()
+          ? stores.map((store) => store.id).join(",")
+          : stores.id
       }]` as AdapterStoreName,
     options
   );
@@ -49,7 +45,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             return;
           }
 
-          console.group(`${storeID}.#up(${JSON.stringify(storeNewState)})`);
+          console.group(`${name()}.#up(${JSON.stringify(storeNewState)})`);
 
           if (!isNewStateChanged(fromStates[index], storeNewState)) {
             console.info("%c~not changed", "color: #FF5E5B");
@@ -68,7 +64,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             ? notify(state)
             : notify(state, {
                 actionID: info.actionID,
-                from: info.from.concat(storeID),
+                from: info.from.concat(id),
               });
           console.groupEnd();
         })
@@ -78,7 +74,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           return;
         }
 
-        console.group(`${storeID}.#up(${JSON.stringify(newFromState)})`);
+        console.group(`${name()}.#up(${JSON.stringify(newFromState)})`);
 
         fromStates = newFromState;
         const newState = adapterAction(fromStates);
@@ -89,14 +85,14 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           ? notify(state)
           : notify(state, {
               actionID: info.actionID,
-              from: info.from.concat(storeID),
+              from: info.from.concat(id),
             });
         console.groupEnd();
       });
 
   isNotifyEnabled = true;
 
-  console.info(`${storeID} created`);
+  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: true,

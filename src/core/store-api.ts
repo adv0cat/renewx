@@ -7,7 +7,7 @@ const setAddActionInfo = (value: boolean) => (addActionInfo = value);
 const stores = [] as AnyStore[];
 const add = <SomeStore extends ReadOnlyStore<any> | InnerStore<any>>(
   store: SomeStore
-): SomeStore => (stores[store.id()] = store) as SomeStore;
+): SomeStore => (stores[store.id] = store) as SomeStore;
 const storeById = (storeID: StoreID): AnyStore | undefined => stores[storeID];
 const storeList = () => stores.slice();
 

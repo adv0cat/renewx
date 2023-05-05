@@ -16,9 +16,9 @@ import type { Freeze } from "../utils/freeze";
 import type { StoreID, AnyStoreName } from "./id";
 
 export interface ReadOnlyStore<State> {
+  id: StoreID;
   get(): Freeze<State>;
   watch(fn: Listener<State>): Unsubscribe;
-  id(): StoreID;
   name(): AnyStoreName;
   isReadOnly: boolean;
 }

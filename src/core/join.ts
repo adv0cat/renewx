@@ -9,11 +9,11 @@ import type {
 } from "../interfaces/store";
 import type { Unsubscribe, KeysOfStores } from "../interfaces/core";
 import type { ActionFnReturn } from "../interfaces/action";
-import type { JoinStoreName, StoreID } from "../interfaces/id";
+import type { JoinStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import { StoreInnerAPI } from "./store-api";
 import { ActionInnerAPI } from "./action-api";
-import { nextActionId, nextStoreId } from "../utils/id";
+import { nextActionId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
 import {
   isNotReadOnlyStore,
@@ -36,15 +36,12 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   };
   let states = getStates();
 
-  const storeID: StoreID = nextStoreId();
-
   const [validation, isCurrentStoreValid] = getValidationFn();
   const [id, get, name, watch, notify] = getCoreFn(
-    () => storeID,
     () => states,
-    () =>
+    (storeID) =>
       `${storeID}:{${storesNameList
-        .map((storeName) => stores[storeName].id())
+        .map((storeName) => stores[storeName].id)
         .join(",")}}` as JoinStoreName,
     options
   );
@@ -79,7 +76,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         ? notify(states)
         : notify(states, {
             actionID: info.actionID,
-            from: info.from.concat(storeID),
+            from: info.from.concat(id),
           });
       console.groupEnd();
     });
@@ -105,7 +102,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   const set: InnerStore<R>["set"] = (actionStates, info): boolean => {
     console.group(
-      `${storeID}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
+      `${name()}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
       actionStates
     );
 
@@ -126,7 +123,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         ? undefined
         : {
             actionID: info.actionID,
-            from: info.from.concat(storeID),
+            from: info.from.concat(id),
           };
     for (const actionState of Object.keys(actionStates)) {
       if (
@@ -156,7 +153,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   isNotifyEnabled = true;
 
-  console.info(`${storeID} created`);
+  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: false,

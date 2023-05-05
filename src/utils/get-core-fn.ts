@@ -2,9 +2,10 @@ import type { Listener, ReadOnlyStore, Notify } from "../interfaces/store";
 import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
+import type { AnyStoreName, StoreID } from "../interfaces/id";
+import type { StoreOptions } from "../interfaces/store";
 import { StoreInnerAPI } from "../core/store-api";
-import { AnyStoreName } from "../interfaces/id";
-import { StoreOptions } from "../interfaces/store";
+import { nextStoreId } from "./id";
 
 let isQueueRunning = false;
 let queue = [] as [
@@ -33,9 +34,8 @@ const runQueue = (start = 0) => {
 };
 
 export const getCoreFn = <State>(
-  id: ReadOnlyStore<State>["id"],
   get: ReadOnlyStore<State>["get"],
-  name: ReadOnlyStore<State>["name"],
+  name: (storeID: StoreID) => AnyStoreName,
   options: StoreOptions
 ): [
   ReadOnlyStore<State>["id"],
@@ -44,15 +44,15 @@ export const getCoreFn = <State>(
   ReadOnlyStore<State>["watch"],
   Notify<State>
 ] => {
-  const storeID = id();
+  const storeID = nextStoreId();
   let storeName: AnyStoreName = "";
   const unsubscribes = new Map<Listener<State>, Unsubscribe | void>();
   return [
-    id,
+    storeID,
     get,
     (): AnyStoreName => {
       if (storeName.length === 0) {
-        storeName = options.name ?? name();
+        storeName = options.name ?? name(storeID);
       }
       return storeName;
     },

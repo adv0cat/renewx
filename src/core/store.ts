@@ -1,12 +1,12 @@
 import type { InnerStore, Store, StoreOptions } from "../interfaces/store";
-import type { ActionID, StoreID, StoreName } from "../interfaces/id";
+import type { StoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
-import { nextActionId, nextStoreId } from "../utils/id";
+import { nextActionId } from "../utils/id";
+import { StoreInnerAPI } from "./store-api";
+import { ActionInnerAPI } from "./action-api";
 import { getCoreFn } from "../utils/get-core-fn";
 import { getValidationFn } from "../utils/get-validation-fn";
 import { isNewStateChanged } from "../utils/is";
-import { StoreInnerAPI } from "./store-api";
-import { ActionInnerAPI } from "./action-api";
 
 export const store = <State>(
   initState: State,
@@ -14,19 +14,16 @@ export const store = <State>(
 ): Store<State> => {
   let state = initState as Freeze<State>;
 
-  const storeID: StoreID = nextStoreId();
-
   const [validation, isValid] = getValidationFn();
   const [id, get, name, watch, notify] = getCoreFn(
-    () => storeID,
     () => state,
-    () => `${storeID}` as StoreName,
+    (id) => `${id}` as StoreName,
     options
   );
 
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
     console.group(
-      `${storeID}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
+      `${name()}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
       newState
     );
 
@@ -42,13 +39,13 @@ export const store = <State>(
       ? notify(state)
       : notify(state, {
           actionID: info.actionID,
-          from: info.from.concat(storeID),
+          from: info.from.concat(id),
         });
     console.groupEnd();
     return true;
   };
 
-  console.info(`${storeID} created`);
+  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: false,
