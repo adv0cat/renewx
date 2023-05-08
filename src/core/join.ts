@@ -15,11 +15,7 @@ import { StoreInnerAPI } from "./store-api";
 import { ActionInnerAPI } from "./action-api";
 import { nextActionId } from "../utils/id";
 import { getCoreFn } from "../utils/get-core-fn";
-import {
-  isNotReadOnlyStore,
-  isNewStateChanged,
-  isInnerStore,
-} from "../utils/is";
+import { isNewStateChanged, isInnerStore } from "../utils/is";
 import { getValidationFn } from "../utils/get-validation-fn";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
@@ -60,31 +56,25 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         return;
       }
 
-      console.group(`${_storeName}.#up(${JSON.stringify(state)})`);
       const newStates = getStates();
       if (
         !isNewStateChanged(states, newStates) ||
         !isChildrenValid(states, newStates as ActionFnReturn<R>)
       ) {
-        console.info("%c~not changed", "color: #FF5E5B");
-        console.groupEnd();
         return;
       }
-      console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
+
+      info &&= {
+        id: info.id,
+        from: info.from.concat(id),
+      };
+
       states = newStates;
-      info === undefined
-        ? notify(states)
-        : notify(states, {
-            actionID: info.actionID,
-            from: info.from.concat(id),
-          });
-      console.groupEnd();
+      notify(states, info);
     });
 
     if (isInnerStore(store)) {
       storesSet[_storeName as KeysOfStores<Stores>] = store.set;
-    }
-    if (isNotReadOnlyStore(store)) {
       storesIsValid[_storeName as KeysOfStores<Stores>] = store.isValid;
     }
   }
@@ -101,35 +91,27 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isCurrentStoreValid(oldState, newState);
 
   const set: InnerStore<R>["set"] = (actionStates, info): boolean => {
-    console.group(
-      `${name()}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
-      actionStates
-    );
-
     if (
       actionStates == null ||
       !isNewStateChanged(states, actionStates) ||
       !isValid(states, actionStates)
     ) {
-      console.info("%c~not changed", "color: #FF5E5B");
-      console.groupEnd();
       return false;
     }
 
+    info &&= {
+      id: info.id,
+      from: info.from.concat(id),
+      isSet: true,
+    };
+
     isNotifyEnabled = false;
     let isChanged = false;
-    const _info =
-      info === undefined
-        ? undefined
-        : {
-            actionID: info.actionID,
-            from: info.from.concat(id),
-          };
     for (const actionState of Object.keys(actionStates)) {
       if (
         storesSet[actionState as KeysOfStores<Stores>]?.(
           actionStates[actionState],
-          _info
+          info
         )
       ) {
         isChanged = true;
@@ -138,22 +120,15 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isNotifyEnabled = true;
 
     if (!isChanged) {
-      console.info("%c~not changed", "color: #FF5E5B");
-      console.groupEnd();
       return false;
     }
 
-    const newStates = getStates();
-    console.info("%c~changed:", "color: #BDFF66", states, "->", newStates);
-    states = newStates;
-    notify(states, _info);
-    console.groupEnd();
+    states = getStates();
+    notify(states, info);
     return true;
   };
 
   isNotifyEnabled = true;
-
-  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: false,
@@ -165,10 +140,10 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     validation,
     set,
     action: (action, options) => {
-      const _info = StoreInnerAPI.addActionInfo
-        ? { actionID: ActionInnerAPI.add(nextActionId(), options), from: [] }
+      const info = ActionInnerAPI.addInfo
+        ? { id: ActionInnerAPI.add(nextActionId(), options), from: [] }
         : undefined;
-      return (...args) => set(action(states, ...args), _info);
+      return (...args) => set(action(states, ...args), info);
     },
   } as InnerStore<R>);
 };

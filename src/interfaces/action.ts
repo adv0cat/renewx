@@ -18,6 +18,7 @@ export type ActionFnReturn<State> = State extends StoresType<
 
 export type ActionOptions = Partial<{ name: string }>;
 export type ActionInfo = {
-  actionID: ActionID;
+  id: ActionID;
   from: StoreID[];
+  isSet?: boolean;
 };

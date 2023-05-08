@@ -8,5 +8,5 @@ export type AnyStoreName =
   | JoinStoreName
   | string;
 
-export type ActionID = number | `#${"init" | "set" | "up"}`;
+export type ActionID = number;
 export type JobID = number;

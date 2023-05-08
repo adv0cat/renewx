@@ -45,28 +45,20 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             return;
           }
 
-          console.group(`${name()}.#up(${JSON.stringify(storeNewState)})`);
-
           if (!isNewStateChanged(fromStates[index], storeNewState)) {
-            console.info("%c~not changed", "color: #FF5E5B");
-            console.groupEnd();
             return;
           }
 
-          fromStates = stores.map((store) => store.get());
-          const newState = (adapterAction as AdapterAction<ToState>)(
-            ...fromStates
-          );
-          console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
-          state = newState as Freeze<ToState>;
+          info &&= {
+            id: info.id,
+            from: info.from.concat(id),
+          };
 
-          info === undefined
-            ? notify(state)
-            : notify(state, {
-                actionID: info.actionID,
-                from: info.from.concat(id),
-              });
-          console.groupEnd();
+          fromStates = stores.map((store) => store.get());
+          state = (adapterAction as AdapterAction<ToState>)(
+            ...fromStates
+          ) as Freeze<ToState>;
+          notify(state, info);
         })
       )
     : stores.watch((newFromState, info) => {
@@ -74,25 +66,17 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           return;
         }
 
-        console.group(`${name()}.#up(${JSON.stringify(newFromState)})`);
+        info &&= {
+          id: info.id,
+          from: info.from.concat(id),
+        };
 
         fromStates = newFromState;
-        const newState = adapterAction(fromStates);
-        console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
-        state = newState as Freeze<ToState>;
-
-        info === undefined
-          ? notify(state)
-          : notify(state, {
-              actionID: info.actionID,
-              from: info.from.concat(id),
-            });
-        console.groupEnd();
+        state = adapterAction(fromStates) as Freeze<ToState>;
+        notify(state, info);
       });
 
   isNotifyEnabled = true;
-
-  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: true,

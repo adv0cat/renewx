@@ -22,30 +22,20 @@ export const store = <State>(
   );
 
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
-    console.group(
-      `${name()}.${info?.from.length === 0 ? info.actionID : "#set"} ->`,
-      newState
-    );
-
     if (!isNewStateChanged(state, newState) || !isValid(state, newState)) {
-      console.info("%c~not changed", "color: #FF5E5B");
-      console.groupEnd();
       return false;
     }
 
-    console.info("%c~changed:", "color: #BDFF66", state, "->", newState);
+    info &&= {
+      id: info.id,
+      from: info.from.concat(id),
+      isSet: true,
+    };
+
     state = newState as Freeze<State>;
-    info === undefined
-      ? notify(state)
-      : notify(state, {
-          actionID: info.actionID,
-          from: info.from.concat(id),
-        });
-    console.groupEnd();
+    notify(state, info);
     return true;
   };
-
-  console.info(`${name()} created`);
 
   return StoreInnerAPI.add({
     isReadOnly: false,
@@ -57,10 +47,10 @@ export const store = <State>(
     validation,
     set,
     action: (action, options) => {
-      const _info = StoreInnerAPI.addActionInfo
-        ? { actionID: ActionInnerAPI.add(nextActionId(), options), from: [] }
+      const info = ActionInnerAPI.addInfo
+        ? { id: ActionInnerAPI.add(nextActionId(), options), from: [] }
         : undefined;
-      return (...args) => set(action(state, ...args), _info);
+      return (...args) => set(action(state, ...args), info);
     },
   } as InnerStore<State>);
 };

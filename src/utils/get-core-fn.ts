@@ -4,15 +4,19 @@ import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
 import type { AnyStoreName, StoreID } from "../interfaces/id";
 import type { StoreOptions } from "../interfaces/store";
-import { StoreInnerAPI } from "../core/store-api";
+import { ActionInnerAPI } from "../core/action-api";
 import { nextStoreId } from "./id";
 
 let isQueueRunning = false;
 let queue = [] as [
   any,
-  Map<Listener<any>, Unsubscribe | void>,
+  Map<Listener<any>, Unsubscribe>,
   ActionInfo | undefined
 ][];
+
+const noop = () => void 0;
+const getUnsubscribe = (unsubscribe: any): Unsubscribe =>
+  typeof unsubscribe === "function" ? unsubscribe : noop;
 
 const runQueue = (start = 0) => {
   isQueueRunning = true;
@@ -20,8 +24,8 @@ const runQueue = (start = 0) => {
   for (let i = currentQueue.length - 1; i >= 0; --i) {
     const [state, unsubscribes, info] = currentQueue[i];
     for (const [listener, unsubscribe] of unsubscribes) {
-      unsubscribe?.();
-      unsubscribes.set(listener, listener(state, info));
+      unsubscribe();
+      unsubscribes.set(listener, getUnsubscribe(listener(state, info)));
     }
   }
   const newStart = start + currentQueue.length;
@@ -46,28 +50,23 @@ export const getCoreFn = <State>(
 ] => {
   const storeID = nextStoreId();
   let storeName: AnyStoreName = "";
-  const unsubscribes = new Map<Listener<State>, Unsubscribe | void>();
+  const unsubscribes = new Map<Listener<State>, Unsubscribe>();
   return [
     storeID,
     get,
-    (): AnyStoreName => {
-      if (storeName.length === 0) {
-        storeName = options.name ?? name(storeID);
-      }
-      return storeName;
-    },
+    (): AnyStoreName => (storeName ||= options.name ?? name(storeID)),
     (listener): Unsubscribe => {
       unsubscribes.set(
         listener,
-        listener(
-          get(),
-          StoreInnerAPI.addActionInfo
-            ? { actionID: "#init", from: [storeID] }
-            : undefined
+        getUnsubscribe(
+          listener(
+            get(),
+            ActionInnerAPI.addInfo ? { id: -1, from: [storeID] } : undefined
+          )
         )
       );
       return () => {
-        unsubscribes.get(listener)?.();
+        getUnsubscribe(unsubscribes.get(listener))();
         unsubscribes.delete(listener);
       };
     },
