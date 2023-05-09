@@ -5,7 +5,7 @@ export { job, allJobs } from "./core/job";
 
 export { StoreAPI } from "./core/store-api";
 export { ActionAPI } from "./core/action-api";
-export { initLog } from "./utils/logger";
+export { initLogger } from "./utils/logger";
 
 export type { Store, ReadOnlyStore, Listener } from "./interfaces/store";
 export type { Unsubscribe } from "./interfaces/core";

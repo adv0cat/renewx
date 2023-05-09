@@ -1,4 +1,5 @@
-import type { InnerStore, Store, StoreOptions } from "../interfaces/store";
+import type { InnerStore, Store } from "../interfaces/store";
+import type { ActionInfo } from "../interfaces/action";
 import type { StoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import { nextActionId } from "../utils/id";
@@ -10,15 +11,15 @@ import { isNewStateChanged } from "../utils/is";
 
 export const store = <State>(
   initState: State,
-  options: StoreOptions = {}
+  storeName: string = ""
 ): Store<State> => {
   let state = initState as Freeze<State>;
 
   const [validation, isValid] = getValidationFn();
   const [id, get, name, watch, notify] = getCoreFn(
+    storeName,
     () => state,
-    (id) => `${id}` as StoreName,
-    options
+    (id): StoreName => `${id}`
   );
 
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
@@ -28,8 +29,8 @@ export const store = <State>(
 
     info &&= {
       id: info.id,
-      from: info.from.concat(id),
-      isSet: true,
+      path: info.path.concat(id),
+      set: true,
     };
 
     state = newState as Freeze<State>;
@@ -46,9 +47,9 @@ export const store = <State>(
     isValid,
     validation,
     set,
-    action: (action, options) => {
-      const info = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(nextActionId(), options), from: [] }
+    action: (action, name) => {
+      const info: ActionInfo | undefined = ActionInnerAPI.addInfo
+        ? { id: ActionInnerAPI.add(nextActionId(), name), path: [] }
         : undefined;
       return (...args) => set(action(state, ...args), info);
     },

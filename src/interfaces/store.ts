@@ -5,12 +5,7 @@ import type {
   OmitFirstArg,
   Unsubscribe,
 } from "./core";
-import type {
-  ActionFn,
-  ActionFnReturn,
-  ActionInfo,
-  ActionOptions,
-} from "./action";
+import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
 import type { ValidationFn } from "./validation";
 import type { Freeze } from "../utils/freeze";
 import type { StoreID, AnyStoreName } from "./id";
@@ -27,7 +22,7 @@ export interface Store<State> extends ReadOnlyStore<State> {
   isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
   action<NewActionFn extends ActionFn<State>>(
     action: NewActionFn,
-    options?: ActionOptions
+    name?: string
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
 }
 
@@ -35,7 +30,6 @@ export interface InnerStore<State> extends Store<State> {
   set(newState: ActionFnReturn<State>, info?: ActionInfo): IsChanged;
 }
 
-export type StoreOptions = Partial<{ name: string }>;
 export type Listener<State> = (
   state: Freeze<State>,
   info?: ActionInfo

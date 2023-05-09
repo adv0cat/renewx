@@ -1,7 +1,13 @@
 import { ActionAPI } from "../core/action-api";
 import { StoreAPI } from "../core/store-api";
 
-export const initLog = () => {
+let isInitialized = false;
+export const initLogger = () => {
+  if (isInitialized) {
+    return;
+  }
+  isInitialized = true;
+
   ActionAPI.setAddInfo(true);
   StoreAPI.watcher({
     watch: (storeID) => {
@@ -13,23 +19,24 @@ export const initLog = () => {
             return;
           }
 
-          if (info.id === -1) {
+          const { id: actionID, path: storeIDList, set } = info;
+          if (actionID === -1) {
             console.log(`${storeName}.#init:`, v);
             return;
           }
 
-          const actionName = ActionAPI.actionNameById(info.id);
-          if (info.from.length === 1) {
+          const actionName = ActionAPI.actionNameById(actionID);
+          if (storeIDList.length === 1) {
             console.log(`${storeName}.${actionName}:`, v);
           } else {
-            const actionPath = info.from
+            const pathOfAction = storeIDList
               .map(
                 (storeID, index) =>
                   StoreAPI.storeById(storeID)?.name() +
                   (index === 0 ? `.${actionName}` : "")
               )
               .join(" --> ");
-            console.log(`${actionPath}.#${info.isSet ? "set" : "up"}:`, v);
+            console.log(`${pathOfAction}.#${set ? "set" : "up"}:`, v);
           }
         });
       }

@@ -1,9 +1,8 @@
 import type { ActionID } from "../interfaces/id";
-import type { ActionOptions } from "../interfaces/action";
 
 const actionsNames = [] as string[];
-const add = (id: ActionID, options?: ActionOptions): ActionID => {
-  actionsNames[id] = options?.name ?? `${id}`;
+const add = (id: ActionID, name = ""): ActionID => {
+  actionsNames[id] = name || `${id}`;
   return id;
 };
 

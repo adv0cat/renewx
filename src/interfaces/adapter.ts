@@ -3,19 +3,18 @@ import type {
   FreezeStoreListType,
   FreezeStoreType,
   ReadOnlyStore,
-  StoreOptions,
 } from "./store";
 
 export interface Adapter {
   <ToState, Stores extends AnyStore[]>(
     stores: [...Stores],
     adapterAction: (...states: FreezeStoreListType<Stores>) => ToState,
-    options?: StoreOptions
+    name?: string
   ): ReadOnlyStore<ToState>;
   <ToState, Store extends AnyStore>(
     store: Store,
     adapterAction: (state: FreezeStoreType<Store>) => ToState,
-    options?: StoreOptions
+    name?: string
   ): ReadOnlyStore<ToState>;
 }
 

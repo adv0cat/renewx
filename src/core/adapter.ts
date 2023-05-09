@@ -1,8 +1,4 @@
-import type {
-  StoreOptions,
-  ReadOnlyStore,
-  AnyStore,
-} from "../interfaces/store";
+import type { ReadOnlyStore, AnyStore } from "../interfaces/store";
 import type { AdapterStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
@@ -13,7 +9,7 @@ import { isNewStateChanged } from "../utils/is";
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
   adapterAction: AdapterAction<ToState, Stores>,
-  options: StoreOptions = {}
+  storeName: string = ""
 ): ReadOnlyStore<ToState> => {
   let fromStates = Array.isArray(stores)
     ? stores.map((store) => store.get())
@@ -26,14 +22,14 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   ) as Freeze<ToState>;
 
   const [id, get, name, watch, notify] = getCoreFn(
+    storeName,
     () => state,
-    (storeID) =>
+    (storeID): AdapterStoreName =>
       `${storeID}:[${
         Array.isArray(stores)
           ? stores.map((store) => store.id).join(",")
           : stores.id
-      }]` as AdapterStoreName,
-    options
+      }]`
   );
 
   let isNotifyEnabled = false;
@@ -51,7 +47,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
           info &&= {
             id: info.id,
-            from: info.from.concat(id),
+            path: info.path.concat(id),
           };
 
           fromStates = stores.map((store) => store.get());
@@ -68,7 +64,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
         info &&= {
           id: info.id,
-          from: info.from.concat(id),
+          path: info.path.concat(id),
         };
 
         fromStates = newFromState;

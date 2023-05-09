@@ -4,11 +4,10 @@ import type {
   StoresType,
   StoresSet,
   StoresIsValid,
-  StoreOptions,
   InnerStore,
 } from "../interfaces/store";
 import type { Unsubscribe, KeysOfStores } from "../interfaces/core";
-import type { ActionFnReturn } from "../interfaces/action";
+import type { ActionFnReturn, ActionInfo } from "../interfaces/action";
 import type { JoinStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import { StoreInnerAPI } from "./store-api";
@@ -20,26 +19,22 @@ import { getValidationFn } from "../utils/get-validation-fn";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores,
-  options: StoreOptions = {}
+  storeName: string = ""
 ): Store<R> => {
   const storesNameList = Object.keys(stores) as (string & keyof Stores)[];
   const getStates = () => {
     const states = {} as R;
-    storesNameList.forEach(
-      (storeName) => (states[storeName] = stores[storeName].get())
-    );
+    storesNameList.forEach((name) => (states[name] = stores[name].get()));
     return states as Freeze<R>;
   };
   let states = getStates();
 
   const [validation, isCurrentStoreValid] = getValidationFn();
   const [id, get, name, watch, notify] = getCoreFn(
+    storeName,
     () => states,
-    (storeID) =>
-      `${storeID}:{${storesNameList
-        .map((storeName) => stores[storeName].id)
-        .join(",")}}` as JoinStoreName,
-    options
+    (storeID): JoinStoreName =>
+      `${storeID}:{${storesNameList.map((name) => stores[name].id).join(",")}}`
   );
 
   let isNotifyEnabled = false;
@@ -66,7 +61,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
       info &&= {
         id: info.id,
-        from: info.from.concat(id),
+        path: info.path.concat(id),
       };
 
       states = newStates;
@@ -82,9 +77,8 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   const isChildrenValid: Store<R>["isValid"] = (oldState, newState) =>
     isValidNameList.every(
-      (storeName) =>
-        storeName in newState &&
-        storesIsValid[storeName](oldState[storeName], newState[storeName])
+      (name) =>
+        name in newState && storesIsValid[name](oldState[name], newState[name])
     );
   const isValid: Store<R>["isValid"] = (oldState, newState) =>
     isChildrenValid(oldState, newState) &&
@@ -101,8 +95,8 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
     info &&= {
       id: info.id,
-      from: info.from.concat(id),
-      isSet: true,
+      path: info.path.concat(id),
+      set: true,
     };
 
     isNotifyEnabled = false;
@@ -139,9 +133,9 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isValid,
     validation,
     set,
-    action: (action, options) => {
-      const info = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(nextActionId(), options), from: [] }
+    action: (action, name) => {
+      const info: ActionInfo | undefined = ActionInnerAPI.addInfo
+        ? { id: ActionInnerAPI.add(nextActionId(), name), path: [] }
         : undefined;
       return (...args) => set(action(states, ...args), info);
     },
