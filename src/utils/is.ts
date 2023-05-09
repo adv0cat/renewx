@@ -7,7 +7,7 @@ export const isInnerStore = (store: AnyStore): store is InnerStore<any> =>
   isNotReadOnlyStore(store);
 
 const OBJECT = "object";
-export const isNewStateChanged = (oldState: any, newState: any) => {
+export const isStateChanged = (oldState: any, newState: any) => {
   if (oldState === newState) {
     return false;
   } else if (

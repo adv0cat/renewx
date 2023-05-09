@@ -7,7 +7,7 @@ import { StoreInnerAPI } from "./store-api";
 import { ActionInnerAPI } from "./action-api";
 import { getCoreFn } from "../utils/get-core-fn";
 import { getValidationFn } from "../utils/get-validation-fn";
-import { isNewStateChanged } from "../utils/is";
+import { isStateChanged } from "../utils/is";
 
 export const store = <State>(
   initState: State,
@@ -23,7 +23,7 @@ export const store = <State>(
   );
 
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
-    if (!isNewStateChanged(state, newState) || !isValid(state, newState)) {
+    if (!isStateChanged(state, newState) || !isValid(state, newState)) {
       return false;
     }
 

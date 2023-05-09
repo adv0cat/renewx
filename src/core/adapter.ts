@@ -4,7 +4,7 @@ import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { StoreInnerAPI } from "./store-api";
 import { getCoreFn } from "../utils/get-core-fn";
-import { isNewStateChanged } from "../utils/is";
+import { isStateChanged } from "../utils/is";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -37,39 +37,34 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   const unsubscribes = Array.isArray(stores)
     ? stores.map((store, index) =>
         store.watch((storeNewState, info) => {
-          if (!isNotifyEnabled) {
-            return;
-          }
+          if (
+            isNotifyEnabled &&
+            isStateChanged(fromStates[index], storeNewState)
+          ) {
+            info &&= {
+              id: info.id,
+              path: info.path.concat(id),
+            };
 
-          if (!isNewStateChanged(fromStates[index], storeNewState)) {
-            return;
+            fromStates = stores.map((store) => store.get());
+            state = (adapterAction as AdapterAction<ToState>)(
+              ...fromStates
+            ) as Freeze<ToState>;
+            notify(state, info);
           }
-
+        })
+      )
+    : stores.watch((newFromState, info) => {
+        if (isNotifyEnabled) {
           info &&= {
             id: info.id,
             path: info.path.concat(id),
           };
 
-          fromStates = stores.map((store) => store.get());
-          state = (adapterAction as AdapterAction<ToState>)(
-            ...fromStates
-          ) as Freeze<ToState>;
+          fromStates = newFromState;
+          state = adapterAction(fromStates) as Freeze<ToState>;
           notify(state, info);
-        })
-      )
-    : stores.watch((newFromState, info) => {
-        if (!isNotifyEnabled) {
-          return;
         }
-
-        info &&= {
-          id: info.id,
-          path: info.path.concat(id),
-        };
-
-        fromStates = newFromState;
-        state = adapterAction(fromStates) as Freeze<ToState>;
-        notify(state, info);
       });
 
   isNotifyEnabled = true;
