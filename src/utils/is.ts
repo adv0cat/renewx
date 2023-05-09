@@ -10,9 +10,11 @@ const OBJECT = "object";
 export const isNewStateChanged = (oldState: any, newState: any) => {
   if (oldState === newState) {
     return false;
-  }
-
-  if (typeof oldState !== OBJECT || oldState === null) {
+  } else if (
+    typeof oldState !== OBJECT ||
+    oldState == null ||
+    newState == null
+  ) {
     return true;
   }
 
