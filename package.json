@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/adv0cat/quencher#readme",
   "devDependencies": {
-    "esbuild": "0.17.17",
+    "esbuild": "0.17.18",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4"
   },
