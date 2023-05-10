@@ -1,10 +1,4 @@
-import type {
-  IsChanged,
-  IsValid,
-  KeysOfStores,
-  OmitFirstArg,
-  Unsubscribe,
-} from "./core";
+import type { IsChanged, IsValid, OmitFirstArg, Unsubscribe } from "./core";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
 import type { ValidationFn } from "./validation";
 import type { Freeze } from "../utils/freeze";
@@ -13,7 +7,7 @@ import type { StoreID, AnyStoreName } from "./id";
 export interface ReadOnlyStore<State> {
   id: StoreID;
   get(): Freeze<State>;
-  watch(fn: Listener<State>): Unsubscribe;
+  watch(fn: Watcher<State>): Unsubscribe;
   name(): AnyStoreName;
   isReadOnly: boolean;
 }
@@ -30,7 +24,7 @@ export interface InnerStore<State> extends Store<State> {
   set(newState: ActionFnReturn<State>, info?: ActionInfo): IsChanged;
 }
 
-export type Listener<State> = (
+export type Watcher<State> = (
   state: Freeze<State>,
   info?: ActionInfo
 ) => Unsubscribe | void;
@@ -53,13 +47,3 @@ export type StoreType<SomeStore extends AnyStore> = SomeStore extends AnyStore<
 export type StoresType<SomeStores extends AnyStores> = {
   [Name in keyof SomeStores]: StoreType<SomeStores[Name]>;
 };
-
-export type StoresSet<SomeStores extends AnyStores> = Record<
-  KeysOfStores<SomeStores>,
-  InnerStore<any>["set"]
->;
-
-export type StoresIsValid<SomeStores extends AnyStores> = Record<
-  KeysOfStores<SomeStores>,
-  Store<any>["isValid"]
->;

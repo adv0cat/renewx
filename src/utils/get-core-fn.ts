@@ -1,4 +1,4 @@
-import type { Listener, ReadOnlyStore, Notify } from "../interfaces/store";
+import type { Watcher, ReadOnlyStore, Notify } from "../interfaces/store";
 import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
@@ -9,7 +9,7 @@ import { nextStoreId } from "./id";
 let isQueueRunning = false;
 let queue = [] as [
   any,
-  Map<Listener<any>, Unsubscribe>,
+  Map<Watcher<any>, Unsubscribe>,
   ActionInfo | undefined
 ][];
 
@@ -22,9 +22,9 @@ const runQueue = (start = 0) => {
   const currentQueue = queue.slice(start);
   for (let i = currentQueue.length - 1; i >= 0; --i) {
     const [state, unsubscribes, info] = currentQueue[i];
-    for (const [listener, unsubscribe] of unsubscribes) {
+    for (const [watcher, unsubscribe] of unsubscribes) {
       unsubscribe();
-      unsubscribes.set(listener, getUnsubscribe(listener(state, info)));
+      unsubscribes.set(watcher, getUnsubscribe(watcher(state, info)));
     }
   }
   const newStart = start + currentQueue.length;
@@ -48,24 +48,24 @@ export const getCoreFn = <State>(
   Notify<State>
 ] => {
   const storeID = nextStoreId();
-  const unsubscribes = new Map<Listener<State>, Unsubscribe>();
+  const unsubscribes = new Map<Watcher<State>, Unsubscribe>();
   return [
     storeID,
     get,
     (): AnyStoreName => (storeName ||= name(storeID)),
-    (listener): Unsubscribe => {
+    (watcher): Unsubscribe => {
       unsubscribes.set(
-        listener,
+        watcher,
         getUnsubscribe(
-          listener(
+          watcher(
             get(),
             ActionInnerAPI.addInfo ? { id: -1, path: [storeID] } : undefined
           )
         )
       );
       return () => {
-        getUnsubscribe(unsubscribes.get(listener))();
-        unsubscribes.delete(listener);
+        getUnsubscribe(unsubscribes.get(watcher))();
+        unsubscribes.delete(watcher);
       };
     },
     (state: Freeze<State>, info?: ActionInfo): void => {
