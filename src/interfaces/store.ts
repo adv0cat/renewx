@@ -15,7 +15,7 @@ export interface ReadOnlyStore<State> {
 export interface Store<State> extends ReadOnlyStore<State> {
   validation(fn: ValidationFn<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
-  action<NewActionFn extends ActionFn<State>>(
+  updater<NewActionFn extends ActionFn<State>>(
     action: NewActionFn,
     name?: string
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
@@ -25,14 +25,14 @@ export interface InnerStore<State> extends Store<State> {
   set(newState: ActionFnReturn<State>, info?: ActionInfo): IsChanged;
 }
 
+export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
+export type AnyStores = Record<string, AnyStore>;
+
 export type Watcher<State> = (
   state: Freeze<State>,
   info?: ActionInfo
 ) => Unsubscribe | void;
 export type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
-
-export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
-export type AnyStores = Record<string, AnyStore>;
 
 export type FreezeStoreType<SomeStore extends AnyStore> =
   SomeStore extends AnyStore<infer Type> ? Freeze<Type> : never;

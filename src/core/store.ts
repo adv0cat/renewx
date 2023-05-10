@@ -57,7 +57,7 @@ export const store = <State>(
     isValid,
     validation,
     set,
-    action: (action, name) => {
+    updater: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo
         ? { id: ActionInnerAPI.add(nextActionId(), name), path: [] }
         : undefined;

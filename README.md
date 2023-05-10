@@ -23,7 +23,7 @@ urls.watch((state) => {
   console.log("urls:", state);
 });
 
-const addUrl = urls.action((state, url: string) => {
+const addUrl = urls.updater((state, url: string) => {
   return state.concat(url);
 });
 
@@ -91,7 +91,7 @@ const pagination = adapter([pageSize, page], (pageSize, page) => {
   };
 });
 
-const nextPage = page.action((state) => state + 1);
+const nextPage = page.updater((state) => state + 1);
 
 pagination.watch((state) => {
   console.log("pagination:", state);
@@ -117,10 +117,10 @@ loading.watch(({ isLoading, urls }) => {
   console.log("urls:", urls, "isLoading:", isLoading);
 });
 
-const startLoading = isLoading.action(() => true);
-const endLoading = isLoading.action(() => false);
+const startLoading = isLoading.updater(() => true);
+const endLoading = isLoading.updater(() => false);
 
-const addUrl = loading.action(({ isLoading, urls }, url: string) => {
+const addUrl = loading.updater(({ isLoading, urls }, url: string) => {
   if (!isLoading) {
     return { urls: urls.concat(url) };
   }
@@ -159,13 +159,13 @@ pageLoading.validation((old, state) => {
   return isLoadingTurnOn ? isPageChanged : false;
 });
 
-const endLoading = isLoading.action(() => false);
-const loadPrevPage = pageLoading.action(
+const endLoading = isLoading.updater(() => false);
+const loadPrevPage = pageLoading.updater(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page - 1, pageSize } };
   }
 );
-const loadNextPage = pageLoading.action(
+const loadNextPage = pageLoading.updater(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page + 1, pageSize } };
   }
@@ -195,10 +195,10 @@ loading.watch(({ isLoading, url }) => {
   console.log("isLoading:", isLoading, "url:", url);
 });
 
-const startLoading = isLoading.action(() => true);
-const endLoading = isLoading.action(() => false);
+const startLoading = isLoading.updater(() => true);
+const endLoading = isLoading.updater(() => false);
 
-const setUrl = url.action((state, url: string) => {
+const setUrl = url.updater((state, url: string) => {
   return state.length === 0 ? url : state;
 });
 
