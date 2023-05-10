@@ -36,7 +36,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   let states = getStates();
 
   const [validation, isCurrentStoreValid] = getValidationFn();
-  const [id, get, name, watch, notify] = getCoreFn(
+  const [id, get, off, name, watch, notify] = getCoreFn(
     storeName,
     () => states,
     (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`
@@ -44,7 +44,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   let isNotifyEnabled = false;
 
-  const unsubscribes = nameList.map((name) =>
+  let unsubscribes = nameList.map((name) =>
     stores[name].watch((state, info) => {
       if (isNotifyEnabled) {
         const newStates = getStates();
@@ -78,6 +78,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   const set: InnerStore<R>["set"] = (actionStates, info): boolean => {
     if (
+      !isNotifyEnabled ||
       actionStates == null ||
       !isStateChanged(states, actionStates) ||
       !isValid(states, actionStates)
@@ -115,6 +116,12 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isReadOnly: false,
     id,
     get,
+    off: () => {
+      isNotifyEnabled = false;
+      off();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
+      unsubscribes = [];
+    },
     name,
     watch,
     isValid,

@@ -1,4 +1,4 @@
-import type { Watcher, ReadOnlyStore, Notify } from "../interfaces/store";
+import type { Notify, ReadOnlyStore, Watcher } from "../interfaces/store";
 import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
@@ -6,16 +6,16 @@ import type { AnyStoreName, StoreID } from "../interfaces/id";
 import { ActionInnerAPI } from "../core/action-api";
 import { nextStoreId } from "./id";
 
+export const noop = () => void 0;
+export const getUnsubscribe = (unsubscribe: any): Unsubscribe =>
+  typeof unsubscribe === "function" ? unsubscribe : noop;
+
 let isQueueRunning = false;
 let queue = [] as [
   any,
   Map<Watcher<any>, Unsubscribe>,
   ActionInfo | undefined
 ][];
-
-const noop = () => void 0;
-const getUnsubscribe = (unsubscribe: any): Unsubscribe =>
-  typeof unsubscribe === "function" ? unsubscribe : noop;
 
 const runQueue = (start = 0) => {
   isQueueRunning = true;
@@ -43,17 +43,28 @@ export const getCoreFn = <State>(
 ): [
   ReadOnlyStore<State>["id"],
   ReadOnlyStore<State>["get"],
+  ReadOnlyStore<State>["off"],
   ReadOnlyStore<State>["name"],
   ReadOnlyStore<State>["watch"],
   Notify<State>
 ] => {
+  let isOff = false;
   const storeID = nextStoreId();
   const unsubscribes = new Map<Watcher<State>, Unsubscribe>();
   return [
     storeID,
     get,
+    () => {
+      isOff = true;
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
+      unsubscribes.clear();
+    },
     (): AnyStoreName => (storeName ||= name(storeID)),
     (watcher): Unsubscribe => {
+      if (isOff) {
+        return noop;
+      }
+
       unsubscribes.set(
         watcher,
         getUnsubscribe(

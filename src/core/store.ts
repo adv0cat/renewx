@@ -16,14 +16,20 @@ export const store = <State>(
   let state = initState as Freeze<State>;
 
   const [validation, isValid] = getValidationFn();
-  const [id, get, name, watch, notify] = getCoreFn(
+  const [id, get, off, name, watch, notify] = getCoreFn(
     storeName,
     () => state,
     (id): StoreName => `${id}`
   );
 
+  let isNotifyEnabled = true;
+
   const set: InnerStore<State>["set"] = (newState, info): boolean => {
-    if (!isStateChanged(state, newState) || !isValid(state, newState)) {
+    if (
+      !isNotifyEnabled ||
+      !isStateChanged(state, newState) ||
+      !isValid(state, newState)
+    ) {
       return false;
     }
 
@@ -42,6 +48,10 @@ export const store = <State>(
     isReadOnly: false,
     id,
     get,
+    off: () => {
+      isNotifyEnabled = false;
+      off();
+    },
     name,
     watch,
     isValid,

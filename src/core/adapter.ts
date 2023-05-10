@@ -3,7 +3,7 @@ import type { AdapterStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
 import { StoreInnerAPI } from "./store-api";
-import { getCoreFn } from "../utils/get-core-fn";
+import { getCoreFn, getUnsubscribe } from "../utils/get-core-fn";
 import { isStateChanged } from "../utils/is";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
@@ -21,7 +21,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
       : adapterAction(fromStates)
   ) as Freeze<ToState>;
 
-  const [id, get, name, watch, notify] = getCoreFn(
+  const [id, get, off, name, watch, notify] = getCoreFn(
     storeName,
     () => state,
     (storeID): AdapterStoreName =>
@@ -34,7 +34,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   let isNotifyEnabled = false;
 
-  const unsubscribes = Array.isArray(stores)
+  let unsubscribes = Array.isArray(stores)
     ? stores.map((store, index) =>
         store.watch((storeNewState, info) => {
           if (
@@ -73,6 +73,14 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     isReadOnly: true,
     id,
     get,
+    off: () => {
+      isNotifyEnabled = false;
+      off();
+      Array.isArray(unsubscribes)
+        ? unsubscribes.forEach((unsubscribe) => unsubscribe())
+        : getUnsubscribe(unsubscribes)();
+      unsubscribes = [];
+    },
     name,
     watch,
   } as ReadOnlyStore<ToState>);

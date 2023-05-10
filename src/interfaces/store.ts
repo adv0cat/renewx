@@ -10,6 +10,7 @@ export interface ReadOnlyStore<State> {
   watch(fn: Watcher<State>): Unsubscribe;
   name(): AnyStoreName;
   isReadOnly: boolean;
+  off(): void;
 }
 export interface Store<State> extends ReadOnlyStore<State> {
   validation(fn: ValidationFn<State>): Unsubscribe;
