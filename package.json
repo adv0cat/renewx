@@ -1,5 +1,5 @@
 {
-  "name": "quench-store",
+  "name": "quencher",
   "version": "0.0.15",
   "description": "Lightweight state management library with support for asynchronous jobs and simple change subscription",
   "main": "./build/lib.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adv0cat/quench-store.git"
+    "url": "git+https://github.com/adv0cat/quencher.git"
   },
   "keywords": [
     "store",
@@ -25,9 +25,9 @@
   "author": "adv0cat",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adv0cat/quench-store/issues"
+    "url": "https://github.com/adv0cat/quencher/issues"
   },
-  "homepage": "https://github.com/adv0cat/quench-store#readme",
+  "homepage": "https://github.com/adv0cat/quencher#readme",
   "devDependencies": {
     "esbuild": "0.17.17",
     "prettier": "^2.8.8",

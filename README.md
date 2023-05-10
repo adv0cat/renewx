@@ -1,14 +1,11 @@
-> # OUT OF DATE and NOT MAINTAINED
-> see https://github.com/adv0cat/quencher
+# Quencher
 
-# Quench Store
-
-[![npm version](https://img.shields.io/npm/v/quench-store.svg?style=flat)](https://www.npmjs.com/package/quench-store) [![npm version](https://deno.bundlejs.com/?q=quench-store&treeshake=[{+store,adapter,join,job,allJobs+}]&badge=)](https://www.npmjs.com/package/quench-store) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/quench-store/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/quencher.svg?style=flat)](https://www.npmjs.com/package/quencher) [![npm version](https://deno.bundlejs.com/?q=quencher&treeshake=[{+store,adapter,join+}]&badge=)](https://www.npmjs.com/package/quencher) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/quencher/blob/main/LICENSE)
 
 ## Install
 
 ```shell
-npm i quench-store
+npm i quencher
 ```
 
 ## Usage
@@ -18,7 +15,7 @@ npm i quench-store
 #### Managing an array of URLs:
 
 ```ts
-import { store } from "quench-store";
+import { store } from "quencher";
 
 const urls = store<string[]>([]);
 
@@ -36,7 +33,7 @@ addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 #### Managing DOM state and event handling:
 
 ```ts
-import { store } from "quench-store";
+import { store } from "quencher";
 
 const div = store(document.createElement("div"));
 
@@ -54,7 +51,7 @@ div.watch((state) => {
 #### Converting page-based pagination to API pagination format:
 
 ```ts
-import { store, adapter } from "quench-store";
+import { store, adapter } from "quencher";
 
 interface PagePagination {
   pageSize: number;
@@ -110,7 +107,7 @@ nextPage(); // pagination: { offset: 20, limit: 30 }
 #### Joining multiple stores for convenient use:
 
 ```ts
-import { store, join } from "quench-store";
+import { store, join } from "quencher";
 
 const isLoading = store(false);
 const urls = store<string[]>([]);
@@ -141,7 +138,7 @@ addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com
 #### Validation of different stores with multiple levels
 
 ```ts
-import { store, join } from "quench-store";
+import { store, join } from "quencher";
 
 interface Pagination {
   pageSize: number;
@@ -188,7 +185,7 @@ loadPrevPage(); // page: 1
 #### Asynchronous data modification using library job:
 
 ```ts
-import { store, join, job } from "quench-store";
+import { store, join, job } from "quencher";
 
 const isLoading = store(false);
 const url = store("");
@@ -224,7 +221,7 @@ loadData("https://example.com/api").then((data) => {
 #### Waiting for completion of all jobs asynchronously:
 
 ```ts
-import { allJobs } from "quench-store";
+import { allJobs } from "quencher";
 
 // Waiting for all jobs to complete before continuing execution
 await allJobs();
