@@ -1,6 +1,6 @@
 {
   "name": "quencher",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Lightweight state management library with support for asynchronous jobs and simple change subscription",
   "main": "./build/lib.js",
   "types": "./build/lib.d.ts",
