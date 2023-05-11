@@ -2,7 +2,7 @@ import type { ReadOnlyStore, AnyStore } from "../interfaces/store";
 import type { AdapterStoreName } from "../interfaces/id";
 import type { Freeze } from "../utils/freeze";
 import type { Adapter, AdapterAction } from "../interfaces/adapter";
-import { StoreInnerAPI } from "./store-api";
+import { StoreInnerAPI } from "../api/store-api";
 import { getCoreFn, getUnsubscribe } from "../utils/get-core-fn";
 import { isStateChanged } from "../utils/is";
 

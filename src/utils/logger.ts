@@ -1,5 +1,5 @@
-import { ActionAPI } from "../core/action-api";
-import { StoreAPI } from "../core/store-api";
+import { ActionAPI } from "../api/action-api";
+import { StoreAPI } from "../api/store-api";
 
 let isInitialized = false;
 export const initLogger = () => {

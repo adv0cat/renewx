@@ -3,7 +3,7 @@ import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "../interfaces/core";
 import type { AnyStoreName, StoreID } from "../interfaces/id";
-import { ActionInnerAPI } from "../core/action-api";
+import { ActionInnerAPI } from "../api/action-api";
 import { nextStoreId } from "./id";
 
 export const noop = () => void 0;
