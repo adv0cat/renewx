@@ -21,7 +21,9 @@ export const isStateChanged = (oldState: any, newState: any) => {
   for (let key in newState) {
     const value = newState[key];
     const oldValue = oldState[key];
-    if (typeof value === OBJECT && value !== null) {
+    if (!(key in oldState)) {
+      return true;
+    } else if (typeof value === OBJECT && value !== null) {
       for (let innerKey in value) {
         const innerValue = value[innerKey];
         if (typeof innerValue === OBJECT && innerValue !== null) {
