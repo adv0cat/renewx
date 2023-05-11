@@ -36,4 +36,10 @@ export const isStateChanged = (oldState: any, newState: any) => {
       return true;
     }
   }
+
+  for (let key in oldState) {
+    if (!(key in newState)) {
+      return true;
+    }
+  }
 };
