@@ -53,6 +53,6 @@ jobs:
           name: core-package-artifacts
 
       - name: Publish NPM package
-        run: npm publish --access
+        run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLIC }}
