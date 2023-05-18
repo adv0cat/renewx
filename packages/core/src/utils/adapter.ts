@@ -1,9 +1,11 @@
-import type {
-  AnyStore,
-  FreezeStoreListType,
-  FreezeStoreType,
-  ReadOnlyStore,
-} from "./store";
+import type { Freeze } from "./freeze";
+import type { AnyStore, ReadOnlyStore } from "./store";
+
+export type FreezeStoreType<SomeStore extends AnyStore> =
+  SomeStore extends AnyStore<infer Type> ? Freeze<Type> : never;
+export type FreezeStoreListType<SomeStoreList extends AnyStore[]> = {
+  [Index in keyof SomeStoreList]: FreezeStoreType<SomeStoreList[Index]>;
+};
 
 export interface Adapter {
   <ToState, Stores extends AnyStore[]>(

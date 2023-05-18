@@ -1,39 +1,40 @@
 {
-  "name": "quencher",
-  "version": "0.0.20",
-  "description": "Lightweight state management library with support for asynchronous jobs and simple change subscription",
-  "main": "./build/lib.js",
-  "types": "./build/lib.d.ts",
-  "type": "module",
-  "sideEffects": false,
+  "name": "renewx",
+  "private": true,
+  "description": "Lightweight state management library",
+  "workspaces": [
+    "packages/core",
+    "packages/logger"
+  ],
   "scripts": {
-    "build": "rm -rf build; npm run build:base -- --analyze=verbose; tsc --emitDeclarationOnly",
-    "build:base": "esbuild src/lib.ts --bundle --platform=neutral --outdir=build --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm",
-    "build:watch": "npm run build:base -- --watch"
+    "build": "npm run build --workspaces --if-present",
+    "update": "npx npm-check-updates -u",
+    "core:patch": "npm version patch --workspace @renewx/core",
+    "core:publish": "npm run build; npm pack --workspace @renewx/core",
+    "logger:patch": "npm version patch --workspace @renewx/logger",
+    "logger:publish": "npm run build; npm pack --workspace @renewx/logger"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/adv0cat/quencher.git"
+  "author": "adv0cat",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "0.17.19",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
   },
   "keywords": [
     "store",
     "state",
     "state manager",
     "reactive",
+    "reactivity",
     "action"
   ],
-  "author": "adv0cat",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adv0cat/renewx.git"
+  },
   "bugs": {
-    "url": "https://github.com/adv0cat/quencher/issues"
+    "url": "https://github.com/adv0cat/renewx/issues"
   },
-  "homepage": "https://github.com/adv0cat/quencher#readme",
-  "devDependencies": {
-    "esbuild": "0.17.18",
-    "prettier": "^2.8.8",
-    "typescript": "^5.0.4"
-  },
-  "files": [
-    "./build"
-  ]
+  "homepage": "https://github.com/adv0cat/renewx#readme"
 }

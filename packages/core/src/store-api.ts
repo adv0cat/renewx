@@ -1,13 +1,9 @@
-import type { StoreID } from "../interfaces/id";
-import type { AnyStore, InnerStore, ReadOnlyStore } from "../interfaces/store";
+import type { StoreID } from "./utils/id";
+import type { AnyStore, InnerStore, ReadOnlyStore } from "./utils/store";
+import type { Unsubscribe } from "./utils/core";
 
-type Watcher = {
-  watch: (storeID: StoreID) => void;
-};
+type Watcher = (storeID: StoreID) => void;
 const watchers = [] as Watcher[];
-const watcher = (watcher: Watcher): void => {
-  watchers.push(watcher);
-};
 
 const stores = [] as AnyStore[];
 const add = <SomeStore extends ReadOnlyStore<any> | InnerStore<any>>(
@@ -15,7 +11,7 @@ const add = <SomeStore extends ReadOnlyStore<any> | InnerStore<any>>(
 ): SomeStore => {
   const storeID: StoreID = store.id;
   stores[storeID] = store;
-  watchers.forEach(({ watch }) => watch(storeID));
+  watchers.forEach((fn) => fn(storeID));
   return store;
 };
 
@@ -26,5 +22,10 @@ export const StoreInnerAPI = { add };
 export const StoreAPI = {
   storeById,
   storeList,
-  watcher,
+  watch: (watcher: Watcher): Unsubscribe => {
+    watchers.push(watcher);
+    return () => {
+      watchers.splice(watchers.indexOf(watcher), 1);
+    };
+  },
 };

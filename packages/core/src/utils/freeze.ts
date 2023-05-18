@@ -1,4 +1,4 @@
-import type { Fn } from "../interfaces/core";
+import type { Fn } from "./core";
 
 export type Freeze<T> = T extends Fn
   ? T

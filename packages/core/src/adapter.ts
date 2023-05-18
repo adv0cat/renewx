@@ -1,10 +1,10 @@
-import type { ReadOnlyStore, AnyStore } from "../interfaces/store";
-import type { AdapterStoreName } from "../interfaces/id";
-import type { Freeze } from "../utils/freeze";
-import type { Adapter, AdapterAction } from "../interfaces/adapter";
-import { StoreInnerAPI } from "../api/store-api";
-import { getCoreFn, getUnsubscribe } from "../utils/get-core-fn";
-import { isStateChanged } from "../utils/is";
+import type { Adapter, AdapterAction } from "./utils/adapter";
+import type { AnyStore, ReadOnlyStore } from "./utils/store";
+import type { Freeze } from "./utils/freeze";
+import type { AdapterStoreName } from "./utils/name";
+import { coreFn, getUnsubscribe } from "./utils/core-fn";
+import { isStateChanged } from "./utils/is";
+import { StoreInnerAPI } from "./store-api";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -21,7 +21,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
       : adapterAction(fromStates)
   ) as Freeze<ToState>;
 
-  const [id, get, off, name, watch, notify] = getCoreFn(
+  const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => state,
     (storeID): AdapterStoreName =>

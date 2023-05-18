@@ -1,12 +1,18 @@
-import type { Notify, ReadOnlyStore, Watcher } from "../interfaces/store";
-import type { ActionInfo } from "../interfaces/action";
 import type { Freeze } from "./freeze";
-import type { Unsubscribe } from "../interfaces/core";
-import type { AnyStoreName, StoreID } from "../interfaces/id";
-import { ActionInnerAPI } from "../api/action-api";
-import { nextStoreId } from "./id";
+import type { ActionInfo } from "./action";
+import type { Unsubscribe } from "./core";
+import type { AnyStoreName } from "./name";
+import type { ReadOnlyStore } from "./store";
+import { nextStoreId, type StoreID } from "./id";
+import { ActionInnerAPI } from "../action-api";
 
-export const noop = () => void 0;
+export type Watcher<State> = (
+  state: Freeze<State>,
+  info?: ActionInfo
+) => Unsubscribe | void;
+export type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
+
+const noop = () => void 0;
 export const getUnsubscribe = (unsubscribe: any): Unsubscribe =>
   typeof unsubscribe === "function" ? unsubscribe : noop;
 
@@ -36,7 +42,7 @@ const runQueue = (start = 0) => {
   isQueueRunning = false;
 };
 
-export const getCoreFn = <State>(
+export const coreFn = <State>(
   storeName: string,
   get: ReadOnlyStore<State>["get"],
   name: (storeID: StoreID) => AnyStoreName

@@ -1,8 +1,5 @@
-name: Build and Publish Public NPM Package
+name: Build and Publish @renewx/logger
 on:
-  push:
-    tags:
-      - '*'
   workflow_dispatch:
 jobs:
   build:
@@ -22,12 +19,19 @@ jobs:
       - name: Build NPM package
         run: npm run build
 
+      - name: Copy LICENSE
+        run: cp LICENSE packages/logger/LICENSE
+
+      - name: Move to NPM package folder
+        run: cd packages/logger
+
       - name: Save package artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: package-artifacts
+          name: logger-package-artifacts
           path: |
-            build
+            dist/index.*
+            dist/src
             package.json
             LICENSE
             README.md
@@ -49,9 +53,10 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: package-artifacts
+          name: logger-package-artifacts
 
       - name: Publish NPM package
-        run: npm publish --access
+        run: npm pack
+#        run: npm publish --access
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLIC }}

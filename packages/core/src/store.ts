@@ -1,13 +1,12 @@
-import type { InnerStore, Store } from "../interfaces/store";
-import type { ActionInfo } from "../interfaces/action";
-import type { StoreName } from "../interfaces/id";
-import type { Freeze } from "../utils/freeze";
-import { nextActionId } from "../utils/id";
-import { StoreInnerAPI } from "../api/store-api";
-import { ActionInnerAPI } from "../api/action-api";
-import { getCoreFn } from "../utils/get-core-fn";
-import { getValidationFn } from "../utils/get-validation-fn";
-import { isStateChanged } from "../utils/is";
+import type { InnerStore, Store } from "./utils/store";
+import type { Freeze } from "./utils/freeze";
+import type { ActionInfo } from "./utils/action";
+import type { StoreName } from "./utils/name";
+import { validationFn } from "./utils/validation-fn";
+import { coreFn } from "./utils/core-fn";
+import { isStateChanged } from "./utils/is";
+import { StoreInnerAPI } from "./store-api";
+import { ActionInnerAPI } from "./action-api";
 
 export const store = <State>(
   initState: State,
@@ -15,8 +14,8 @@ export const store = <State>(
 ): Store<State> => {
   let state = initState as Freeze<State>;
 
-  const [validation, isValid] = getValidationFn();
-  const [id, get, off, name, watch, notify] = getCoreFn(
+  const [validation, isValid] = validationFn();
+  const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => state,
     (id): StoreName => `${id}`
@@ -59,7 +58,7 @@ export const store = <State>(
     set,
     updater: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(nextActionId(), name), path: [] }
+        ? { id: ActionInnerAPI.add(name), path: [] }
         : undefined;
       return (...args) => set(action(state, ...args), info);
     },

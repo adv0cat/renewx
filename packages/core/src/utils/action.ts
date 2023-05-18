@@ -1,7 +1,7 @@
-import type { ActionID, StoreID } from "./id";
-import type { Freeze } from "../utils/freeze";
+import type { Freeze } from "./freeze";
 import type { AnyStores, StoresType } from "./store";
 import type { KeysOfStores } from "./core";
+import type { ActionID, StoreID } from "./id";
 
 export type ActionFn<State> = (
   state: Freeze<State>,

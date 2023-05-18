@@ -1,13 +1,7 @@
-import type { AnyStore, InnerStore, Store } from "../interfaces/store";
-
-export const isNotReadOnlyStore = (store: AnyStore): store is Store<any> =>
-  !store.isReadOnly;
-
-export const isInnerStore = (store: AnyStore): store is InnerStore<any> =>
-  isNotReadOnlyStore(store);
+import type { IsChanged } from "./core";
 
 const OBJECT = "object";
-export const isStateChanged = (oldState: any, newState: any) => {
+export const isStateChanged = (oldState: any, newState: any): IsChanged => {
   if (oldState === newState) {
     return false;
   } else if (
@@ -42,4 +36,6 @@ export const isStateChanged = (oldState: any, newState: any) => {
       return true;
     }
   }
+
+  return false;
 };

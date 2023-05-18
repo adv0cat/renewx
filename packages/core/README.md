@@ -1,4 +1,4 @@
-# RenewX
+# @renewx/core
 
 [![npm version](https://img.shields.io/npm/v/@renewx/core.svg?style=flat)](https://www.npmjs.com/package/@renewx/core) [![npm version](https://deno.bundlejs.com/?q=@renewx/core&treeshake=[{+store,adapter,join+}]&badge=)](https://www.npmjs.com/package/@renewx/core) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
 

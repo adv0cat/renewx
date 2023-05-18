@@ -1,19 +1,19 @@
-import type {
-  AnyStores,
-  Store,
-  StoresType,
-  InnerStore,
-} from "../interfaces/store";
-import type { KeysOfStores } from "../interfaces/core";
-import type { ActionFnReturn, ActionInfo } from "../interfaces/action";
-import type { JoinStoreName } from "../interfaces/id";
-import type { Freeze } from "../utils/freeze";
-import { StoreInnerAPI } from "../api/store-api";
-import { ActionInnerAPI } from "../api/action-api";
-import { nextActionId } from "../utils/id";
-import { getCoreFn } from "../utils/get-core-fn";
-import { isStateChanged, isInnerStore } from "../utils/is";
-import { getValidationFn } from "../utils/get-validation-fn";
+import {
+  type AnyStores,
+  type InnerStore,
+  isInnerStore,
+  type Store,
+  type StoresType,
+} from "./utils/store";
+import type { KeysOfStores } from "./utils/core";
+import type { Freeze } from "./utils/freeze";
+import type { ActionFnReturn, ActionInfo } from "./utils/action";
+import type { JoinStoreName } from "./utils/name";
+import { validationFn } from "./utils/validation-fn";
+import { coreFn } from "./utils/core-fn";
+import { isStateChanged } from "./utils/is";
+import { StoreInnerAPI } from "./store-api";
+import { ActionInnerAPI } from "./action-api";
 
 export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   stores: Stores,
@@ -35,8 +35,20 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   };
   let states = getStates();
 
-  const [validation, isCurrentStoreValid] = getValidationFn();
-  const [id, get, off, name, watch, notify] = getCoreFn(
+  const [validation, isCurrentStoreValid] = validationFn();
+  const isChildrenValid: Store<R>["isValid"] = (oldState, newState) => {
+    for (const [name, store] of innerStoreMap) {
+      if (name in newState && !store.isValid(oldState[name], newState[name])) {
+        return false;
+      }
+    }
+    return true;
+  };
+  const isValid: Store<R>["isValid"] = (oldState, newState) =>
+    isChildrenValid(oldState, newState) &&
+    isCurrentStoreValid(oldState, newState);
+
+  const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => states,
     (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`
@@ -63,18 +75,6 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
       }
     })
   );
-
-  const isChildrenValid: Store<R>["isValid"] = (oldState, newState) => {
-    for (const [name, store] of innerStoreMap) {
-      if (name in newState && !store.isValid(oldState[name], newState[name])) {
-        return false;
-      }
-    }
-    return true;
-  };
-  const isValid: Store<R>["isValid"] = (oldState, newState) =>
-    isChildrenValid(oldState, newState) &&
-    isCurrentStoreValid(oldState, newState);
 
   const set: InnerStore<R>["set"] = (actionStates, info): boolean => {
     if (
@@ -129,7 +129,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     set,
     updater: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(nextActionId(), name), path: [] }
+        ? { id: ActionInnerAPI.add(name), path: [] }
         : undefined;
       return (...args) => set(action(states, ...args), info);
     },

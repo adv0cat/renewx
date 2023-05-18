@@ -1,0 +1,36 @@
+{
+  "name": "@renewx/core",
+  "version": "0.0.21",
+  "description": "Lightweight state management library",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": false,
+  "sideEffects": false,
+  "scripts": {
+    "build": "rm -rf dist; npm run build:lib -- --analyze=verbose; tsc --emitDeclarationOnly",
+    "build:lib": "esbuild ./index.ts --bundle --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adv0cat/renewx.git"
+  },
+  "keywords": [
+    "store",
+    "state",
+    "state manager",
+    "reactive",
+    "reactivity",
+    "action"
+  ],
+  "author": "adv0cat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adv0cat/renewx/issues"
+  },
+  "homepage": "https://github.com/adv0cat/renewx#readme",
+  "files": [
+    "./dist/index.*",
+    "./dist/src"
+  ]
+}

@@ -1,8 +1,10 @@
+import type { StoreID } from "./id";
+import type { Freeze } from "./freeze";
+import type { Watcher } from "./core-fn";
 import type { IsChanged, IsValid, OmitFirstArg, Unsubscribe } from "./core";
+import type { AnyStoreName } from "./name";
+import type { ValidationFn } from "./validation-fn";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
-import type { ValidationFn } from "./validation";
-import type { Freeze } from "../utils/freeze";
-import type { StoreID, AnyStoreName } from "./id";
 
 export interface ReadOnlyStore<State> {
   id: StoreID;
@@ -12,6 +14,7 @@ export interface ReadOnlyStore<State> {
   isReadOnly: boolean;
   off(): void;
 }
+
 export interface Store<State> extends ReadOnlyStore<State> {
   validation(fn: ValidationFn<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
@@ -28,18 +31,6 @@ export interface InnerStore<State> extends Store<State> {
 export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
 export type AnyStores = Record<string, AnyStore>;
 
-export type Watcher<State> = (
-  state: Freeze<State>,
-  info?: ActionInfo
-) => Unsubscribe | void;
-export type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
-
-export type FreezeStoreType<SomeStore extends AnyStore> =
-  SomeStore extends AnyStore<infer Type> ? Freeze<Type> : never;
-export type FreezeStoreListType<SomeStoreList extends AnyStore[]> = {
-  [Index in keyof SomeStoreList]: FreezeStoreType<SomeStoreList[Index]>;
-};
-
 export type StoreType<SomeStore extends AnyStore> = SomeStore extends AnyStore<
   infer Type
 >
@@ -48,3 +39,9 @@ export type StoreType<SomeStore extends AnyStore> = SomeStore extends AnyStore<
 export type StoresType<SomeStores extends AnyStores> = {
   [Name in keyof SomeStores]: StoreType<SomeStores[Name]>;
 };
+
+export const isNotReadOnlyStore = (store: AnyStore): store is Store<any> =>
+  !store.isReadOnly;
+
+export const isInnerStore = (store: AnyStore): store is InnerStore<any> =>
+  isNotReadOnlyStore(store);
