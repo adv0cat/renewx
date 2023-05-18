@@ -22,19 +22,16 @@ jobs:
       - name: Copy LICENSE
         run: cp LICENSE packages/logger/LICENSE
 
-      - name: Move to NPM package folder
-        run: cd packages/logger
-
       - name: Save package artifacts
         uses: actions/upload-artifact@v3
         with:
           name: logger-package-artifacts
           path: |
-            dist/index.*
-            dist/src
-            package.json
-            LICENSE
-            README.md
+            packages/logger/dist/index.*
+            packages/logger/dist/src
+            packages/logger/package.json
+            packages/logger/LICENSE
+            packages/logger/README.md
 
   publish:
     needs: build
