@@ -1,7 +1,7 @@
 {
   "name": "renewx",
   "private": true,
-  "description": "Lightweight state management library",
+  "description": "Lightweight state management library with validation support",
   "workspaces": [
     "packages/core",
     "packages/logger"
@@ -24,10 +24,12 @@
   "keywords": [
     "store",
     "state",
-    "state manager",
+    "action",
+    "validation",
     "reactive",
     "reactivity",
-    "action"
+    "state-management",
+    "state manager"
   ],
   "repository": {
     "type": "git",

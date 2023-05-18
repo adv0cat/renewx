@@ -1,7 +1,7 @@
 {
   "name": "@renewx/core",
   "version": "0.0.21",
-  "description": "Lightweight state management library",
+  "description": "Lightweight state management library with validation support",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,10 +18,12 @@
   "keywords": [
     "store",
     "state",
-    "state manager",
+    "action",
+    "validation",
     "reactive",
     "reactivity",
-    "action"
+    "state-management",
+    "state manager"
   ],
   "author": "adv0cat",
   "license": "MIT",
