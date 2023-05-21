@@ -23,7 +23,7 @@ urls.watch((state) => {
   console.log("urls:", state);
 });
 
-const addUrl = urls.updater((state, url: string) => {
+const addUrl = urls.newAction((state, url: string) => {
   return state.concat(url);
 });
 
@@ -93,7 +93,7 @@ const pagination = adapter([pageSize, page], (pageSize, page) => {
   };
 });
 
-const nextPage = page.updater((state) => state + 1);
+const nextPage = page.newAction((state) => state + 1);
 
 pagination.watch((state) => {
   console.log("pagination:", state);
@@ -119,10 +119,10 @@ loading.watch(({ isLoading, urls }) => {
   console.log("urls:", urls, "isLoading:", isLoading);
 });
 
-const startLoading = isLoading.updater(() => true);
-const endLoading = isLoading.updater(() => false);
+const startLoading = isLoading.newAction(() => true);
+const endLoading = isLoading.newAction(() => false);
 
-const addUrl = loading.updater(({ isLoading, urls }, url: string) => {
+const addUrl = loading.newAction(({ isLoading, urls }, url: string) => {
   if (!isLoading) {
     return { urls: urls.concat(url) };
   }
@@ -161,13 +161,13 @@ pageLoading.validation((old, state) => {
   return isLoadingTurnOn ? isPageChanged : false;
 });
 
-const endLoading = isLoading.updater(() => false);
-const loadPrevPage = pageLoading.updater(
+const endLoading = isLoading.newAction(() => false);
+const loadPrevPage = pageLoading.newAction(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page - 1, pageSize } };
   }
 );
-const loadNextPage = pageLoading.updater(
+const loadNextPage = pageLoading.newAction(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page + 1, pageSize } };
   }

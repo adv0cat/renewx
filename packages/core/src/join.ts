@@ -127,7 +127,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     isValid,
     validation,
     set,
-    updater: (action, name) => {
+    newAction: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo
         ? { id: ActionInnerAPI.add(name), path: [] }
         : undefined;

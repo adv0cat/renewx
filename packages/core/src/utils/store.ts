@@ -18,7 +18,7 @@ export interface ReadOnlyStore<State> {
 export interface Store<State> extends ReadOnlyStore<State> {
   validation(fn: ValidationFn<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
-  updater<NewActionFn extends ActionFn<State>>(
+  newAction<NewActionFn extends ActionFn<State>>(
     action: NewActionFn,
     name?: string
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
