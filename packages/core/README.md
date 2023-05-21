@@ -135,7 +135,7 @@ endLoading(); // urls: ["https://npmjs.com"] isLoading: false
 addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
 ```
 
-### Validation
+### Validator
 
 #### Validation of different stores with multiple levels
 
@@ -154,8 +154,8 @@ const pagination = store<Pagination>({
 const isLoading = store(false);
 const pageLoading = join({ pagination, isLoading });
 
-pagination.validation((old, state) => state.page > 0);
-pageLoading.validation((old, state) => {
+pagination.validator((old, state) => state.page > 0);
+pageLoading.validator((old, state) => {
   const isLoadingTurnOn = !old.isLoading && !!state?.isLoading;
   const isPageChanged = old.pagination.page != state?.pagination?.page;
   return isLoadingTurnOn ? isPageChanged : false;
@@ -175,9 +175,9 @@ const loadNextPage = pageLoading.newAction(
 
 pageLoading.watch(({ pagination: { page } }) => console.log("page:", page));
 
-loadPrevPage(); // not changed, because state.page === 0 in pagination validation
+loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 loadNextPage(); // page: 2
-loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading validation
+loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading validator
 endLoading(); // page: 2, because isLoading state changed
 loadPrevPage(); // page: 1
 ```

@@ -9,7 +9,7 @@ import type { KeysOfStores } from "./utils/core";
 import type { Freeze } from "./utils/freeze";
 import type { ActionFnReturn, ActionInfo } from "./utils/action";
 import type { JoinStoreName } from "./utils/name";
-import { validationFn } from "./utils/validation-fn";
+import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
@@ -35,7 +35,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
   };
   let states = getStates();
 
-  const [validation, isCurrentStoreValid] = validationFn();
+  const [validator, isCurrentStoreValid] = newValidator();
   const isChildrenValid: Store<R>["isValid"] = (oldState, newState) => {
     for (const [name, store] of innerStoreMap) {
       if (name in newState && !store.isValid(oldState[name], newState[name])) {
@@ -125,7 +125,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     name,
     watch,
     isValid,
-    validation,
+    validator,
     set,
     newAction: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo

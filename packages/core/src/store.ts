@@ -2,7 +2,7 @@ import type { InnerStore, Store } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { StoreName } from "./utils/name";
-import { validationFn } from "./utils/validation-fn";
+import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
@@ -14,7 +14,7 @@ export const store = <State>(
 ): Store<State> => {
   let state = initState as Freeze<State>;
 
-  const [validation, isValid] = validationFn();
+  const [validator, isValid] = newValidator();
   const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => state,
@@ -54,7 +54,7 @@ export const store = <State>(
     name,
     watch,
     isValid,
-    validation,
+    validator,
     set,
     newAction: (action, name) => {
       const info: ActionInfo | undefined = ActionInnerAPI.addInfo

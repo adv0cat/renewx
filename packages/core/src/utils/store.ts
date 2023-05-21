@@ -3,7 +3,7 @@ import type { Freeze } from "./freeze";
 import type { Watcher } from "./core-fn";
 import type { IsChanged, IsValid, OmitFirstArg, Unsubscribe } from "./core";
 import type { AnyStoreName } from "./name";
-import type { ValidationFn } from "./validation-fn";
+import type { Validator } from "./validator";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
 
 export interface ReadOnlyStore<State> {
@@ -16,7 +16,7 @@ export interface ReadOnlyStore<State> {
 }
 
 export interface Store<State> extends ReadOnlyStore<State> {
-  validation(fn: ValidationFn<State>): Unsubscribe;
+  validator(fn: Validator<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
   newAction<NewActionFn extends ActionFn<State>>(
     action: NewActionFn,
