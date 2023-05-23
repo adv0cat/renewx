@@ -5,24 +5,25 @@ export const isStateChanged = (oldState: any, newState: any): IsChanged => {
   if (oldState === newState) {
     return false;
   } else if (
-    typeof oldState !== OBJECT ||
     oldState == null ||
-    newState == null
+    newState == null ||
+    typeof newState !== OBJECT
   ) {
+    // NOTE: If we need to check for NaN
+    // return oldState === oldState || newState === newState;
     return true;
   }
 
   for (let key in newState) {
-    const value = newState[key];
-    const oldValue = oldState[key];
     if (!(key in oldState)) {
       return true;
-    } else if (typeof value === OBJECT && value !== null) {
+    }
+
+    const value = newState[key];
+    const oldValue = oldState[key];
+    if (value != null && oldValue != null && typeof value === OBJECT) {
       for (let innerKey in value) {
-        const innerValue = value[innerKey];
-        if (typeof innerValue === OBJECT && innerValue !== null) {
-          // Nothing to do... Because we don't need more deepening
-        } else if (innerValue !== oldValue[innerKey]) {
+        if (value[innerKey] !== oldValue[innerKey]) {
           return true;
         }
       }
