@@ -2,6 +2,7 @@ import type { Adapter, AdapterAction } from "./utils/adapter";
 import type { AnyStore, ReadOnlyStore } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { AdapterStoreName } from "./utils/name";
+import type { AdapterMark } from "./utils/mark";
 import { coreFn, getUnsubscribe } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
@@ -10,7 +11,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
   adapterAction: AdapterAction<ToState, Stores>,
   storeName: string = ""
-): ReadOnlyStore<ToState> => {
+): ReadOnlyStore<ToState, AdapterMark> => {
   let fromStates = Array.isArray(stores)
     ? stores.map((store) => store.get())
     : stores.get();
@@ -71,6 +72,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   return StoreInnerAPI.add({
     isReadOnly: true,
+    mark: "adapter-readOnly",
     id,
     get,
     off: () => {
@@ -83,5 +85,5 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     },
     name,
     watch,
-  } as ReadOnlyStore<ToState>);
+  } as ReadOnlyStore<ToState, AdapterMark>);
 };

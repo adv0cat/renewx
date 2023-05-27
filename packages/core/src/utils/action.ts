@@ -1,20 +1,24 @@
-import type { Freeze } from "./freeze";
-import type { AnyStores, StoresType } from "./store";
-import type { KeysOfStores } from "./core";
+import type { Freeze, MaybeFreeze } from "./freeze";
 import type { ActionID, StoreID } from "./id";
+import type { StateFromSerial } from "./serial";
+import type { JoinMark, SerialMark, WritableMark } from "./mark";
+import type { ActionFnJoinReturn, JoinState } from "./join";
 
-export type ActionFn<State> = (
+export type ActionFn<State, MarkType extends WritableMark> = (
   state: Freeze<State>,
   ...args: any[]
-) => ActionFnReturn<State>;
+) => ActionFnReturn<State, MarkType>;
 
-export type ActionFnReturn<State> = State extends StoresType<
-  infer SomeStores extends AnyStores
->
-  ? KeysOfStores<SomeStores> extends never
-    ? State | Freeze<State>
-    : Partial<Pick<State, KeysOfStores<SomeStores>>> | undefined
-  : State | Freeze<State>;
+export type ActionFnReturn<
+  State,
+  MarkType extends WritableMark
+> = MarkType extends SerialMark
+  ? MaybeFreeze<StateFromSerial<State>>
+  : MarkType extends JoinMark
+  ? State extends JoinState<infer Stores>
+    ? ActionFnJoinReturn<Stores>
+    : never
+  : MaybeFreeze<State>;
 
 export type ActionInfo = {
   id: ActionID;

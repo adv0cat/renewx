@@ -1,47 +1,69 @@
 import type { StoreID } from "./id";
 import type { Freeze } from "./freeze";
 import type { Watcher } from "./core-fn";
-import type { IsChanged, IsValid, OmitFirstArg, Unsubscribe } from "./core";
+import type {
+  IsChanged,
+  IsValid,
+  KeysOfObject,
+  OmitFirstArg,
+  Unsubscribe,
+} from "./core";
 import type { AnyStoreName } from "./name";
 import type { Validator } from "./validator";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
+import type { Mark, StoreMark, WritableMark } from "./mark";
 
-export interface ReadOnlyStore<State> {
+export interface ReadOnlyStore<
+  State,
+  MarkType extends Mark<string, boolean> = Mark<string>
+> {
   id: StoreID;
   get(): Freeze<State>;
   watch(fn: Watcher<State>): Unsubscribe;
   name(): AnyStoreName;
-  isReadOnly: boolean;
   off(): void;
+  isReadOnly: MarkType extends WritableMark ? false : true;
+  mark: MarkType;
 }
 
-export interface Store<State> extends ReadOnlyStore<State> {
-  validator(fn: Validator<State>): Unsubscribe;
-  isValid(oldState: Freeze<State>, newState: ActionFnReturn<State>): IsValid;
-  newAction<NewActionFn extends ActionFn<State>>(
+export interface ActionStore<State, MarkType extends WritableMark>
+  extends ReadOnlyStore<State, MarkType> {
+  validator(fn: Validator<State, MarkType>): Unsubscribe;
+  isValid(
+    oldState: Freeze<State>,
+    newState: ActionFnReturn<State, MarkType> | Freeze<State>
+  ): IsValid;
+  newAction<NewActionFn extends ActionFn<State, MarkType>>(
     action: NewActionFn,
     name?: string
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
 }
 
-export interface InnerStore<State> extends Store<State> {
-  set(newState: ActionFnReturn<State>, info?: ActionInfo): IsChanged;
+export interface Store<State> extends ActionStore<State, StoreMark> {}
+
+export interface InnerStore<State, MarkType extends WritableMark>
+  extends ActionStore<State, MarkType> {
+  set(newState: ActionFnReturn<State, MarkType>, info?: ActionInfo): IsChanged;
 }
 
-export type AnyStore<State = any> = Store<State> | ReadOnlyStore<State>;
-export type AnyStores = Record<string, AnyStore>;
+export type AnyStore<
+  State = any,
+  MarkType extends Mark<string, boolean> = Mark<string, boolean>
+> = ReadOnlyStore<State, MarkType>;
 
-export type StoreType<SomeStore extends AnyStore> = SomeStore extends AnyStore<
-  infer Type
->
-  ? Type
-  : never;
-export type StoresType<SomeStores extends AnyStores> = {
-  [Name in keyof SomeStores]: StoreType<SomeStores[Name]>;
+export type InnerStoresType<InnerStores> = {
+  [Name in keyof InnerStores]: InnerStores[Name] extends InnerStore<
+    infer Type,
+    WritableMark
+  >
+    ? Type
+    : never;
 };
 
-export const isNotReadOnlyStore = (store: AnyStore): store is Store<any> =>
-  !store.isReadOnly;
+export type KeysOfInnerStores<InnerStores> = KeysOfObject<
+  InnerStoresType<InnerStores>
+>;
 
-export const isInnerStore = (store: AnyStore): store is InnerStore<any> =>
-  isNotReadOnlyStore(store);
+export const isInnerStore = <State>(
+  store: AnyStore<State>
+): store is InnerStore<State, WritableMark> => !store.isReadOnly;

@@ -7,3 +7,5 @@ export type Freeze<T> = T extends Fn
   : T extends object
   ? { readonly [P in keyof T]: Freeze<T[P]> }
   : Readonly<T>;
+
+export type MaybeFreeze<State> = State | Freeze<State>;

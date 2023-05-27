@@ -1,42 +1,54 @@
 import {
-  type AnyStores,
+  type AnyStore,
   type InnerStore,
   isInnerStore,
-  type Store,
-  type StoresType,
+  type KeysOfInnerStores,
 } from "./utils/store";
-import type { KeysOfStores } from "./utils/core";
 import type { Freeze } from "./utils/freeze";
-import type { ActionFnReturn, ActionInfo } from "./utils/action";
+import type { ActionInfo } from "./utils/action";
 import type { JoinStoreName } from "./utils/name";
+import type { JoinMark, WritableMark } from "./utils/mark";
+import type { ActionFnJoinReturn, JoinState, JoinStore } from "./utils/join";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
 import { ActionInnerAPI } from "./action-api";
 
-export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
+export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
   storeName: string = ""
-): Store<R> => {
+): JoinStore<Stores> => {
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
-  const innerStoreMap = new Map<KeysOfStores<Stores>, InnerStore<any>>();
+  const innerStoreMap = new Map<
+    KeysOfInnerStores<Stores>,
+    InnerStore<any, WritableMark>
+  >();
   nameList.forEach((name) => {
     const store = stores[name];
     if (isInnerStore(store)) {
-      innerStoreMap.set(name as KeysOfStores<Stores>, store);
+      innerStoreMap.set(name as KeysOfInnerStores<Stores>, store);
     }
   });
 
   const getStates = () => {
-    const states = {} as R;
+    const states = {} as JoinState<Stores>;
     nameList.forEach((name) => (states[name] = stores[name].get()));
-    return states as Freeze<R>;
+    return states as Freeze<JoinState<Stores>>;
   };
   let states = getStates();
 
-  const [validator, isCurrentStoreValid] = newValidator();
-  const isChildrenValid: Store<R>["isValid"] = (oldState, newState) => {
+  const [validator, isCurrentStoreValid] = newValidator<
+    JoinState<Stores>,
+    JoinMark
+  >();
+  const isChildrenValid: InnerStore<JoinState<Stores>, JoinMark>["isValid"] = (
+    oldState,
+    newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>
+  ) => {
+    if (newState == null) {
+      return true;
+    }
     for (const [name, store] of innerStoreMap) {
       if (name in newState && !store.isValid(oldState[name], newState[name])) {
         return false;
@@ -44,7 +56,10 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     }
     return true;
   };
-  const isValid: Store<R>["isValid"] = (oldState, newState) =>
+  const isValid: InnerStore<JoinState<Stores>, JoinMark>["isValid"] = (
+    oldState,
+    newState
+  ) =>
     isChildrenValid(oldState, newState) &&
     isCurrentStoreValid(oldState, newState);
 
@@ -62,7 +77,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         const newStates = getStates();
         if (
           isStateChanged(states, newStates) &&
-          isChildrenValid(states, newStates as ActionFnReturn<R>)
+          isChildrenValid(states, newStates)
         ) {
           info &&= {
             id: info.id,
@@ -76,7 +91,10 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
     })
   );
 
-  const set: InnerStore<R>["set"] = (actionStates, info): boolean => {
+  const set: InnerStore<JoinState<Stores>, JoinMark>["set"] = (
+    actionStates,
+    info
+  ): boolean => {
     if (
       !isNotifyEnabled ||
       actionStates == null ||
@@ -114,6 +132,7 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
 
   return StoreInnerAPI.add({
     isReadOnly: false,
+    mark: "join-writable",
     id,
     get,
     off: () => {
@@ -133,5 +152,5 @@ export const join = <Stores extends AnyStores, R extends StoresType<Stores>>(
         : undefined;
       return (...args) => set(action(states, ...args), info);
     },
-  } as InnerStore<R>);
+  } as InnerStore<JoinState<Stores>, JoinMark>);
 };

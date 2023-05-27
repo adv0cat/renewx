@@ -1,22 +1,25 @@
-import type { InnerStore, Store } from "./utils/store";
-import type { Freeze } from "./utils/freeze";
-import type { ActionInfo } from "./utils/action";
+import type { Serial, SerialStore } from "./utils/serial";
 import type { StoreName } from "./utils/name";
-import type { StoreMark } from "./utils/mark";
+import type { ActionInfo } from "./utils/action";
+import type { Freeze } from "./utils/freeze";
+import type { InnerStore } from "./utils/store";
+import type { SerialMark } from "./utils/mark";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
-import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
 import { ActionInnerAPI } from "./action-api";
 
-export const store = <State>(
+export const serial = <State>(
   initState: State,
   storeName: string = ""
-): Store<State> => {
-  let state = initState as Freeze<State>;
+): SerialStore<State> => {
+  let state = {
+    order: 0,
+    state: initState,
+  } as Freeze<Serial<State>>;
 
-  const [validator, isValid] = newValidator<State, StoreMark>();
-  const [id, get, off, name, watch, notify] = coreFn(
+  const [validator, isValid] = newValidator<Serial<State>, SerialMark>();
+  const [id, get, off, name, watch, notify] = coreFn<Serial<State>>(
     storeName,
     () => state,
     (id): StoreName => `${id}`
@@ -24,15 +27,11 @@ export const store = <State>(
 
   let isNotifyEnabled = true;
 
-  const set: InnerStore<State, StoreMark>["set"] = (
+  const set: InnerStore<Serial<State>, SerialMark>["set"] = (
     newState,
     info
   ): boolean => {
-    if (
-      !isNotifyEnabled ||
-      !isStateChanged(state, newState) ||
-      !isValid(state, newState)
-    ) {
+    if (!isNotifyEnabled || !isValid(state, newState)) {
       return false;
     }
 
@@ -42,14 +41,17 @@ export const store = <State>(
       set: true,
     };
 
-    state = newState as Freeze<State>;
+    state = {
+      order: state.order + 1,
+      state: newState,
+    } as Freeze<Serial<State>>;
     notify(state, info);
     return true;
   };
 
   return StoreInnerAPI.add({
     isReadOnly: false,
-    mark: "store-writable",
+    mark: "serial-writable",
     id,
     get,
     off: () => {
@@ -67,5 +69,5 @@ export const store = <State>(
         : undefined;
       return (...args) => set(action(state, ...args), info);
     },
-  } as InnerStore<State, StoreMark>);
+  } as InnerStore<Serial<State>, SerialMark>);
 };
