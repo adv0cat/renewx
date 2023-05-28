@@ -11,6 +11,7 @@ export type { Unsubscribe } from "./src/utils/core";
 export type { Store, ActionStore, ReadOnlyStore } from "./src/utils/store";
 export type { JoinStore } from "./src/utils/join";
 export type { SerialStore } from "./src/utils/serial";
+export type { AdapterStore } from "./src/utils/adapter";
 
 export type {
   Mark,

@@ -9,7 +9,7 @@ import { StoreInnerAPI } from "./store-api";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
-  adapterAction: AdapterAction<ToState, Stores>,
+  action: AdapterAction,
   storeName: string = ""
 ): ReadOnlyStore<ToState, AdapterMark> => {
   let fromStates = Array.isArray(stores)
@@ -17,9 +17,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     : stores.get();
 
   let state = (
-    Array.isArray(stores)
-      ? (adapterAction as AdapterAction<ToState>)(...fromStates)
-      : adapterAction(fromStates)
+    Array.isArray(stores) ? action(...fromStates) : action(fromStates)
   ) as Freeze<ToState>;
 
   const [id, get, off, name, watch, notify] = coreFn(
@@ -48,9 +46,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             };
 
             fromStates = stores.map((store) => store.get());
-            state = (adapterAction as AdapterAction<ToState>)(
-              ...fromStates
-            ) as Freeze<ToState>;
+            state = action(...fromStates) as Freeze<ToState>;
             notify(state, info);
           }
         })
@@ -63,7 +59,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           };
 
           fromStates = newFromState;
-          state = adapterAction(fromStates) as Freeze<ToState>;
+          state = action(fromStates) as Freeze<ToState>;
           notify(state, info);
         }
       });
