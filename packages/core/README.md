@@ -104,6 +104,23 @@ nextPage(); // pagination: { offset: 10, limit: 20 }
 nextPage(); // pagination: { offset: 20, limit: 30 }
 ```
 
+### Serial
+
+#### Capturing mouse events in a serial store:
+
+```ts
+import { serial } from "@renewx/core";
+
+const serialEvent = serial<MouseEvent | undefined>(undefined, "serialEvent");
+const onMouseEvent = serialEvent.newAction(
+  (_, mouseEvent: MouseEvent) => mouseEvent,
+  "onMouseEvent"
+);
+
+document.addEventListener("mousedown", onMouseEvent);
+document.addEventListener("mouseup", onMouseEvent);
+```
+
 ### Join
 
 #### Joining multiple stores for convenient use:
