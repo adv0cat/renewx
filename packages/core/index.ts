@@ -22,8 +22,10 @@ export type {
   Tag,
   AnyTag,
   WritableTag,
+  ReadableTag,
   StoreTag,
   JoinTag,
   SerialTag,
   AdapterTag,
+  ToReadOnly,
 } from "./src/utils/tag";

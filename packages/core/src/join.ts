@@ -3,11 +3,12 @@ import {
   type InnerStore,
   isInnerStore,
   type KeysOfInnerStores,
+  ReadOnlyStore,
 } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { JoinStoreName } from "./utils/name";
-import type { JoinTag, WritableTag } from "./utils/tag";
+import type { JoinTag, Tag, WritableTag } from "./utils/tag";
 import type { ActionFnJoinReturn, JoinState, JoinStore } from "./utils/join";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
@@ -130,9 +131,9 @@ export const join = <Stores extends Record<string, AnyStore>>(
 
   isNotifyEnabled = true;
 
-  return StoreInnerAPI.add({
-    isReadOnly: false,
-    mark: "join-writable",
+  const readOnly = {
+    isReadOnly: true,
+    mark: "join-readOnly",
     id,
     get,
     off: () => {
@@ -143,6 +144,13 @@ export const join = <Stores extends Record<string, AnyStore>>(
     },
     name,
     watch,
+  } as ReadOnlyStore<JoinState<Stores>, Tag<"join">>;
+
+  return StoreInnerAPI.add({
+    ...readOnly,
+    readOnly: () => readOnly,
+    isReadOnly: false,
+    mark: "join-writable",
     isValid,
     validator,
     set,

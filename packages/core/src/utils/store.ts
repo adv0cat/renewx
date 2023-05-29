@@ -11,9 +11,15 @@ import type {
 import type { AnyStoreName } from "./name";
 import type { Validator } from "./validator";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
-import type { AnyTag, StoreTag, Tag, WritableTag } from "./tag";
+import type {
+  AnyTag,
+  ReadableTag,
+  StoreTag,
+  ToReadOnly,
+  WritableTag,
+} from "./tag";
 
-export interface ReadOnlyStore<State, TagType extends AnyTag = Tag<string>> {
+export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
   id: StoreID;
   get(): Freeze<State>;
   watch(fn: Watcher<State>): Unsubscribe;
@@ -25,6 +31,7 @@ export interface ReadOnlyStore<State, TagType extends AnyTag = Tag<string>> {
 
 export interface ActionStore<State, TagType extends WritableTag>
   extends ReadOnlyStore<State, TagType> {
+  readOnly(): ReadOnlyStore<State, ToReadOnly<TagType>>;
   validator(fn: Validator<State, TagType>): Unsubscribe;
   isValid(
     oldState: Freeze<State>,

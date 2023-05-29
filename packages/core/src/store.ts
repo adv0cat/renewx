@@ -1,8 +1,8 @@
-import type { InnerStore, Store } from "./utils/store";
+import type { InnerStore, ReadOnlyStore, Store } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { StoreName } from "./utils/name";
-import type { StoreTag } from "./utils/tag";
+import type { StoreTag, Tag } from "./utils/tag";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
@@ -44,9 +44,9 @@ export const store = <State>(
     return true;
   };
 
-  return StoreInnerAPI.add({
-    isReadOnly: false,
-    mark: "store-writable",
+  const readOnly = {
+    isReadOnly: true,
+    mark: "store-readOnly",
     id,
     get,
     off: () => {
@@ -55,6 +55,13 @@ export const store = <State>(
     },
     name,
     watch,
+  } as ReadOnlyStore<State, Tag<"store">>;
+
+  return StoreInnerAPI.add({
+    ...readOnly,
+    readOnly: () => readOnly,
+    isReadOnly: false,
+    mark: "store-writable",
     isValid,
     validator,
     set,

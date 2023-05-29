@@ -2,8 +2,8 @@ import type { Serial, SerialStore } from "./utils/serial";
 import type { StoreName } from "./utils/name";
 import type { ActionInfo } from "./utils/action";
 import type { Freeze } from "./utils/freeze";
-import type { InnerStore } from "./utils/store";
-import type { SerialTag } from "./utils/tag";
+import type { InnerStore, ReadOnlyStore } from "./utils/store";
+import type { SerialTag, Tag } from "./utils/tag";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { StoreInnerAPI } from "./store-api";
@@ -49,9 +49,9 @@ export const serial = <State>(
     return true;
   };
 
-  return StoreInnerAPI.add({
-    isReadOnly: false,
-    mark: "serial-writable",
+  const readOnly = {
+    isReadOnly: true,
+    mark: "serial-readOnly",
     id,
     get,
     off: () => {
@@ -60,6 +60,13 @@ export const serial = <State>(
     },
     name,
     watch,
+  } as ReadOnlyStore<Serial<State>, Tag<"serial">>;
+
+  return StoreInnerAPI.add({
+    ...readOnly,
+    readOnly: () => readOnly,
+    isReadOnly: false,
+    mark: "serial-writable",
     isValid,
     validator,
     set,
