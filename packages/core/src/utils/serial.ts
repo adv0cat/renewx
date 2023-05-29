@@ -1,5 +1,5 @@
 import type { ActionStore } from "./store";
-import type { SerialMark } from "./mark";
+import type { SerialTag } from "./tag";
 
 export type Serial<State> = { order: number; state: State };
 export type StateFromSerial<SerialType> = SerialType extends Serial<infer State>
@@ -7,4 +7,4 @@ export type StateFromSerial<SerialType> = SerialType extends Serial<infer State>
   : never;
 
 export interface SerialStore<State>
-  extends ActionStore<Serial<State>, SerialMark> {}
+  extends ActionStore<Serial<State>, SerialTag> {}

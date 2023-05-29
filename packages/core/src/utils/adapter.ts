@@ -1,6 +1,6 @@
 import type { Freeze } from "./freeze";
 import type { AnyStore, ReadOnlyStore } from "./store";
-import type { AdapterMark } from "./mark";
+import type { AdapterTag } from "./tag";
 
 export interface Adapter {
   <ToState extends any[], Stores extends AnyStore[]>(
@@ -32,7 +32,7 @@ export type AdapterStoresType<Stores extends AnyStore[]> = {
 };
 
 export interface AdapterStore<ToState>
-  extends ReadOnlyStore<ToState, AdapterMark> {}
+  extends ReadOnlyStore<ToState, AdapterTag> {}
 
 export interface AdapterAction {
   <ToState, Stores extends AnyStore[]>(

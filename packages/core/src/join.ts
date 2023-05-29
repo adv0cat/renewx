@@ -7,7 +7,7 @@ import {
 import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { JoinStoreName } from "./utils/name";
-import type { JoinMark, WritableMark } from "./utils/mark";
+import type { JoinTag, WritableTag } from "./utils/tag";
 import type { ActionFnJoinReturn, JoinState, JoinStore } from "./utils/join";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
@@ -22,7 +22,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const innerStoreMap = new Map<
     KeysOfInnerStores<Stores>,
-    InnerStore<any, WritableMark>
+    InnerStore<any, WritableTag>
   >();
   nameList.forEach((name) => {
     const store = stores[name];
@@ -40,9 +40,9 @@ export const join = <Stores extends Record<string, AnyStore>>(
 
   const [validator, isCurrentStoreValid] = newValidator<
     JoinState<Stores>,
-    JoinMark
+    JoinTag
   >();
-  const isChildrenValid: InnerStore<JoinState<Stores>, JoinMark>["isValid"] = (
+  const isChildrenValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
     oldState,
     newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>
   ) => {
@@ -56,7 +56,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     }
     return true;
   };
-  const isValid: InnerStore<JoinState<Stores>, JoinMark>["isValid"] = (
+  const isValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
     oldState,
     newState
   ) =>
@@ -91,7 +91,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     })
   );
 
-  const set: InnerStore<JoinState<Stores>, JoinMark>["set"] = (
+  const set: InnerStore<JoinState<Stores>, JoinTag>["set"] = (
     actionStates,
     info
   ): boolean => {
@@ -152,5 +152,5 @@ export const join = <Stores extends Record<string, AnyStore>>(
         : undefined;
       return (...args) => set(action(states, ...args), info);
     },
-  } as InnerStore<JoinState<Stores>, JoinMark>);
+  } as InnerStore<JoinState<Stores>, JoinTag>);
 };

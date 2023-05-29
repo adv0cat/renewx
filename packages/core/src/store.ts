@@ -2,7 +2,7 @@ import type { InnerStore, Store } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { StoreName } from "./utils/name";
-import type { StoreMark } from "./utils/mark";
+import type { StoreTag } from "./utils/tag";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
@@ -15,7 +15,7 @@ export const store = <State>(
 ): Store<State> => {
   let state = initState as Freeze<State>;
 
-  const [validator, isValid] = newValidator<State, StoreMark>();
+  const [validator, isValid] = newValidator<State, StoreTag>();
   const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => state,
@@ -24,10 +24,7 @@ export const store = <State>(
 
   let isNotifyEnabled = true;
 
-  const set: InnerStore<State, StoreMark>["set"] = (
-    newState,
-    info
-  ): boolean => {
+  const set: InnerStore<State, StoreTag>["set"] = (newState, info): boolean => {
     if (
       !isNotifyEnabled ||
       !isStateChanged(state, newState) ||
@@ -67,5 +64,5 @@ export const store = <State>(
         : undefined;
       return (...args) => set(action(state, ...args), info);
     },
-  } as InnerStore<State, StoreMark>);
+  } as InnerStore<State, StoreTag>);
 };

@@ -1,4 +1,4 @@
-import type { JoinMark } from "./mark";
+import type { JoinTag } from "./tag";
 import type {
   ActionStore,
   AnyStore,
@@ -7,10 +7,7 @@ import type {
 } from "./store";
 
 export type JoinState<Stores> = {
-  [Name in keyof Stores]: Stores[Name] extends AnyStore<
-    infer Type,
-    infer MarkType
-  >
+  [Name in keyof Stores]: Stores[Name] extends AnyStore<infer Type>
     ? Type
     : never;
 };
@@ -20,4 +17,4 @@ export type ActionFnJoinReturn<Stores> =
   | undefined;
 
 export interface JoinStore<State>
-  extends ActionStore<JoinState<State>, JoinMark> {}
+  extends ActionStore<JoinState<State>, JoinTag> {}

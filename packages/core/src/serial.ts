@@ -3,7 +3,7 @@ import type { StoreName } from "./utils/name";
 import type { ActionInfo } from "./utils/action";
 import type { Freeze } from "./utils/freeze";
 import type { InnerStore } from "./utils/store";
-import type { SerialMark } from "./utils/mark";
+import type { SerialTag } from "./utils/tag";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { StoreInnerAPI } from "./store-api";
@@ -18,7 +18,7 @@ export const serial = <State>(
     state: initState,
   } as Freeze<Serial<State>>;
 
-  const [validator, isValid] = newValidator<Serial<State>, SerialMark>();
+  const [validator, isValid] = newValidator<Serial<State>, SerialTag>();
   const [id, get, off, name, watch, notify] = coreFn<Serial<State>>(
     storeName,
     () => state,
@@ -27,7 +27,7 @@ export const serial = <State>(
 
   let isNotifyEnabled = true;
 
-  const set: InnerStore<Serial<State>, SerialMark>["set"] = (
+  const set: InnerStore<Serial<State>, SerialTag>["set"] = (
     newState,
     info
   ): boolean => {
@@ -69,5 +69,5 @@ export const serial = <State>(
         : undefined;
       return (...args) => set(action(state, ...args), info);
     },
-  } as InnerStore<Serial<State>, SerialMark>);
+  } as InnerStore<Serial<State>, SerialTag>);
 };
