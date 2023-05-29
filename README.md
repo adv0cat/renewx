@@ -198,3 +198,23 @@ loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading val
 endLoading(); // page: 2, because isLoading state changed
 loadPrevPage(); // page: 1
 ```
+
+### ReadOnly
+
+#### Returning a read-only store
+
+```ts
+import { store } from "@renewx/core";
+
+const count = store(0, "count");
+const add = count.newAction((count, num: number) => count + num, "add");
+
+const readOnlyCount = count.readOnly();
+readOnlyCount.watch((state) => {
+  console.log("count state:", state);
+});
+
+// count state: 0
+add(10); // count state: 10
+add(3); // count state: 13
+```
