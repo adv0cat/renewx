@@ -133,7 +133,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
 
   const readOnly = {
     isReadOnly: true,
-    mark: "join-readOnly",
+    tag: "join-readOnly",
     id,
     get,
     off: () => {
@@ -150,7 +150,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     ...readOnly,
     readOnly: () => readOnly,
     isReadOnly: false,
-    mark: "join-writable",
+    tag: "join-writable",
     isValid,
     validator,
     set,

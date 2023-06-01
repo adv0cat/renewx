@@ -26,7 +26,7 @@ export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
   name(): AnyStoreName;
   off(): void;
   isReadOnly: TagType extends WritableTag ? false : true;
-  mark: TagType;
+  tag: TagType;
 }
 
 export interface ActionStore<State, TagType extends WritableTag>

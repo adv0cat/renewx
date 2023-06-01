@@ -68,7 +68,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   return StoreInnerAPI.add({
     isReadOnly: true,
-    mark: "adapter-readOnly",
+    tag: "adapter-readOnly",
     id,
     get,
     off: () => {

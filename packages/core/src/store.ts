@@ -46,7 +46,7 @@ export const store = <State>(
 
   const readOnly = {
     isReadOnly: true,
-    mark: "store-readOnly",
+    tag: "store-readOnly",
     id,
     get,
     off: () => {
@@ -61,7 +61,7 @@ export const store = <State>(
     ...readOnly,
     readOnly: () => readOnly,
     isReadOnly: false,
-    mark: "store-writable",
+    tag: "store-writable",
     isValid,
     validator,
     set,

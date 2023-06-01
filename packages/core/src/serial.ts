@@ -51,7 +51,7 @@ export const serial = <State>(
 
   const readOnly = {
     isReadOnly: true,
-    mark: "serial-readOnly",
+    tag: "serial-readOnly",
     id,
     get,
     off: () => {
@@ -66,7 +66,7 @@ export const serial = <State>(
     ...readOnly,
     readOnly: () => readOnly,
     isReadOnly: false,
-    mark: "serial-writable",
+    tag: "serial-writable",
     isValid,
     validator,
     set,
