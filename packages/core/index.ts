@@ -6,6 +6,8 @@ export { serial } from "./src/serial";
 export { StoreAPI } from "./src/store-api";
 export { ActionAPI } from "./src/action-api";
 
+export { isAnyStore } from "./src/utils/store";
+
 export type { Freeze } from "./src/utils/freeze";
 export type { Unsubscribe } from "./src/utils/core";
 export type {

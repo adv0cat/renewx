@@ -71,3 +71,10 @@ export type KeysOfInnerStores<InnerStores> = KeysOfObject<
 export const isInnerStore = <State>(
   store: AnyStore<State>
 ): store is InnerStore<State, WritableTag> => !store.isReadOnly;
+
+export const isAnyStore = (v: any): v is AnyStore =>
+  "id" in v &&
+  Number.isInteger(v.id) &&
+  "tag" in v &&
+  typeof v.tag === "string" &&
+  "isReadOnly" in v;
