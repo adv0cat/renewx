@@ -40,27 +40,33 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             isNotifyEnabled &&
             isStateChanged(fromStates[index], storeNewState)
           ) {
-            info &&= {
-              id: info.id,
-              path: info.path.concat(id),
-            };
-
             fromStates = stores.map((store) => store.get());
-            state = action(...fromStates) as Freeze<ToState>;
-            notify(state, info);
+            const newState = action(...fromStates) as Freeze<ToState>;
+            if (isStateChanged(state, newState)) {
+              state = newState;
+
+              info &&= {
+                id: info.id,
+                path: info.path.concat(id),
+              };
+              notify(state, info);
+            }
           }
         })
       )
     : stores.watch((newFromState, info) => {
         if (isNotifyEnabled) {
-          info &&= {
-            id: info.id,
-            path: info.path.concat(id),
-          };
-
           fromStates = newFromState;
-          state = action(fromStates) as Freeze<ToState>;
-          notify(state, info);
+          const newState = action(fromStates) as Freeze<ToState>;
+          if (isStateChanged(state, newState)) {
+            state = newState;
+
+            info &&= {
+              id: info.id,
+              path: info.path.concat(id),
+            };
+            notify(state, info);
+          }
         }
       });
 
