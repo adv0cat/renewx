@@ -23,6 +23,8 @@ let queue = [] as [
   ActionInfo | undefined
 ][];
 
+let lastWatcher: Watcher<any> | undefined = undefined;
+
 const runQueue = (start = 0) => {
   isQueueRunning = true;
   const currentQueue = queue.slice(start);
@@ -30,9 +32,17 @@ const runQueue = (start = 0) => {
     const [state, unsubscribes, info] = currentQueue[i];
     for (const [watcher, unsubscribe] of unsubscribes) {
       unsubscribe();
-      unsubscribes.set(watcher, getUnsubscribe(watcher(state, info)));
+      lastWatcher = watcher;
+      const newUnsubscribe = getUnsubscribe(watcher(state, info));
+      if (lastWatcher !== undefined) {
+        unsubscribes.set(watcher, newUnsubscribe);
+      } else {
+        newUnsubscribe();
+      }
     }
   }
+  lastWatcher = undefined;
+
   const newStart = start + currentQueue.length;
   if (queue.length - newStart > 0) {
     runQueue(newStart);
@@ -81,7 +91,11 @@ export const coreFn = <State>(
         )
       );
       return () => {
-        getUnsubscribe(unsubscribes.get(watcher))();
+        if (watcher !== lastWatcher) {
+          getUnsubscribe(unsubscribes.get(watcher))();
+        } else {
+          lastWatcher = undefined;
+        }
         unsubscribes.delete(watcher);
       };
     },
