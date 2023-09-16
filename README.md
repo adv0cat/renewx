@@ -46,6 +46,20 @@ div.watch((state) => {
 });
 ```
 
+#### Capturing mouse event type in store with _skipStateCheck_:
+
+```ts
+import { store } from "@renewx/core";
+
+const event = store<string>("", "event", { skipStateCheck: true });
+const onMouseEvent = event.newAction(
+  (_, { type }: MouseEvent) => type,
+  "onMouseEvent",
+);
+
+document.addEventListener("click", onMouseEvent);
+```
+
 ### Adapter
 
 #### Converting page-based pagination to API pagination format:
@@ -102,23 +116,6 @@ pagination.watch((state) => {
 // pagination: { offset: 0, limit: 10 }
 nextPage(); // pagination: { offset: 10, limit: 20 }
 nextPage(); // pagination: { offset: 20, limit: 30 }
-```
-
-### Serial
-
-#### Capturing mouse events in a serial store:
-
-```ts
-import { serial } from "@renewx/core";
-
-const serialEvent = serial<MouseEvent | undefined>(undefined, "serialEvent");
-const onMouseEvent = serialEvent.newAction(
-  (_, mouseEvent: MouseEvent) => mouseEvent,
-  "onMouseEvent"
-);
-
-document.addEventListener("mousedown", onMouseEvent);
-document.addEventListener("mouseup", onMouseEvent);
 ```
 
 ### Join

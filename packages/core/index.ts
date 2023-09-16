@@ -1,7 +1,6 @@
 export { store } from "./src/store";
 export { join } from "./src/join";
 export { adapter } from "./src/adapter";
-export { serial } from "./src/serial";
 
 export { StoreAPI } from "./src/store-api";
 export { ActionAPI } from "./src/action-api";
@@ -17,7 +16,6 @@ export type {
   AnyStore,
 } from "./src/utils/store";
 export type { JoinStore } from "./src/utils/join";
-export type { SerialStore } from "./src/utils/serial";
 export type { AdapterStore } from "./src/utils/adapter";
 
 export type {
@@ -27,7 +25,6 @@ export type {
   ReadableTag,
   StoreTag,
   JoinTag,
-  SerialTag,
   AdapterTag,
   ToReadOnly,
 } from "./src/utils/tag";
