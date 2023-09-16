@@ -10,6 +10,7 @@ import type { ActionInfo } from "./utils/action";
 import type { JoinStoreName } from "./utils/name";
 import type { JoinTag, Tag, WritableTag } from "./utils/tag";
 import type { ActionFnJoinReturn, JoinState, JoinStore } from "./utils/join";
+import { type Config, toConfig } from "./utils/config";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
@@ -18,8 +19,11 @@ import { ActionInnerAPI } from "./action-api";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
-  storeName: string = ""
+  storeName: string = "",
+  config: Partial<Config> = {},
 ): JoinStore<Stores> => {
+  const { skipStateCheck } = toConfig(config);
+
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const innerStoreMap = new Map<
     KeysOfInnerStores<Stores>,
@@ -77,7 +81,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
       if (isNotifyEnabled) {
         const newStates = getStates();
         if (
-          isStateChanged(states, newStates) &&
+          (skipStateCheck ? true : isStateChanged(states, newStates)) &&
           isChildrenValid(states, newStates)
         ) {
           info &&= {
@@ -99,7 +103,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     if (
       !isNotifyEnabled ||
       actionStates == null ||
-      !isStateChanged(states, actionStates) ||
+      !(skipStateCheck ? true : isStateChanged(states, actionStates)) ||
       !isValid(states, actionStates)
     ) {
       return false;

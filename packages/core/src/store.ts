@@ -3,6 +3,7 @@ import type { Freeze } from "./utils/freeze";
 import type { ActionInfo } from "./utils/action";
 import type { StoreName } from "./utils/name";
 import type { StoreTag, Tag } from "./utils/tag";
+import { type Config, toConfig } from "./utils/config";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
@@ -11,8 +12,11 @@ import { ActionInnerAPI } from "./action-api";
 
 export const store = <State>(
   initState: State,
-  storeName: string = ""
+  storeName: string = "",
+  config: Partial<Config> = {},
 ): Store<State> => {
+  const { skipStateCheck } = toConfig(config);
+
   let state = initState as Freeze<State>;
 
   const [validator, isValid] = newValidator<State, StoreTag>();
@@ -27,7 +31,7 @@ export const store = <State>(
   const set: InnerStore<State, StoreTag>["set"] = (newState, info): boolean => {
     if (
       !isNotifyEnabled ||
-      !isStateChanged(state, newState) ||
+      !(skipStateCheck ? true : isStateChanged(state, newState)) ||
       !isValid(state, newState)
     ) {
       return false;

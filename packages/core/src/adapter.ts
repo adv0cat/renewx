@@ -3,6 +3,7 @@ import type { AnyStore, ReadOnlyStore } from "./utils/store";
 import type { Freeze } from "./utils/freeze";
 import type { AdapterStoreName } from "./utils/name";
 import type { AdapterTag } from "./utils/tag";
+import { type Config, toConfig } from "./utils/config";
 import { coreFn, getUnsubscribe } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
 import { StoreInnerAPI } from "./store-api";
@@ -10,8 +11,11 @@ import { StoreInnerAPI } from "./store-api";
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
   action: AdapterAction,
-  storeName: string = ""
+  storeName: string = "",
+  config: Partial<Config> = {},
 ): ReadOnlyStore<ToState, AdapterTag> => {
+  const { skipStateCheck } = toConfig(config);
+
   let fromStates = Array.isArray(stores)
     ? stores.map((store) => store.get())
     : stores.get();
@@ -38,11 +42,13 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
         store.watch((storeNewState, info) => {
           if (
             isNotifyEnabled &&
-            isStateChanged(fromStates[index], storeNewState)
+            (skipStateCheck
+              ? true
+              : isStateChanged(fromStates[index], storeNewState))
           ) {
             fromStates = stores.map((store) => store.get());
             const newState = action(...fromStates) as Freeze<ToState>;
-            if (isStateChanged(state, newState)) {
+            if (skipStateCheck ? true : isStateChanged(state, newState)) {
               state = newState;
 
               info &&= {
@@ -58,7 +64,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
         if (isNotifyEnabled) {
           fromStates = newFromState;
           const newState = action(fromStates) as Freeze<ToState>;
-          if (isStateChanged(state, newState)) {
+          if (skipStateCheck ? true : isStateChanged(state, newState)) {
             state = newState;
 
             info &&= {
