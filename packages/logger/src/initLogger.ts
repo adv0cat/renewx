@@ -31,7 +31,7 @@ export const initLogger = (): Unsubscribe => {
             .map(
               (storeID, index) =>
                 StoreAPI.storeById(storeID)?.name() +
-                (index === 0 ? `.${actionName}` : "")
+                (index === 0 ? `.${actionName}` : ""),
             )
             .join(" --> ");
           console.log(`${pathOfAction}.#${set ? "set" : "up"}:`, v);

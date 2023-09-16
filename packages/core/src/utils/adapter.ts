@@ -6,22 +6,22 @@ export interface Adapter {
   <ToState extends any[], Stores extends AnyStore[]>(
     stores: [...Stores],
     action: (...state: AdapterStoresType<Stores>) => [...ToState],
-    name?: string
+    name?: string,
   ): AdapterStore<ToState>;
   <ToState, Stores extends AnyStore[]>(
     stores: [...Stores],
     action: (...state: AdapterStoresType<Stores>) => ToState,
-    name?: string
+    name?: string,
   ): AdapterStore<ToState>;
   <ToState extends any[], Store extends AnyStore>(
     store: Store,
     action: (state: AdapterStoreType<Store>) => [...ToState],
-    name?: string
+    name?: string,
   ): AdapterStore<ToState>;
   <ToState, Store extends AnyStore>(
     store: Store,
     action: (state: AdapterStoreType<Store>) => ToState,
-    name?: string
+    name?: string,
   ): AdapterStore<ToState>;
 }
 

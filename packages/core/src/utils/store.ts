@@ -35,11 +35,11 @@ export interface ActionStore<State, TagType extends WritableTag>
   validator(fn: Validator<State, TagType>): Unsubscribe;
   isValid(
     oldState: Freeze<State>,
-    newState: ActionFnReturn<State, TagType> | Freeze<State>
+    newState: ActionFnReturn<State, TagType> | Freeze<State>,
   ): IsValid;
   newAction<NewActionFn extends ActionFn<State, TagType>>(
     action: NewActionFn,
-    name?: string
+    name?: string,
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
 }
 
@@ -52,7 +52,7 @@ export interface InnerStore<State, TagType extends WritableTag>
 
 export type AnyStore<
   State = any,
-  TagType extends AnyTag = AnyTag
+  TagType extends AnyTag = AnyTag,
 > = ReadOnlyStore<State, TagType>;
 
 export type InnerStoresType<InnerStores> = {
@@ -69,7 +69,7 @@ export type KeysOfInnerStores<InnerStores> = KeysOfObject<
 >;
 
 export const isInnerStore = <State>(
-  store: AnyStore<State>
+  store: AnyStore<State>,
 ): store is InnerStore<State, WritableTag> => !store.isReadOnly;
 
 export const isAnyStore = (v: any): v is AnyStore =>

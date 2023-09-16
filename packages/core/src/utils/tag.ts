@@ -1,6 +1,6 @@
 export type Tag<
   Type extends string = "default",
-  Writable extends boolean = false
+  Writable extends boolean = false,
 > = `${Type}-${Writable extends false ? "readOnly" : "writable"}`;
 export type WritableTag = Tag<string, true>;
 export type ReadableTag = Tag<string>;

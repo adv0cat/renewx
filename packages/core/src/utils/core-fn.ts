@@ -8,7 +8,7 @@ import { ActionInnerAPI } from "../action-api";
 
 export type Watcher<State> = (
   state: Freeze<State>,
-  info?: ActionInfo
+  info?: ActionInfo,
 ) => Unsubscribe | void;
 export type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
 
@@ -20,7 +20,7 @@ let isQueueRunning = false;
 let queue = [] as [
   any,
   Map<Watcher<any>, Unsubscribe>,
-  ActionInfo | undefined
+  ActionInfo | undefined,
 ][];
 
 let lastWatcher: Watcher<any> | undefined = undefined;
@@ -55,14 +55,14 @@ const runQueue = (start = 0) => {
 export const coreFn = <State>(
   storeName: string,
   get: ReadOnlyStore<State>["get"],
-  name: (storeID: StoreID) => AnyStoreName
+  name: (storeID: StoreID) => AnyStoreName,
 ): [
   ReadOnlyStore<State>["id"],
   ReadOnlyStore<State>["get"],
   ReadOnlyStore<State>["off"],
   ReadOnlyStore<State>["name"],
   ReadOnlyStore<State>["watch"],
-  Notify<State>
+  Notify<State>,
 ] => {
   let isOff = false;
   const storeID = nextStoreId();
@@ -86,9 +86,9 @@ export const coreFn = <State>(
         getUnsubscribe(
           watcher(
             get(),
-            ActionInnerAPI.addInfo ? { id: -1, path: [storeID] } : undefined
-          )
-        )
+            ActionInnerAPI.addInfo ? { id: -1, path: [storeID] } : undefined,
+          ),
+        ),
       );
       return () => {
         if (watcher !== lastWatcher) {

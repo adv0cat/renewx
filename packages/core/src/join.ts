@@ -49,7 +49,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
   >();
   const isChildrenValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
     oldState,
-    newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>
+    newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>,
   ) => {
     if (newState == null) {
       return true;
@@ -63,7 +63,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
   };
   const isValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
     oldState,
-    newState
+    newState,
   ) =>
     isChildrenValid(oldState, newState) &&
     isCurrentStoreValid(oldState, newState);
@@ -71,7 +71,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
   const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => states,
-    (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`
+    (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`,
   );
 
   let isNotifyEnabled = false;
@@ -93,12 +93,12 @@ export const join = <Stores extends Record<string, AnyStore>>(
           notify(states, info);
         }
       }
-    })
+    }),
   );
 
   const set: InnerStore<JoinState<Stores>, JoinTag>["set"] = (
     actionStates,
-    info
+    info,
   ): boolean => {
     if (
       !isNotifyEnabled ||

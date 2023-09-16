@@ -32,7 +32,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
         Array.isArray(stores)
           ? stores.map((store) => store.id).join(",")
           : stores.id
-      }]`
+      }]`,
   );
 
   let isNotifyEnabled = false;
@@ -58,7 +58,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
               notify(state, info);
             }
           }
-        })
+        }),
       )
     : stores.watch((newFromState, info) => {
         if (isNotifyEnabled) {

@@ -6,12 +6,12 @@ import type { WritableTag } from "./tag";
 
 export type Validator<State, TagType extends WritableTag> = (
   old: Freeze<State>,
-  state: ActionFnReturn<State, TagType> | Freeze<State>
+  state: ActionFnReturn<State, TagType> | Freeze<State>,
 ) => IsValid;
 
 export const newValidator = <State, TagType extends WritableTag>(): [
   ActionStore<State, TagType>["validator"],
-  ActionStore<State, TagType>["isValid"]
+  ActionStore<State, TagType>["isValid"],
 ] => {
   const validators = [] as Validator<State, TagType>[];
   return [
@@ -23,7 +23,7 @@ export const newValidator = <State, TagType extends WritableTag>(): [
     },
     (
       oldState: Freeze<State>,
-      newState: ActionFnReturn<State, TagType> | Freeze<State>
+      newState: ActionFnReturn<State, TagType> | Freeze<State>,
     ) => validators.every((fn) => fn(oldState, newState)),
   ];
 };

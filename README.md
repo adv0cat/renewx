@@ -179,12 +179,12 @@ const endLoading = isLoading.newAction(() => false);
 const loadPrevPage = pageLoading.newAction(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page - 1, pageSize } };
-  }
+  },
 );
 const loadNextPage = pageLoading.newAction(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page + 1, pageSize } };
-  }
+  },
 );
 
 pageLoading.watch(({ pagination: { page } }) => console.log("page:", page));

@@ -23,7 +23,7 @@ export const store = <State>(
   const [id, get, off, name, watch, notify] = coreFn(
     storeName,
     () => state,
-    (id): StoreName => `${id}`
+    (id): StoreName => `${id}`,
   );
 
   let isNotifyEnabled = true;
