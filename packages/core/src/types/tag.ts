@@ -5,11 +5,9 @@ export type Tag<
 export type WritableTag = Tag<string, true>;
 export type ReadableTag = Tag<string>;
 export type AnyTag = Tag<string, boolean>;
-
 export type AdapterTag = Tag<"adapter">;
 export type StoreTag = Tag<"store", true>;
 export type JoinTag = Tag<"join", true>;
-
 export type ToReadOnly<SomeTag extends WritableTag> = SomeTag extends Tag<
   infer TagType,
   true

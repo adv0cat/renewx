@@ -1,7 +1,7 @@
-import type { Freeze, MaybeFreeze } from "./freeze";
-import type { ActionID, StoreID } from "./id";
+import type { ActionID, StoreID } from "../utils/id";
 import type { JoinTag, WritableTag } from "./tag";
 import type { ActionFnJoinReturn, JoinState } from "./join";
+import type { Freeze, MaybeFreeze } from "./freeze";
 
 export type ActionFn<State, TagType extends WritableTag> = (
   state: Freeze<State>,

@@ -1,10 +1,7 @@
+import type { InnerStoresType, KeysOfInnerStores } from "./inner-store";
+import type { ActionStore } from "./store";
 import type { JoinTag } from "./tag";
-import type {
-  ActionStore,
-  AnyStore,
-  InnerStoresType,
-  KeysOfInnerStores,
-} from "./store";
+import type { AnyStore } from "./any-store";
 
 export type JoinState<Stores> = {
   [Name in keyof Stores]: Stores[Name] extends AnyStore<infer Type>

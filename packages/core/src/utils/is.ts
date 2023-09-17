@@ -1,4 +1,4 @@
-import type { IsChanged } from "./core";
+import type { IsChanged } from "../types/core";
 
 const OBJECT = "object";
 export const isStateChanged = (oldState: any, newState: any): IsChanged => {

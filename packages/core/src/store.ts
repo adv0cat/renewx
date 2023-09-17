@@ -1,21 +1,22 @@
-import type { InnerStore, ReadOnlyStore, Store } from "./utils/store";
-import type { Freeze } from "./utils/freeze";
-import type { ActionInfo } from "./utils/action";
-import type { StoreName } from "./utils/name";
-import type { StoreTag, Tag } from "./utils/tag";
-import { type Config, toConfig } from "./utils/config";
+import type { ReadOnlyStore, Store } from "./types/store";
+import type { InnerStore } from "./types/inner-store";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./store-api";
-import { ActionInnerAPI } from "./action-api";
+import { StoreInnerAPI } from "./api/store-api";
+import { ActionInnerAPI } from "./api/action-api";
+import type { ActionInfo } from "./types/action";
+import type { StoreTag, Tag } from "./types/tag";
+import type { Freeze } from "./types/freeze";
+import type { StoreName } from "./types/name";
+import type { Config } from "./types/config";
 
 export const store = <State>(
   initState: State,
   storeName: string = "",
   config: Partial<Config> = {},
 ): Store<State> => {
-  const { skipStateCheck } = toConfig(config);
+  const { skipStateCheck } = config;
 
   let state = initState as Freeze<State>;
 

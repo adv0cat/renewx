@@ -1,4 +1,4 @@
-import { type ActionID, nextActionId } from "./utils/id";
+import { type ActionID, nextActionId } from "../utils/id";
 
 const actionsNames = [] as string[];
 const add = (name = ""): ActionID => {

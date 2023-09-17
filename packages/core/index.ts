@@ -2,29 +2,25 @@ export { store } from "./src/store";
 export { join } from "./src/join";
 export { adapter } from "./src/adapter";
 
-export { StoreAPI } from "./src/store-api";
-export { ActionAPI } from "./src/action-api";
+export { StoreAPI } from "./src/api/store-api";
+export { ActionAPI } from "./src/api/action-api";
 
-export { isAnyStore } from "./src/utils/store";
+export { isAnyStore } from "./src/types/any-store";
+export type { AnyStore } from "./src/types/any-store";
+export type { Store, ActionStore, ReadOnlyStore } from "./src/types/store";
+export type { AdapterStore } from "./src/types/adapter";
+export type { JoinStore } from "./src/types/join";
 
-export type { Freeze } from "./src/utils/freeze";
-export type { Unsubscribe } from "./src/utils/core";
-export type {
-  Store,
-  ActionStore,
-  ReadOnlyStore,
-  AnyStore,
-} from "./src/utils/store";
-export type { JoinStore } from "./src/utils/join";
-export type { AdapterStore } from "./src/utils/adapter";
+export type { Unsubscribe } from "./src/types/core";
+export type { Freeze } from "./src/types/freeze";
 
 export type {
-  Tag,
-  AnyTag,
-  WritableTag,
-  ReadableTag,
-  StoreTag,
-  JoinTag,
-  AdapterTag,
   ToReadOnly,
-} from "./src/utils/tag";
+  JoinTag,
+  StoreTag,
+  AdapterTag,
+  AnyTag,
+  ReadableTag,
+  WritableTag,
+  Tag,
+} from "./src/types/tag";

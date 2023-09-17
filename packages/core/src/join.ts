@@ -1,28 +1,28 @@
-import {
-  type AnyStore,
-  type InnerStore,
-  isInnerStore,
-  type KeysOfInnerStores,
-  ReadOnlyStore,
-} from "./utils/store";
-import type { Freeze } from "./utils/freeze";
-import type { ActionInfo } from "./utils/action";
-import type { JoinStoreName } from "./utils/name";
-import type { JoinTag, Tag, WritableTag } from "./utils/tag";
-import type { ActionFnJoinReturn, JoinState, JoinStore } from "./utils/join";
-import { type Config, toConfig } from "./utils/config";
 import { newValidator } from "./utils/validator";
 import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./store-api";
-import { ActionInnerAPI } from "./action-api";
+import { StoreInnerAPI } from "./api/store-api";
+import { ActionInnerAPI } from "./api/action-api";
+import type { ReadOnlyStore } from "./types/store";
+import {
+  type InnerStore,
+  isInnerStore,
+  type KeysOfInnerStores,
+} from "./types/inner-store";
+import type { AnyStore } from "./types/any-store";
+import type { ActionInfo } from "./types/action";
+import type { JoinTag, Tag, WritableTag } from "./types/tag";
+import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
+import type { Freeze } from "./types/freeze";
+import type { JoinStoreName } from "./types/name";
+import type { Config } from "./types/config";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
   storeName: string = "",
   config: Partial<Config> = {},
 ): JoinStore<Stores> => {
-  const { skipStateCheck } = toConfig(config);
+  const { skipStateCheck } = config;
 
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const innerStoreMap = new Map<

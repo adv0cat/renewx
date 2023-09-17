@@ -1,8 +1,8 @@
-import type { Freeze } from "./freeze";
-import type { IsValid } from "./core";
-import type { ActionFnReturn } from "./action";
-import type { ActionStore } from "./store";
-import type { WritableTag } from "./tag";
+import type { ActionStore } from "../types/store";
+import type { ActionFnReturn } from "../types/action";
+import type { IsValid } from "../types/core";
+import type { WritableTag } from "../types/tag";
+import type { Freeze } from "../types/freeze";
 
 export type Validator<State, TagType extends WritableTag> = (
   old: Freeze<State>,

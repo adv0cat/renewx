@@ -1,12 +1,13 @@
-import type { Adapter, AdapterAction } from "./utils/adapter";
-import type { AnyStore, ReadOnlyStore } from "./utils/store";
-import type { Freeze } from "./utils/freeze";
-import type { AdapterStoreName } from "./utils/name";
-import type { AdapterTag } from "./utils/tag";
-import { type Config, toConfig } from "./utils/config";
 import { coreFn, getUnsubscribe } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./store-api";
+import { StoreInnerAPI } from "./api/store-api";
+import type { ReadOnlyStore } from "./types/store";
+import type { AnyStore } from "./types/any-store";
+import type { Adapter, AdapterAction } from "./types/adapter";
+import type { AdapterTag } from "./types/tag";
+import type { Freeze } from "./types/freeze";
+import type { AdapterStoreName } from "./types/name";
+import type { Config } from "./types/config";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -14,7 +15,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   storeName: string = "",
   config: Partial<Config> = {},
 ): ReadOnlyStore<ToState, AdapterTag> => {
-  const { skipStateCheck } = toConfig(config);
+  const { skipStateCheck } = config;
 
   let fromStates = Array.isArray(stores)
     ? stores.map((store) => store.get())

@@ -1,10 +1,10 @@
-import type { Freeze } from "./freeze";
-import type { ActionInfo } from "./action";
-import type { Unsubscribe } from "./core";
-import type { AnyStoreName } from "./name";
-import type { ReadOnlyStore } from "./store";
 import { nextStoreId, type StoreID } from "./id";
-import { ActionInnerAPI } from "../action-api";
+import { ActionInnerAPI } from "../api/action-api";
+import type { ReadOnlyStore } from "../types/store";
+import type { ActionInfo } from "../types/action";
+import type { Unsubscribe } from "../types/core";
+import type { Freeze } from "../types/freeze";
+import type { AnyStoreName } from "../types/name";
 
 export type Watcher<State> = (
   state: Freeze<State>,

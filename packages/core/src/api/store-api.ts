@@ -1,8 +1,9 @@
-import type { StoreID } from "./utils/id";
-import type { AnyStore } from "./utils/store";
-import type { Unsubscribe } from "./utils/core";
+import type { StoreID } from "../utils/id";
+import type { AnyStore } from "../types/any-store";
+import type { Unsubscribe } from "../types/core";
 
 type StoreApiWatcher = (storeID: StoreID) => void;
+
 const watchers = [] as StoreApiWatcher[];
 
 const stores = [] as AnyStore[];

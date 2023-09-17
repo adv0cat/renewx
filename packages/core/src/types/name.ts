@@ -1,4 +1,4 @@
-import type { StoreID } from "./id";
+import type { StoreID } from "../utils/id";
 
 export type StoreName = `${StoreID}`; // "42"
 export type AdapterStoreName = `${StoreID}:[${string}]`; // "42:[2,13]"
