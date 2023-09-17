@@ -1,6 +1,6 @@
-import type { ReadOnlyStore } from "./store";
 import type { AnyTag } from "./tag";
 import type { Freeze } from "./freeze";
+import type { ReadOnlyStore } from "./read-only-store";
 
 export type AnyStore<
   State = any,

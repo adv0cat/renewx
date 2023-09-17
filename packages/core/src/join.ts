@@ -1,21 +1,20 @@
 import { newValidator } from "./utils/validator";
-import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./api/store-api";
-import { ActionInnerAPI } from "./api/action-api";
-import type { ReadOnlyStore } from "./types/store";
+import { saveStore } from "./api/store-api";
 import {
   type InnerStore,
   isInnerStore,
   type KeysOfInnerStores,
 } from "./types/inner-store";
 import type { AnyStore } from "./types/any-store";
-import type { ActionInfo } from "./types/action";
-import type { JoinTag, Tag, WritableTag } from "./types/tag";
+import type { JoinTag, WritableTag } from "./types/tag";
 import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
+import { readOnlyStore } from "./read-only-store";
+import { getNotify } from "./api/queue-api";
+import { newActionInfo } from "./api/action-api";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
@@ -68,13 +67,20 @@ export const join = <Stores extends Record<string, AnyStore>>(
     isChildrenValid(oldState, newState) &&
     isCurrentStoreValid(oldState, newState);
 
-  const [id, get, off, name, watch, notify] = coreFn(
+  let isNotifyEnabled = false;
+  const readOnly = readOnlyStore(
     storeName,
+    "join-readOnly",
     () => states,
     (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`,
+    () => {
+      isNotifyEnabled = false;
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
+      unsubscribes = [];
+    },
   );
-
-  let isNotifyEnabled = false;
+  const id = readOnly.id;
+  const notify = getNotify(readOnly);
 
   let unsubscribes = nameList.map((name) =>
     stores[name].watch((state, info) => {
@@ -135,22 +141,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
 
   isNotifyEnabled = true;
 
-  const readOnly = {
-    isReadOnly: true,
-    tag: "join-readOnly",
-    id,
-    get,
-    off: () => {
-      isNotifyEnabled = false;
-      off();
-      unsubscribes.forEach((unsubscribe) => unsubscribe());
-      unsubscribes = [];
-    },
-    name,
-    watch,
-  } as ReadOnlyStore<JoinState<Stores>, Tag<"join">>;
-
-  return StoreInnerAPI.add({
+  return saveStore({
     ...readOnly,
     readOnly: () => readOnly,
     isReadOnly: false,
@@ -159,9 +150,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     validator,
     set,
     newAction: (action, name) => {
-      const info: ActionInfo | undefined = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(name), path: [] }
-        : undefined;
+      const info = newActionInfo(name);
       return (...args) => set(action(states, ...args), info);
     },
   } as InnerStore<JoinState<Stores>, JoinTag>);

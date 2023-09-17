@@ -1,15 +1,15 @@
-import type { ReadOnlyStore, Store } from "./types/store";
+import type { Store } from "./types/store";
 import type { InnerStore } from "./types/inner-store";
 import { newValidator } from "./utils/validator";
-import { coreFn } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./api/store-api";
-import { ActionInnerAPI } from "./api/action-api";
-import type { ActionInfo } from "./types/action";
-import type { StoreTag, Tag } from "./types/tag";
+import { saveStore } from "./api/store-api";
+import type { StoreTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { StoreName } from "./types/name";
 import type { Config } from "./types/config";
+import { readOnlyStore } from "./read-only-store";
+import { getNotify } from "./api/queue-api";
+import { newActionInfo } from "./api/action-api";
 
 export const store = <State>(
   initState: State,
@@ -21,13 +21,19 @@ export const store = <State>(
   let state = initState as Freeze<State>;
 
   const [validator, isValid] = newValidator<State, StoreTag>();
-  const [id, get, off, name, watch, notify] = coreFn(
-    storeName,
-    () => state,
-    (id): StoreName => `${id}`,
-  );
 
   let isNotifyEnabled = true;
+  const readOnly = readOnlyStore(
+    storeName,
+    "store-readOnly",
+    () => state,
+    (storeID): StoreName => `${storeID}`,
+    () => {
+      isNotifyEnabled = false;
+    },
+  );
+  const id = readOnly.id;
+  const notify = getNotify(readOnly);
 
   const set: InnerStore<State, StoreTag>["set"] = (newState, info): boolean => {
     if (
@@ -49,20 +55,7 @@ export const store = <State>(
     return true;
   };
 
-  const readOnly = {
-    isReadOnly: true,
-    tag: "store-readOnly",
-    id,
-    get,
-    off: () => {
-      isNotifyEnabled = false;
-      off();
-    },
-    name,
-    watch,
-  } as ReadOnlyStore<State, Tag<"store">>;
-
-  return StoreInnerAPI.add({
+  return saveStore({
     ...readOnly,
     readOnly: () => readOnly,
     isReadOnly: false,
@@ -71,9 +64,7 @@ export const store = <State>(
     validator,
     set,
     newAction: (action, name) => {
-      const info: ActionInfo | undefined = ActionInnerAPI.addInfo
-        ? { id: ActionInnerAPI.add(name), path: [] }
-        : undefined;
+      const info = newActionInfo(name);
       return (...args) => set(action(state, ...args), info);
     },
   } as InnerStore<State, StoreTag>);

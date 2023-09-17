@@ -1,13 +1,14 @@
-import { coreFn, getUnsubscribe } from "./utils/core-fn";
 import { isStateChanged } from "./utils/is";
-import { StoreInnerAPI } from "./api/store-api";
-import type { ReadOnlyStore } from "./types/store";
 import type { AnyStore } from "./types/any-store";
 import type { Adapter, AdapterAction } from "./types/adapter";
 import type { AdapterTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { AdapterStoreName } from "./types/name";
 import type { Config } from "./types/config";
+import type { ReadOnlyStore } from "./types/read-only-store";
+import { readOnlyStore } from "./read-only-store";
+import { getNotify } from "./api/queue-api";
+import { saveStore } from "./api/store-api";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -25,8 +26,10 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     Array.isArray(stores) ? action(...fromStates) : action(fromStates)
   ) as Freeze<ToState>;
 
-  const [id, get, off, name, watch, notify] = coreFn(
+  let isNotifyEnabled = false;
+  const readOnly = readOnlyStore(
     storeName,
+    "adapter-readOnly",
     () => state,
     (storeID): AdapterStoreName =>
       `${storeID}:[${
@@ -34,9 +37,16 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           ? stores.map((store) => store.id).join(",")
           : stores.id
       }]`,
+    () => {
+      isNotifyEnabled = false;
+      (Array.isArray(unsubscribes) ? unsubscribes : [unsubscribes]).forEach(
+        (unsubscribe) => unsubscribe(),
+      );
+      unsubscribes = [];
+    },
   );
-
-  let isNotifyEnabled = false;
+  const id = readOnly.id;
+  const notify = getNotify(readOnly);
 
   let unsubscribes = Array.isArray(stores)
     ? stores.map((store, index) =>
@@ -79,20 +89,5 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
 
   isNotifyEnabled = true;
 
-  return StoreInnerAPI.add({
-    isReadOnly: true,
-    tag: "adapter-readOnly",
-    id,
-    get,
-    off: () => {
-      isNotifyEnabled = false;
-      off();
-      Array.isArray(unsubscribes)
-        ? unsubscribes.forEach((unsubscribe) => unsubscribe())
-        : getUnsubscribe(unsubscribes)();
-      unsubscribes = [];
-    },
-    name,
-    watch,
-  } as ReadOnlyStore<ToState, AdapterTag>);
+  return saveStore(readOnly);
 };

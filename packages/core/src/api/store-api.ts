@@ -5,22 +5,20 @@ import type { Unsubscribe } from "../types/core";
 type StoreApiWatcher = (storeID: StoreID) => void;
 
 const watchers = [] as StoreApiWatcher[];
-
 const stores = [] as AnyStore[];
-const add = <SomeStore extends AnyStore>(store: SomeStore): SomeStore => {
+
+export const saveStore = <SomeStore extends AnyStore>(
+  store: SomeStore,
+): SomeStore => {
   const storeID: StoreID = store.id;
   stores[storeID] = store;
   watchers.forEach((fn) => fn(storeID));
   return store;
 };
 
-const storeById = (storeID: StoreID): AnyStore | undefined => stores[storeID];
-const storeList = () => stores.slice();
-
-export const StoreInnerAPI = { add };
 export const StoreAPI = {
-  storeById,
-  storeList,
+  storeById: (storeID: StoreID): AnyStore | undefined => stores[storeID],
+  storeList: () => stores.slice(),
   watch: (watcher: StoreApiWatcher): Unsubscribe => {
     watchers.push(watcher);
     return () => {

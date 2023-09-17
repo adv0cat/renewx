@@ -14,3 +14,6 @@ export type ToReadOnly<SomeTag extends WritableTag> = SomeTag extends Tag<
 >
   ? Tag<TagType>
   : never;
+export type isReadOnly<TagType extends AnyTag> = TagType extends WritableTag
+  ? false
+  : true;

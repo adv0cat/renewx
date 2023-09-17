@@ -1,7 +1,7 @@
 import type { AnyStore, AnyStoresType, AnyStoreType } from "./any-store";
-import type { ReadOnlyStore } from "./store";
 import type { AdapterTag } from "./tag";
 import type { Config } from "./config";
+import type { ReadOnlyStore } from "./read-only-store";
 
 export interface Adapter {
   <ToState extends any[], Stores extends AnyStore[]>(

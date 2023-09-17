@@ -1,27 +1,9 @@
 import type { Validator } from "../utils/validator";
-import type { StoreID } from "../utils/id";
-import type { Watcher } from "../utils/core-fn";
 import type { ActionFn, ActionFnReturn } from "./action";
 import type { IsChanged, IsValid, OmitFirstArg, Unsubscribe } from "./core";
-import type {
-  AnyTag,
-  ReadableTag,
-  StoreTag,
-  ToReadOnly,
-  WritableTag,
-} from "./tag";
+import type { StoreTag, ToReadOnly, WritableTag } from "./tag";
 import type { Freeze } from "./freeze";
-import type { AnyStoreName } from "./name";
-
-export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
-  id: StoreID;
-  get(): Freeze<State>;
-  watch(fn: Watcher<State>): Unsubscribe;
-  name(): AnyStoreName;
-  off(): void;
-  isReadOnly: TagType extends WritableTag ? false : true;
-  tag: TagType;
-}
+import type { ReadOnlyStore } from "./read-only-store";
 
 export interface ActionStore<State, TagType extends WritableTag>
   extends ReadOnlyStore<State, TagType> {

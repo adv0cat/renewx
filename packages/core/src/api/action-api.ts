@@ -1,15 +1,19 @@
 import { type ActionID, nextActionId } from "../utils/id";
+import type { ActionInfo } from "../types/action";
+
+let addInfo = false;
+export const getAddInfo = (): boolean => addInfo;
 
 const actionsNames = [] as string[];
-const add = (name = ""): ActionID => {
-  const id: ActionID = nextActionId();
-  actionsNames[id] = name || `${id}`;
-  return id;
+export const newActionInfo = (name = ""): ActionInfo | undefined => {
+  if (addInfo) {
+    const id: ActionID = nextActionId();
+    actionsNames[id] = name || `${id}`;
+    return { id, path: [] };
+  }
 };
 
-const nameById = (actionID: ActionID) => actionsNames[actionID];
-
-const setAddInfo = (value: boolean) => (ActionInnerAPI.addInfo = value);
-
-export const ActionInnerAPI = { add, addInfo: false };
-export const ActionAPI = { nameById, setAddInfo };
+export const ActionAPI = {
+  nameById: (actionID: ActionID) => actionsNames[actionID],
+  setAddInfo: (value: boolean) => (addInfo = value),
+};

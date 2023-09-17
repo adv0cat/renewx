@@ -7,7 +7,8 @@ export { ActionAPI } from "./src/api/action-api";
 
 export { isAnyStore } from "./src/types/any-store";
 export type { AnyStore } from "./src/types/any-store";
-export type { Store, ActionStore, ReadOnlyStore } from "./src/types/store";
+export type { ReadOnlyStore } from "./src/types/read-only-store";
+export type { Store, ActionStore } from "./src/types/store";
 export type { AdapterStore } from "./src/types/adapter";
 export type { JoinStore } from "./src/types/join";
 
