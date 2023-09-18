@@ -17,8 +17,8 @@ export type ActionFnReturn<
     : never
   : MaybeFreeze<State>;
 
-export type ActionInfo = {
+export interface ActionInfo {
   id: ActionID;
   path: StoreID[];
   set?: boolean;
-};
+}

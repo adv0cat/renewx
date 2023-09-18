@@ -12,6 +12,7 @@ import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
+import type { ActionInfo } from "./types/action";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
@@ -50,12 +51,14 @@ export const join = <Stores extends Record<string, AnyStore>>(
     oldState,
     newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>,
   ) => {
-    if (newState == null) {
-      return true;
-    }
-    for (const [name, store] of innerStoreMap) {
-      if (name in newState && !store.isValid(oldState[name], newState[name])) {
-        return false;
+    if (newState != null) {
+      for (const [name, store] of innerStoreMap) {
+        if (
+          name in newState &&
+          !store.isValid(oldState[name], newState[name])
+        ) {
+          return false;
+        }
       }
     }
     return true;
@@ -79,24 +82,17 @@ export const join = <Stores extends Record<string, AnyStore>>(
       unsubscribes = [];
     },
   );
-  const id = readOnly.id;
   const notify = getNotify(readOnly);
 
   let unsubscribes = nameList.map((name) =>
-    stores[name].watch((state, info) => {
-      if (isNotifyEnabled) {
+    stores[name].watch((storeNewState, info) => {
+      if (
+        isNotifyEnabled &&
+        (skipStateCheck ? true : isStateChanged(states[name], storeNewState))
+      ) {
         const newStates = getStates();
-        if (
-          (skipStateCheck ? true : isStateChanged(states, newStates)) &&
-          isChildrenValid(states, newStates)
-        ) {
-          info &&= {
-            id: info.id,
-            path: info.path.concat(id),
-          };
-
-          states = newStates;
-          notify(states, info);
+        if (isValid(states, newStates)) {
+          notify((states = newStates), info);
         }
       }
     }),
@@ -106,37 +102,36 @@ export const join = <Stores extends Record<string, AnyStore>>(
     actionStates,
     info,
   ): boolean => {
+    if (!isNotifyEnabled || actionStates == null) {
+      return false;
+    }
+
+    const newStates: Freeze<JoinState<Stores>> = Object.assign(
+      {},
+      states,
+      actionStates,
+    );
     if (
-      !isNotifyEnabled ||
-      actionStates == null ||
-      !(skipStateCheck ? true : isStateChanged(states, actionStates)) ||
-      !isValid(states, actionStates)
+      !(skipStateCheck ? true : isStateChanged(states, newStates)) ||
+      !isValid(states, newStates)
     ) {
       return false;
     }
 
-    info &&= {
-      id: info.id,
-      path: info.path.concat(id),
-      set: true,
-    };
-
+    const storeInfo =
+      info &&
+      ({
+        id: info.id,
+        path: info.path.concat(readOnly.id),
+      } as ActionInfo);
     isNotifyEnabled = false;
-    let isChanged = false;
     for (const [name, store] of innerStoreMap) {
-      if (name in actionStates && store.set(actionStates[name], info)) {
-        isChanged = true;
-      }
+      store.set(newStates[name], storeInfo);
     }
     isNotifyEnabled = true;
 
-    if (isChanged) {
-      states = getStates();
-      notify(states, info);
-      return true;
-    }
-
-    return false;
+    notify((states = getStates()), info, true);
+    return true;
   };
 
   isNotifyEnabled = true;

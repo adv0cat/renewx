@@ -22,7 +22,7 @@ export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
     id: storeID,
     tag,
     get,
-    isReadOnly: false as isReadOnly<TagType>,
+    isReadOnly: true as isReadOnly<TagType>,
     name: (): AnyStoreName => (storeName ||= name(storeID)),
     off: () => {
       isOff = true;

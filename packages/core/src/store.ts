@@ -32,7 +32,6 @@ export const store = <State>(
       isNotifyEnabled = false;
     },
   );
-  const id = readOnly.id;
   const notify = getNotify(readOnly);
 
   const set: InnerStore<State, StoreTag>["set"] = (newState, info): boolean => {
@@ -44,14 +43,7 @@ export const store = <State>(
       return false;
     }
 
-    info &&= {
-      id: info.id,
-      path: info.path.concat(id),
-      set: true,
-    };
-
-    state = newState as Freeze<State>;
-    notify(state, info);
+    notify((state = newState as Freeze<State>), info, true);
     return true;
   };
 

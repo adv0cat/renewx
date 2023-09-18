@@ -33,9 +33,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
     () => state,
     (storeID): AdapterStoreName =>
       `${storeID}:[${
-        Array.isArray(stores)
-          ? stores.map((store) => store.id).join(",")
-          : stores.id
+        Array.isArray(stores) ? stores.map(({ id }) => id).join(",") : stores.id
       }]`,
     () => {
       isNotifyEnabled = false;
@@ -45,7 +43,6 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
       unsubscribes = [];
     },
   );
-  const id = readOnly.id;
   const notify = getNotify(readOnly);
 
   let unsubscribes = Array.isArray(stores)
@@ -60,13 +57,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
             fromStates = stores.map((store) => store.get());
             const newState = action(...fromStates) as Freeze<ToState>;
             if (skipStateCheck ? true : isStateChanged(state, newState)) {
-              state = newState;
-
-              info &&= {
-                id: info.id,
-                path: info.path.concat(id),
-              };
-              notify(state, info);
+              notify((state = newState), info);
             }
           }
         }),
@@ -76,13 +67,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
           fromStates = newFromState;
           const newState = action(fromStates) as Freeze<ToState>;
           if (skipStateCheck ? true : isStateChanged(state, newState)) {
-            state = newState;
-
-            info &&= {
-              id: info.id,
-              path: info.path.concat(id),
-            };
-            notify(state, info);
+            notify((state = newState), info);
           }
         }
       });

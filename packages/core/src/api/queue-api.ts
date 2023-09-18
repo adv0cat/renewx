@@ -5,7 +5,11 @@ import type { ReadOnlyStore, Watcher } from "../types/read-only-store";
 import { getUnsubscribe } from "../utils/get-unsubscribe";
 import type { StoreID } from "../utils/id";
 
-type Notify<State> = (state: Freeze<State>, info?: ActionInfo) => void;
+type Notify<State> = (
+  state: Freeze<State>,
+  info?: ActionInfo,
+  set?: boolean,
+) => void;
 
 const stores: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
 
@@ -45,8 +49,17 @@ const runQueue = (start = 0) => {
 
 export const getNotify =
   <State>(store: ReadOnlyStore<State>): Notify<State> =>
-  (state: Freeze<State>, info?: ActionInfo): void => {
-    queue.push([state, store.id, info]);
+  (state: Freeze<State>, info?: ActionInfo, set = false): void => {
+    const { id } = store;
+    queue.push([
+      state,
+      id,
+      info && {
+        id: info.id,
+        path: info.path.concat(id),
+        set,
+      },
+    ]);
     if (!isQueueRunning) {
       runQueue();
     }
