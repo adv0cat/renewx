@@ -8,7 +8,7 @@ import {
 } from "./types/inner-store";
 import type { AnyStore } from "./types/any-store";
 import type { JoinTag, WritableTag } from "./types/tag";
-import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
+import type { JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
@@ -47,28 +47,17 @@ export const join = <Stores extends Record<string, AnyStore>>(
     JoinState<Stores>,
     JoinTag
   >();
-  const isChildrenValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
-    oldState,
-    newState: ActionFnJoinReturn<Stores> | Freeze<JoinState<Stores>>,
-  ) => {
-    if (newState != null) {
-      for (const [name, store] of innerStoreMap) {
-        if (
-          name in newState &&
-          !store.isValid(oldState[name], newState[name])
-        ) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
   const isValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
     oldState,
     newState,
-  ) =>
-    isChildrenValid(oldState, newState) &&
-    isCurrentStoreValid(oldState, newState);
+  ) => {
+    for (const [name, store] of innerStoreMap) {
+      if (!store.isValid(oldState[name], newState[name])) {
+        return false;
+      }
+    }
+    return isCurrentStoreValid(oldState, newState);
+  };
 
   let isNotifyEnabled = false;
   const readOnly = readOnlyStore(
@@ -99,18 +88,19 @@ export const join = <Stores extends Record<string, AnyStore>>(
   );
 
   const set: InnerStore<JoinState<Stores>, JoinTag>["set"] = (
-    actionStates,
+    partialNewStates,
     info,
   ): boolean => {
-    if (!isNotifyEnabled || actionStates == null) {
+    if (!isNotifyEnabled || partialNewStates == null) {
       return false;
     }
 
-    const newStates: Freeze<JoinState<Stores>> = Object.assign(
-      {},
-      states,
-      actionStates,
-    );
+    const newStates: Freeze<JoinState<Stores>> = Object.assign({}, states);
+    for (const key in partialNewStates) {
+      if (key in newStates) {
+        newStates[key] = (partialNewStates as any)[key];
+      }
+    }
     if (
       !(skipStateCheck ? true : isStateChanged(states, newStates)) ||
       !isValid(states, newStates)
@@ -118,15 +108,15 @@ export const join = <Stores extends Record<string, AnyStore>>(
       return false;
     }
 
-    const storeInfo =
-      info &&
-      ({
-        id: info.id,
-        path: info.path.concat(readOnly.id),
-      } as ActionInfo);
+    const storeInfo: ActionInfo | undefined = info && {
+      id: info.id,
+      path: info.path.concat(readOnly.id),
+    };
     isNotifyEnabled = false;
     for (const [name, store] of innerStoreMap) {
-      store.set(newStates[name], storeInfo);
+      if (name in partialNewStates) {
+        store.set(partialNewStates[name], storeInfo);
+      }
     }
     isNotifyEnabled = true;
 

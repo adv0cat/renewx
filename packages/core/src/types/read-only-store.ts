@@ -10,12 +10,16 @@ export type Watcher<State> = (
   info?: ActionInfo,
 ) => Unsubscribe | void;
 
-export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
-  id: StoreID;
-  get(): Freeze<State>;
+export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag>
+  extends BasicStore<State> {
   watch(fn: Watcher<State>): Unsubscribe;
   name(): AnyStoreName;
   off(): void;
   isReadOnly: isReadOnly<TagType>;
   tag: TagType;
+}
+
+export interface BasicStore<State> {
+  id: StoreID;
+  get(): Freeze<State>;
 }

@@ -1,10 +1,10 @@
 import type { InnerStoresType, KeysOfInnerStores } from "./inner-store";
 import type { ActionStore } from "./store";
 import type { JoinTag } from "./tag";
-import type { AnyStore } from "./any-store";
+import type { BasicStore } from "./read-only-store";
 
 export type JoinState<Stores> = {
-  [Name in keyof Stores]: Stores[Name] extends AnyStore<infer Type>
+  [Name in keyof Stores]: Stores[Name] extends BasicStore<infer Type>
     ? Type
     : never;
 };

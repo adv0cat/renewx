@@ -34,7 +34,10 @@ export const store = <State>(
   );
   const notify = getNotify(readOnly);
 
-  const set: InnerStore<State, StoreTag>["set"] = (newState, info): boolean => {
+  const set: InnerStore<State, StoreTag>["set"] = (
+    newState: Freeze<State>,
+    info,
+  ): boolean => {
     if (
       !isNotifyEnabled ||
       !(skipStateCheck ? true : isStateChanged(state, newState)) ||
@@ -43,7 +46,7 @@ export const store = <State>(
       return false;
     }
 
-    notify((state = newState as Freeze<State>), info, true);
+    notify((state = newState), info, true);
     return true;
   };
 
