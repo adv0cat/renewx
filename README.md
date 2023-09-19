@@ -19,15 +19,25 @@ import { store } from "@renewx/core";
 
 const urls = store<string[]>([]);
 
-urls.watch((state) => {
-  console.log("urls:", state);
-});
-
+// Let's create an action that takes a URL
+// and adds it to the array,
+// returning a new array from the function,
+// thereby changing the state
 const addUrl = urls.newAction((state, url: string) => {
   return state.concat(url);
 });
 
+// Watching state changes returns an "unsubscribe" function;
+// invoking it will stop the watching
+const unsubscribe = urls.watch((state) => {
+  console.log("urls:", state);
+});
+
+// Let's call the action and pass the URL to it
 addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
+
+// After use, you can unsubscribe.
+unsubscribe();
 ```
 
 #### Managing DOM state and event handling:
@@ -35,15 +45,26 @@ addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 ```ts
 import { store } from "@renewx/core";
 
-const div = store(document.createElement("div"));
+const element = store(document.getElementById("first"));
 
-div.watch((state) => {
+// Let's create an action that will take an nextElement
+// and replace the current one with it
+const nextElement = element.newAction((_, nextElement: HTMLElement) => {
+  return nextElement;
+});
+
+// If you return a function in the "watch" callback,
+// it will be invoked as an unsubscribe function when the state changes.
+element.watch((state) => {
   const onClick = () => console.log("click");
   state.addEventListener("click", onClick);
   return () => {
     state.removeEventListener("click", onClick);
   };
 });
+
+// After using the "first" element, we use the "second"
+nextElement(document.getElementById("second"));
 ```
 
 #### Capturing mouse event type in store with _skipStateCheck_:
