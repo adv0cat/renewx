@@ -15,7 +15,7 @@ npm i @renewx/core
 #### Managing an array of URLs:
 
 ```ts
-import { store } from "@renewx/core";
+import { store, watch } from "@renewx/core";
 
 const urls = store<string[]>([]);
 
@@ -29,7 +29,7 @@ const addUrl = urls.newAction((state, url: string) => {
 
 // Watching state changes returns an "unsubscribe" function;
 // invoking it will stop the watching
-const unsubscribe = urls.watch((state) => {
+const unsubscribe = watch(urls, (state) => {
   console.log("urls:", state);
 });
 
@@ -43,7 +43,7 @@ unsubscribe();
 #### Managing DOM state and event handling:
 
 ```ts
-import { store } from "@renewx/core";
+import { store, watch } from "@renewx/core";
 
 const element = store(document.getElementById("first"));
 
@@ -55,7 +55,7 @@ const nextElement = element.newAction((_, nextElement: HTMLElement) => {
 
 // If you return a function in the "watch" callback,
 // it will be invoked as an unsubscribe function when the state changes.
-element.watch((state) => {
+watch(element, (state) => {
   const onClick = () => console.log("click");
   state.addEventListener("click", onClick);
   return () => {
@@ -67,12 +67,34 @@ element.watch((state) => {
 nextElement(document.getElementById("second"));
 ```
 
-#### Capturing mouse event type in store with _skipStateCheck_:
+#### Watching multiple state stores using _watch_ function:
+
+```ts
+import { store, watch } from "@renewx/core";
+
+const index = store(0);
+const add = index.newAction((state, num: number) => state + num, "add");
+const title = store("Title");
+const changeTitle = title.newAction(
+  (_, text: string) => `Title ${text}`,
+  "changeTitle",
+);
+
+watch([index, title], ([index, title]) => {
+  console.log(`index: ${index}, title: "${title}"`);
+});
+
+add(2); // index: 2, title: "Title"
+changeTitle("of News"); // index: 2, title: "Title of News"
+add(40); // index: 42, title: "Title of News"
+```
+
+#### Capturing mouse event type in store with _optimizeStateChange_:
 
 ```ts
 import { store } from "@renewx/core";
 
-const event = store<string>("", "event", { skipStateCheck: true });
+const event = store<string>("", "event", { optimizeStateChange: false });
 const onMouseEvent = event.newAction(
   (_, { type }: MouseEvent) => type,
   "onMouseEvent",
@@ -116,7 +138,7 @@ console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 
 #### Combined stores for use in an adapter:
 
 ```ts
-import { adapter } from "@renewx/core";
+import { adapter, watch } from "@renewx/core";
 
 const pageSize = store(10);
 const page = store(1);
@@ -130,7 +152,7 @@ const pagination = adapter([pageSize, page], (pageSize, page) => {
 
 const nextPage = page.newAction((state) => state + 1);
 
-pagination.watch((state) => {
+watch(pagination, (state) => {
   console.log("pagination:", state);
 });
 
@@ -144,13 +166,13 @@ nextPage(); // pagination: { offset: 20, limit: 30 }
 #### Joining multiple stores for convenient use:
 
 ```ts
-import { store, join } from "@renewx/core";
+import { store, join, watch } from "@renewx/core";
 
 const isLoading = store(false);
 const urls = store<string[]>([]);
 const loading = join({ isLoading, urls });
 
-loading.watch(({ isLoading, urls }) => {
+watch(loading, ({ isLoading, urls }) => {
   console.log("urls:", urls, "isLoading:", isLoading);
 });
 
@@ -175,7 +197,7 @@ addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com
 #### Validation of different stores with multiple levels
 
 ```ts
-import { store, join } from "@renewx/core";
+import { store, join, watch } from "@renewx/core";
 
 interface Pagination {
   pageSize: number;
@@ -208,7 +230,7 @@ const loadNextPage = pageLoading.newAction(
   },
 );
 
-pageLoading.watch(({ pagination: { page } }) => console.log("page:", page));
+watch(pageLoading, ({ pagination: { page } }) => console.log("page:", page));
 
 loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 loadNextPage(); // page: 2
@@ -222,13 +244,13 @@ loadPrevPage(); // page: 1
 #### Returning a read-only store
 
 ```ts
-import { store } from "@renewx/core";
+import { store, watch } from "@renewx/core";
 
 const count = store(0, "count");
 const add = count.newAction((count, num: number) => count + num, "add");
 
 const readOnlyCount = count.readOnly();
-readOnlyCount.watch((state) => {
+watch(readOnlyCount, (state) => {
   console.log("count state:", state);
 });
 
