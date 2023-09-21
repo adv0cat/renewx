@@ -2,7 +2,6 @@ import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
 import type { Freeze } from "../types/freeze";
 import type { ReadOnlyStore } from "../types/read-only-store";
-import { getUnsubscribe } from "../utils/get-unsubscribe";
 import type { StoreID } from "../utils/id";
 import type { Watcher } from "../types/watch";
 
@@ -29,7 +28,7 @@ const runQueue = (start = 0) => {
     for (const [watcher, unsubscribe] of unsubscribes) {
       unsubscribe();
       lastWatcher = watcher;
-      const newUnsubscribe = getUnsubscribe(watcher(state, info));
+      const newUnsubscribe = watcher(state, info) || (() => {});
       if (lastWatcher !== undefined) {
         unsubscribes.set(watcher, newUnsubscribe);
       } else {

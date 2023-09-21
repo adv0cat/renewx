@@ -1,11 +1,8 @@
 import { nextStoreId, type StoreID } from "./utils/id";
 import type { AnyStoreName } from "./types/name";
 import type { AnyTag, isReadOnly, ReadableTag } from "./types/tag";
-import type { Unsubscribe } from "./types/core";
-import { isNotLastWatcher, getWatchers } from "./api/queue-api";
+import { getWatchers } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
-import { getUnsubscribe } from "./utils/get-unsubscribe";
-import { getAddInfo } from "./api/action-api";
 
 export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
   storeName: string,
@@ -14,7 +11,6 @@ export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
   name: (storeID: StoreID) => AnyStoreName,
   off: () => void,
 ): ReadOnlyStore<State, TagType> => {
-  let isOff = false;
   const storeID = nextStoreId();
   const watchers = getWatchers<State>(storeID);
 
@@ -25,32 +21,9 @@ export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
     isReadOnly: true as isReadOnly<TagType>,
     name: (): AnyStoreName => (storeName ||= name(storeID)),
     off: () => {
-      isOff = true;
       off();
       watchers.forEach((unsubscribe) => unsubscribe());
       watchers.clear();
-    },
-    watch: (watcher): Unsubscribe => {
-      if (isOff) {
-        return () => {};
-      }
-
-      watchers.set(
-        watcher,
-        getUnsubscribe(
-          watcher(
-            get(),
-            getAddInfo() ? { id: -1, path: [storeID] } : undefined,
-          ),
-        ),
-      );
-
-      return () => {
-        if (isNotLastWatcher(watcher)) {
-          getUnsubscribe(watchers.get(watcher))();
-        }
-        watchers.delete(watcher);
-      };
     },
   };
 };
