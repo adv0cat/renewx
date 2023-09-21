@@ -3,7 +3,7 @@ export interface Config {
 }
 
 export const globalConfig: Config = {
-  optimizeStateChange: false,
+  optimizeStateChange: true,
 };
 
 export const configMerge = (config: Partial<Config> = {}): Config =>

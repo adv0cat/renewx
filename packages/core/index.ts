@@ -2,6 +2,8 @@ export { store } from "./src/store";
 export { join } from "./src/join";
 export { adapter } from "./src/adapter";
 
+export { watch } from "./src/fn/watch";
+
 export { globalConfig } from "./src/types/config";
 
 export { StoreAPI } from "./src/api/store-api";

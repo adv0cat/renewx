@@ -17,25 +17,27 @@ import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
 import { configMerge } from "./types/config";
+import { watch } from "./fn/watch";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
   storeName: string = "",
   config: Partial<Config> = {},
 ): JoinStore<Stores> => {
-  const { optimizeStateChange } = configMerge(config);
+  const mergedConfig = configMerge(config);
+  const { optimizeStateChange } = mergedConfig;
 
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
+  const storeList = nameList.map((name) => stores[name]);
   const innerStoreMap = new Map<
     KeysOfInnerStores<Stores>,
     InnerStore<any, WritableTag>
   >();
-  nameList.forEach((name) => {
-    const store = stores[name];
-    if (isInnerStore(store)) {
-      innerStoreMap.set(name as KeysOfInnerStores<Stores>, store);
-    }
-  });
+  storeList.forEach((store, index) =>
+    isInnerStore(store)
+      ? innerStoreMap.set(nameList[index] as KeysOfInnerStores<Stores>, store)
+      : void 0,
+  );
 
   const getStates = () => {
     const states = {} as JoinState<Stores>;
@@ -68,24 +70,20 @@ export const join = <Stores extends Record<string, AnyStore>>(
     (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`,
     () => {
       isNotifyEnabled = false;
-      unsubscribes.forEach((unsubscribe) => unsubscribe());
-      unsubscribes = [];
+      unsubscribe();
     },
   );
   const notify = getNotify(readOnly);
 
-  let unsubscribes = nameList.map((name) =>
-    stores[name].watch((storeNewState, info) => {
-      if (
-        isNotifyEnabled &&
-        (!optimizeStateChange || isStateChanged(states[name], storeNewState))
-      ) {
-        const newStates = getStates();
-        if (isValid(states, newStates)) {
-          notify((states = newStates), info);
-        }
+  const unsubscribe = watch(
+    storeList,
+    (_, info) => {
+      const newStates = getStates();
+      if (isValid(states, newStates)) {
+        notify((states = newStates), info);
       }
-    }),
+    },
+    mergedConfig,
   );
 
   const set: InnerStore<JoinState<Stores>, JoinTag>["set"] = (
