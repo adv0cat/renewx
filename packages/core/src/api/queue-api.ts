@@ -1,9 +1,10 @@
 import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
 import type { Freeze } from "../types/freeze";
-import type { ReadOnlyStore, Watcher } from "../types/read-only-store";
+import type { ReadOnlyStore } from "../types/read-only-store";
 import { getUnsubscribe } from "../utils/get-unsubscribe";
 import type { StoreID } from "../utils/id";
+import type { Watcher } from "../types/watch";
 
 type Notify<State> = (
   state: Freeze<State>,
@@ -65,7 +66,7 @@ export const getNotify =
     }
   };
 
-export const registryWatchers = <State>(
+export const getWatchers = <State>(
   id: StoreID,
 ): Map<Watcher<State>, Unsubscribe> =>
-  (stores[id] = new Map<Watcher<State>, Unsubscribe>());
+  (stores[id] ??= new Map<Watcher<State>, Unsubscribe>());

@@ -2,7 +2,7 @@ import { nextStoreId, type StoreID } from "./utils/id";
 import type { AnyStoreName } from "./types/name";
 import type { AnyTag, isReadOnly, ReadableTag } from "./types/tag";
 import type { Unsubscribe } from "./types/core";
-import { isNotLastWatcher, registryWatchers } from "./api/queue-api";
+import { isNotLastWatcher, getWatchers } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
 import { getUnsubscribe } from "./utils/get-unsubscribe";
 import { getAddInfo } from "./api/action-api";
@@ -16,7 +16,7 @@ export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
 ): ReadOnlyStore<State, TagType> => {
   let isOff = false;
   const storeID = nextStoreId();
-  const watchers = registryWatchers<State>(storeID);
+  const watchers = getWatchers<State>(storeID);
 
   return {
     id: storeID,

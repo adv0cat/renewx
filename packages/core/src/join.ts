@@ -16,13 +16,14 @@ import type { ActionInfo } from "./types/action";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
+import { configMerge } from "./types/config";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
   storeName: string = "",
   config: Partial<Config> = {},
 ): JoinStore<Stores> => {
-  const { skipStateCheck } = config;
+  const { optimizeStateChange } = configMerge(config);
 
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const innerStoreMap = new Map<
@@ -77,7 +78,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
     stores[name].watch((storeNewState, info) => {
       if (
         isNotifyEnabled &&
-        (skipStateCheck ? true : isStateChanged(states[name], storeNewState))
+        (!optimizeStateChange || isStateChanged(states[name], storeNewState))
       ) {
         const newStates = getStates();
         if (isValid(states, newStates)) {
@@ -102,7 +103,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
       }
     }
     if (
-      !(skipStateCheck ? true : isStateChanged(states, newStates)) ||
+      !(!optimizeStateChange || isStateChanged(states, newStates)) ||
       !isValid(states, newStates)
     ) {
       return false;

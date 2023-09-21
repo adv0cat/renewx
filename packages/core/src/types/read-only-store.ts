@@ -3,12 +3,7 @@ import type { StoreID } from "../utils/id";
 import type { Freeze } from "./freeze";
 import type { Unsubscribe } from "./core";
 import type { AnyStoreName } from "./name";
-import type { ActionInfo } from "./action";
-
-export type Watcher<State> = (
-  state: Freeze<State>,
-  info?: ActionInfo,
-) => Unsubscribe | void;
+import type { Watcher } from "./watch";
 
 export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag>
   extends BasicStore<State> {

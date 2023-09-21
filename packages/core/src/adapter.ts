@@ -9,6 +9,7 @@ import type { ReadOnlyStore } from "./types/read-only-store";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { saveStore } from "./api/store-api";
+import { configMerge } from "./types/config";
 
 export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   stores: Stores,
@@ -16,7 +17,7 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
   storeName: string = "",
   config: Partial<Config> = {},
 ): ReadOnlyStore<ToState, AdapterTag> => {
-  const { skipStateCheck } = config;
+  const { optimizeStateChange } = configMerge(config);
 
   let fromStates = Array.isArray(stores)
     ? stores.map((store) => store.get())
@@ -50,23 +51,25 @@ export const adapter: Adapter = <ToState, Stores extends AnyStore | AnyStore[]>(
         store.watch((storeNewState, info) => {
           if (
             isNotifyEnabled &&
-            (skipStateCheck
-              ? true
-              : isStateChanged(fromStates[index], storeNewState))
+            (!optimizeStateChange ||
+              isStateChanged(fromStates[index], storeNewState))
           ) {
             fromStates = stores.map((store) => store.get());
             const newState = action(...fromStates) as Freeze<ToState>;
-            if (skipStateCheck ? true : isStateChanged(state, newState)) {
+            if (!optimizeStateChange || isStateChanged(state, newState)) {
               notify((state = newState), info);
             }
           }
         }),
       )
     : stores.watch((newFromState, info) => {
-        if (isNotifyEnabled) {
+        if (
+          isNotifyEnabled &&
+          (!optimizeStateChange || isStateChanged(fromStates, newFromState))
+        ) {
           fromStates = newFromState;
           const newState = action(fromStates) as Freeze<ToState>;
-          if (skipStateCheck ? true : isStateChanged(state, newState)) {
+          if (!optimizeStateChange || isStateChanged(state, newState)) {
             notify((state = newState), info);
           }
         }

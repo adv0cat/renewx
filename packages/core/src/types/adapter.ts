@@ -1,4 +1,8 @@
-import type { AnyStore, AnyStoresType, AnyStoreType } from "./any-store";
+import type {
+  AnyStore,
+  AnyStoresFreezeStates,
+  AnyStoreFreezeState,
+} from "./any-store";
 import type { AdapterTag } from "./tag";
 import type { Config } from "./config";
 import type { ReadOnlyStore } from "./read-only-store";
@@ -6,28 +10,28 @@ import type { ReadOnlyStore } from "./read-only-store";
 export interface Adapter {
   <ToState extends any[], Stores extends AnyStore[]>(
     stores: [...Stores],
-    action: (...state: AnyStoresType<Stores>) => [...ToState],
-    name?: string,
-    config?: Partial<Config>,
-  ): AdapterStore<ToState>;
-
-  <ToState, Stores extends AnyStore[]>(
-    stores: [...Stores],
-    action: (...state: AnyStoresType<Stores>) => ToState,
+    action: (...state: AnyStoresFreezeStates<Stores>) => [...ToState],
     name?: string,
     config?: Partial<Config>,
   ): AdapterStore<ToState>;
 
   <ToState extends any[], Store extends AnyStore>(
     store: Store,
-    action: (state: AnyStoreType<Store>) => [...ToState],
+    action: (state: AnyStoreFreezeState<Store>) => [...ToState],
+    name?: string,
+    config?: Partial<Config>,
+  ): AdapterStore<ToState>;
+
+  <ToState, Stores extends AnyStore[]>(
+    stores: [...Stores],
+    action: (...state: AnyStoresFreezeStates<Stores>) => ToState,
     name?: string,
     config?: Partial<Config>,
   ): AdapterStore<ToState>;
 
   <ToState, Store extends AnyStore>(
     store: Store,
-    action: (state: AnyStoreType<Store>) => ToState,
+    action: (state: AnyStoreFreezeState<Store>) => ToState,
     name?: string,
     config?: Partial<Config>,
   ): AdapterStore<ToState>;
@@ -38,8 +42,8 @@ export interface AdapterStore<ToState>
 
 export interface AdapterAction {
   <ToState, Stores extends AnyStore[]>(
-    ...state: AnyStoresType<Stores>
+    ...state: AnyStoresFreezeStates<Stores>
   ): ToState;
 
-  <ToState, Store extends AnyStore>(state: AnyStoreType<Store>): ToState;
+  <ToState, Store extends AnyStore>(state: AnyStoreFreezeState<Store>): ToState;
 }

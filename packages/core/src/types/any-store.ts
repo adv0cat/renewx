@@ -7,10 +7,16 @@ export type AnyStore<
   TagType extends AnyTag = AnyTag,
 > = ReadOnlyStore<State, TagType>;
 
-export type AnyStoreType<SomeStore extends AnyStore> =
-  SomeStore extends AnyStore<infer Type> ? Freeze<Type> : never;
-export type AnyStoresType<Stores extends AnyStore[]> = {
-  [Index in keyof Stores]: AnyStoreType<Stores[Index]>;
+export type AnyStoreFreezeState<SomeStore extends AnyStore> =
+  SomeStore extends AnyStore<infer State> ? Freeze<State> : never;
+export type AnyStoresFreezeStates<Stores extends AnyStore[]> = {
+  [Index in keyof Stores]: AnyStoreFreezeState<Stores[Index]>;
+};
+
+export type AnyStoreState<SomeStore extends AnyStore> =
+  SomeStore extends AnyStore<infer State> ? State : never;
+export type AnyStoresStates<Stores extends AnyStore[]> = {
+  [Index in keyof Stores]: AnyStoreState<Stores[Index]>;
 };
 
 export const isAnyStore = (v: any): v is AnyStore =>
