@@ -3,6 +3,7 @@ export { join } from "./src/join";
 export { adapter } from "./src/adapter";
 
 export { watch } from "./src/fn/watch";
+export { actions } from "./src/fn/actions";
 
 export { globalConfig } from "./src/types/config";
 
