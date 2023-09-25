@@ -89,6 +89,27 @@ changeTitle("of News"); // index: 2, title: "Title of News"
 add(40); // index: 42, title: "Title of News"
 ```
 
+#### Grouping multiple actions into a typed _Actions_ object for easier usage:
+
+```ts
+import { store, actions, watch } from "@renewx/core";
+
+const index = actions(store(100), {
+  add: (state, b: number) => state + b,
+  minus: (state, b: number) => state - b,
+  toZero: () => 0,
+});
+
+watch(index.store, (state) => {
+  console.log("index:", state);
+});
+
+// index: 100
+index.add(42); // index: 142
+index.toZero(); // index: 0
+index.minus(13); // index: -13
+```
+
 #### Capturing mouse event type in store with _optimizeStateChange_:
 
 ```ts
