@@ -1,23 +1,20 @@
-import { newValidator } from "./utils/validator";
 import { isStateChanged } from "./utils/is";
 import { saveStore } from "./api/store-api";
-import {
-  type InnerStore,
-  isInnerStore,
-  type KeysOfInnerStores,
-} from "./types/inner-store";
-import type { AnyStore } from "./types/any-store";
-import type { JoinTag, WritableTag } from "./types/tag";
-import type { JoinState, JoinStore } from "./types/join";
+import type { AnyActionStore, AnyStore } from "./types/any-store";
+import type { JoinTag } from "./types/tag";
+import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
+import { configMerge } from "./types/config";
 import type { ActionInfo } from "./types/action";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
-import { configMerge } from "./types/config";
 import { watch } from "./fn/watch";
+import type { ActionStore } from "./types/store";
+import { actionStore, isActionStore } from "./action-store";
+import type { KeysOfActionStores } from "./types/action-store";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
@@ -29,13 +26,10 @@ export const join = <Stores extends Record<string, AnyStore>>(
 
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const storeList = nameList.map((name) => stores[name]);
-  const innerStoreMap = new Map<
-    KeysOfInnerStores<Stores>,
-    InnerStore<any, WritableTag>
-  >();
+  const actionStoreMap = new Map<KeysOfActionStores<Stores>, AnyActionStore>();
   storeList.forEach((store, index) =>
-    isInnerStore(store)
-      ? innerStoreMap.set(nameList[index] as KeysOfInnerStores<Stores>, store)
+    isActionStore(store)
+      ? actionStoreMap.set(nameList[index] as KeysOfActionStores<Stores>, store)
       : void 0,
   );
 
@@ -46,50 +40,25 @@ export const join = <Stores extends Record<string, AnyStore>>(
   };
   let states = getStates();
 
-  const [validator, isCurrentStoreValid] = newValidator<
-    JoinState<Stores>,
-    JoinTag
-  >();
-  const isValid: InnerStore<JoinState<Stores>, JoinTag>["isValid"] = (
-    oldState,
-    newState,
-  ) => {
-    for (const [name, store] of innerStoreMap) {
-      if (!store.isValid(oldState[name], newState[name])) {
-        return false;
-      }
-    }
-    return isCurrentStoreValid(oldState, newState);
-  };
-
-  let isNotifyEnabled = false;
-  const readOnly = readOnlyStore(
-    storeName,
-    "join-readOnly",
+  let isNotifyEnabled = true;
+  const _readOnlyStore = readOnlyStore(
     () => states,
-    (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`,
+    "join-readOnly",
     () => {
       isNotifyEnabled = false;
       unsubscribe();
     },
-  );
-  const notify = getNotify(readOnly);
-
-  const unsubscribe = watch(
-    storeList,
-    (_, info) => {
-      const newStates = getStates();
-      if (isValid(states, newStates)) {
-        notify((states = newStates), info);
-      }
-    },
-    mergedConfig,
+    storeName,
+    (storeID): JoinStoreName => `${storeID}:{${nameList.join(",")}}`,
   );
 
-  const set: InnerStore<JoinState<Stores>, JoinTag>["set"] = (
+  const _actionStore = actionStore<JoinState<Stores>, JoinTag>(_readOnlyStore);
+  const notify = getNotify<JoinState<Stores>>(_actionStore.id);
+  const setInfo = newActionInfo("set");
+  const set: ActionStore<JoinState<Stores>, JoinTag>["set"] = (
     partialNewStates,
-    info,
-  ): boolean => {
+    info = setInfo,
+  ) => {
     if (!isNotifyEnabled || partialNewStates == null) {
       return false;
     }
@@ -97,45 +66,66 @@ export const join = <Stores extends Record<string, AnyStore>>(
     const newStates: Freeze<JoinState<Stores>> = Object.assign({}, states);
     for (const key in partialNewStates) {
       if (key in newStates) {
-        newStates[key] = (partialNewStates as any)[key];
+        newStates[key] =
+          partialNewStates[key as keyof ActionFnJoinReturn<Stores>];
       }
     }
     if (
       !(!optimizeStateChange || isStateChanged(states, newStates)) ||
-      !isValid(states, newStates)
+      !_actionStore.isValid(states, newStates)
     ) {
       return false;
     }
 
-    const storeInfo: ActionInfo | undefined = info && {
-      id: info.id,
-      path: info.path.concat(readOnly.id),
-    };
+    const storeInfo =
+      info &&
+      ({
+        id: info.id,
+        path: info.path.concat(_readOnlyStore.id),
+      } as ActionInfo);
+
     isNotifyEnabled = false;
-    for (const [name, store] of innerStoreMap) {
+    for (const [name, store] of actionStoreMap) {
       if (name in partialNewStates) {
-        store.set(partialNewStates[name], storeInfo);
+        store.set(
+          partialNewStates[name as keyof ActionFnJoinReturn<Stores>],
+          storeInfo,
+        );
       }
     }
     isNotifyEnabled = true;
 
-    notify((states = getStates()), info, true);
-    return true;
+    return notify((states = getStates()), info, true);
   };
 
-  isNotifyEnabled = true;
+  const unsubscribe = watch(
+    storeList,
+    (_, info) => {
+      if (isNotifyEnabled) {
+        const newStates = getStates();
+        if (_actionStore.isValid(states, newStates)) {
+          notify((states = newStates), info);
+        }
+      }
+    },
+    mergedConfig,
+  );
+
+  _actionStore.validator((oldState, newState) => {
+    for (const [name, store] of actionStoreMap) {
+      if (!store.isValid(oldState[name], newState[name])) {
+        return false;
+      }
+    }
+    return true;
+  });
 
   return saveStore({
-    ...readOnly,
-    readOnly: () => readOnly,
-    isReadOnly: false,
-    tag: "join-writable",
-    isValid,
-    validator,
+    ..._actionStore,
     set,
     newAction: (action, name) => {
       const info = newActionInfo(name);
       return (...args) => set(action(states, ...args), info);
     },
-  } as InnerStore<JoinState<Stores>, JoinTag>);
+  });
 };

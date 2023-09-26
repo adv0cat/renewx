@@ -1,15 +1,16 @@
 import { nextStoreId, type StoreID } from "./utils/id";
 import type { AnyStoreName } from "./types/name";
-import type { AnyTag, isReadOnly, ReadableTag } from "./types/tag";
+import type { isReadOnly, ReadableTag } from "./types/tag";
 import { getWatchers } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
+import type { Unsubscribe } from "./types/core";
 
-export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
-  storeName: string,
-  tag: TagType,
+export const readOnlyStore = <State, TagType extends ReadableTag>(
   get: ReadOnlyStore<State>["get"],
+  tag: TagType,
+  off: Unsubscribe,
+  storeName: string,
   name: (storeID: StoreID) => AnyStoreName,
-  off: () => void,
 ): ReadOnlyStore<State, TagType> => {
   const storeID = nextStoreId();
   const watchers = getWatchers<State>(storeID);
@@ -22,7 +23,7 @@ export const readOnlyStore = <State, TagType extends AnyTag = ReadableTag>(
     name: (): AnyStoreName => (storeName ||= name(storeID)),
     off: () => {
       off();
-      watchers.forEach((unsubscribe) => unsubscribe());
+      watchers.forEach((fn) => fn());
       watchers.clear();
     },
   };

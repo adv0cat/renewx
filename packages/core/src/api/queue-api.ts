@@ -1,7 +1,6 @@
 import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
 import type { Freeze } from "../types/freeze";
-import type { ReadOnlyStore } from "../types/read-only-store";
 import type { StoreID } from "../utils/id";
 import type { Watcher } from "../types/watch";
 
@@ -9,7 +8,7 @@ type Notify<State> = (
   state: Freeze<State>,
   info?: ActionInfo,
   set?: boolean,
-) => void;
+) => boolean;
 
 const stores: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
 
@@ -48,9 +47,8 @@ const runQueue = (start = 0) => {
 };
 
 export const getNotify =
-  <State>(store: ReadOnlyStore<State>): Notify<State> =>
-  (state: Freeze<State>, info?: ActionInfo, set = false): void => {
-    const { id } = store;
+  <State>(id: StoreID): Notify<State> =>
+  (state, info, set = false): boolean => {
     queue.push([
       state,
       id,
@@ -63,6 +61,8 @@ export const getNotify =
     if (!isQueueRunning) {
       runQueue();
     }
+
+    return true;
   };
 
 export const getWatchers = <State>(

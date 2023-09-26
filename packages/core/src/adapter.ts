@@ -28,17 +28,17 @@ export const adapter: Adapter = <ToState>(
       : adapt(...stores.map((store) => store.get()))
   ) as Freeze<ToState>;
 
-  const readOnly = readOnlyStore(
-    storeName,
-    "adapter-readOnly",
+  const _readOnlyStore = readOnlyStore(
     () => state,
+    "adapter-readOnly",
+    () => unsubscribe(),
+    storeName,
     (storeID): AdapterStoreName =>
       `${storeID}:[${
         isSingleStore ? stores.id : stores.map(({ id }) => id).join(",")
       }]`,
-    () => unsubscribe(),
   );
-  const notify = getNotify(readOnly);
+  const notify = getNotify<ToState>(_readOnlyStore.id);
 
   const unsubscribe = watch(
     stores as AnyStore[],
@@ -53,5 +53,5 @@ export const adapter: Adapter = <ToState>(
     mergedConfig,
   );
 
-  return saveStore(readOnly);
+  return saveStore(_readOnlyStore);
 };

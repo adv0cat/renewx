@@ -1,17 +1,17 @@
-import type { InnerStoresType, KeysOfInnerStores } from "./inner-store";
 import type { ActionStore } from "./store";
 import type { JoinTag } from "./tag";
-import type { BasicStore } from "./read-only-store";
+import type { KeysOfActionStores, OnlyActionStores } from "./action-store";
+import type { AnyStore } from "./any-store";
 
-export type JoinState<Stores> = {
-  [Name in keyof Stores]: Stores[Name] extends BasicStore<infer Type>
+export type JoinState<Stores extends Record<string, AnyStore>> = {
+  [Name in keyof Stores]: Stores[Name] extends AnyStore<infer Type>
     ? Type
     : never;
 };
 
-export type ActionFnJoinReturn<Stores> =
-  | Partial<Pick<InnerStoresType<Stores>, KeysOfInnerStores<Stores>>>
+export type ActionFnJoinReturn<Stores extends Record<string, AnyStore>> =
+  | Partial<Pick<OnlyActionStores<Stores>, KeysOfActionStores<Stores>>>
   | undefined;
 
-export interface JoinStore<State>
-  extends ActionStore<JoinState<State>, JoinTag> {}
+export interface JoinStore<Stores extends Record<string, AnyStore>>
+  extends ActionStore<JoinState<Stores>, JoinTag> {}

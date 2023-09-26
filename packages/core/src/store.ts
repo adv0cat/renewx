@@ -1,6 +1,4 @@
-import type { Store } from "./types/store";
-import type { InnerStore } from "./types/inner-store";
-import { newValidator } from "./utils/validator";
+import type { ActionStore, Store } from "./types/store";
 import { isStateChanged } from "./utils/is";
 import { saveStore } from "./api/store-api";
 import type { StoreTag } from "./types/tag";
@@ -11,6 +9,7 @@ import { configMerge } from "./types/config";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
+import { actionStore } from "./action-store";
 
 export const store = <State>(
   initState: State,
@@ -21,47 +20,34 @@ export const store = <State>(
 
   let state = initState as Freeze<State>;
 
-  const [validator, isValid] = newValidator<State, StoreTag>();
-
   let isNotifyEnabled = true;
-  const readOnly = readOnlyStore(
-    storeName,
-    "store-readOnly",
+  const _readOnlyStore = readOnlyStore(
     () => state,
+    "store-readOnly",
+    () => (isNotifyEnabled = false),
+    storeName,
     (storeID): StoreName => `${storeID}`,
-    () => {
-      isNotifyEnabled = false;
-    },
   );
-  const notify = getNotify(readOnly);
 
-  const set: InnerStore<State, StoreTag>["set"] = (
+  const _actionStore = actionStore<State, StoreTag>(_readOnlyStore);
+  const notify = getNotify<State>(_actionStore.id);
+  const setInfo = newActionInfo("set");
+  const set: ActionStore<State, StoreTag>["set"] = (
     newState: Freeze<State>,
-    info,
-  ): boolean => {
-    if (
-      !isNotifyEnabled ||
-      !(!optimizeStateChange || isStateChanged(state, newState)) ||
-      !isValid(state, newState)
-    ) {
-      return false;
-    }
-
-    notify((state = newState), info, true);
-    return true;
-  };
+    info = setInfo,
+  ) =>
+    !isNotifyEnabled ||
+    !(!optimizeStateChange || isStateChanged(state, newState)) ||
+    !_actionStore.isValid(state, newState)
+      ? false
+      : notify((state = newState), info, true);
 
   return saveStore({
-    ...readOnly,
-    readOnly: () => readOnly,
-    isReadOnly: false,
-    tag: "store-writable",
-    isValid,
-    validator,
+    ..._actionStore,
     set,
     newAction: (action, name) => {
       const info = newActionInfo(name);
       return (...args) => set(action(state, ...args), info);
     },
-  } as InnerStore<State, StoreTag>);
+  });
 };
