@@ -1,6 +1,9 @@
-import type { ActionStore } from "./store";
 import type { JoinTag } from "./tag";
-import type { KeysOfActionStores, OnlyActionStores } from "./action-store";
+import type {
+  ActionStore,
+  KeysOfActionStores,
+  OnlyActionStores,
+} from "./action-store";
 import type { AnyStore } from "./any-store";
 
 export type JoinState<Stores extends Record<string, AnyStore>> = {

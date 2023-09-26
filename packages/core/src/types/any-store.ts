@@ -1,7 +1,7 @@
 import type { AnyTag, WritableTag } from "./tag";
 import type { Freeze } from "./freeze";
 import type { ReadOnlyStore } from "./read-only-store";
-import type { ActionStore } from "./store";
+import type { ActionStore } from "./action-store";
 
 export type AnyStore<
   State = any,
@@ -26,8 +26,4 @@ export type AnyStoresStates<Stores extends AnyStore[]> = {
 };
 
 export const isAnyStore = (v: any): v is AnyStore =>
-  "id" in v &&
-  Number.isInteger(v.id) &&
-  "tag" in v &&
-  typeof v.tag === "string" &&
-  "isReadOnly" in v;
+  "id" in v && "tag" in v && "off" in v && typeof v.off === "function";

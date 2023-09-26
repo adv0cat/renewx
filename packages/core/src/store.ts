@@ -1,4 +1,4 @@
-import type { ActionStore, Store } from "./types/store";
+import type { Store } from "./types/store";
 import { isStateChanged } from "./utils/is";
 import { saveStore } from "./api/store-api";
 import type { StoreTag } from "./types/tag";
@@ -10,6 +10,7 @@ import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
 import { actionStore } from "./action-store";
+import type { ActionStore } from "./types/action-store";
 
 export const store = <State>(
   initState: State,

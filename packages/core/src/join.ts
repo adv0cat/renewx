@@ -12,9 +12,9 @@ import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
 import { watch } from "./fn/watch";
-import type { ActionStore } from "./types/store";
-import { actionStore, isActionStore } from "./action-store";
-import type { KeysOfActionStores } from "./types/action-store";
+import type { ActionStore, KeysOfActionStores } from "./types/action-store";
+import { actionStore } from "./action-store";
+import { isActionStore } from "./types/action-store";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
