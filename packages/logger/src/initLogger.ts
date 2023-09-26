@@ -38,7 +38,7 @@ export const initLogger = (log: (...data: any[]) => void): Unsubscribe => {
             }
           }
         },
-        { optimizeStateChange: false },
+        { stateCheck: false },
       );
     }
   });
