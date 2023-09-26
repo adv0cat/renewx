@@ -30,7 +30,7 @@ export const adapter: Adapter = <ToState>(
 
   const _readOnlyStore = readOnlyStore(
     () => state,
-    "adapter-readOnly",
+    "ra",
     () => unsubscribe(),
     storeName,
     (storeID): AdapterStoreName =>

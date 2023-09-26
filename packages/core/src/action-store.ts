@@ -12,7 +12,7 @@ export const actionStore = <State, TagType extends WritableTag>(
 
   return {
     ...readOnly,
-    tag: (readOnly.tag.split("-")[0] + "-writable") as TagType,
+    tag: ("w" + readOnly.tag.slice(1)) as TagType,
     isReadOnly: false as isReadOnly<TagType>,
     readOnly: () => readOnly,
     validator: (fn) => {

@@ -43,7 +43,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
   let isNotifyEnabled = true;
   const _readOnlyStore = readOnlyStore(
     () => states,
-    "join-readOnly",
+    "rj",
     () => {
       isNotifyEnabled = false;
       unsubscribe();

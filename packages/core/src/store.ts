@@ -23,7 +23,7 @@ export const store = <State>(
   let isNotifyEnabled = true;
   const _readOnlyStore = readOnlyStore(
     () => state,
-    "store-readOnly",
+    "rs",
     () => (isNotifyEnabled = false),
     storeName,
     (storeID): StoreName => `${storeID}`,
