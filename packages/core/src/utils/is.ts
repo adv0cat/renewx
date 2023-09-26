@@ -1,4 +1,5 @@
 import type { IsChanged } from "../types/core";
+import type { AnyActionStore, AnyStore } from "../types/any-store";
 
 const OBJECT = "object";
 export const isStateChanged = (oldState: any, newState: any): IsChanged => {
@@ -40,3 +41,10 @@ export const isStateChanged = (oldState: any, newState: any): IsChanged => {
 
   return false;
 };
+
+export const isAnyStore = (v: any): v is AnyStore =>
+  "id" in v && "tag" in v && "off" in v && typeof v.off === "function";
+
+export const isActionStore = <State>(
+  store: AnyStore<State>,
+): store is AnyActionStore<State> => store.tag[0] === "w";

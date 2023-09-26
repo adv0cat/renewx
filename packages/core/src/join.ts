@@ -1,4 +1,4 @@
-import { isStateChanged } from "./utils/is";
+import { isActionStore, isStateChanged } from "./utils/is";
 import { saveStore } from "./api/store-api";
 import type { AnyActionStore, AnyStore } from "./types/any-store";
 import type { JoinTag } from "./types/tag";
@@ -6,14 +6,13 @@ import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { mergeConfig } from "./types/config";
+import { mergeConfig } from "./utils/merge-config";
 import type { ActionInfo } from "./types/action";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
 import { watch } from "./fn/watch";
 import type { ActionStore, KeysOfActionStores } from "./types/action-store";
-import { isActionStore } from "./types/action-store";
 import { actionStore } from "./action-store";
 
 export const join = <Stores extends Record<string, AnyStore>>(

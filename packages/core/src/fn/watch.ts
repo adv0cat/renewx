@@ -1,10 +1,11 @@
 import type { AnyStore } from "../types/any-store";
 import type { Unsubscribe } from "../types/core";
-import { isNotLastWatcher, getWatchers } from "../api/queue-api";
+import { getWatchers, isNotLastWatcher } from "../api/queue-api";
 import { getAddInfo } from "../api/action-api";
 import type { ActionInfo } from "../types/action";
 import { isStateChanged } from "../utils/is";
-import { type Config, mergeConfig } from "../types/config";
+import type { Config } from "../types/config";
+import { mergeConfig } from "../utils/merge-config";
 import type { Watch, Watcher } from "../types/watch";
 
 const noop = () => {};

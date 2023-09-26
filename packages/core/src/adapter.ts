@@ -5,7 +5,7 @@ import type { AdapterTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { AdapterStoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { mergeConfig } from "./types/config";
+import { mergeConfig } from "./utils/merge-config";
 import type { ReadOnlyStore } from "./types/read-only-store";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";

@@ -5,7 +5,7 @@ import type { StoreTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { StoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { mergeConfig } from "./types/config";
+import { mergeConfig } from "./utils/merge-config";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";

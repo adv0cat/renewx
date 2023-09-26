@@ -31,7 +31,3 @@ export interface ActionStore<State, TagType extends WritableTag>
     name?: string,
   ): (...args: OmitFirstArg<NewActionFn>) => IsChanged;
 }
-
-export const isActionStore = <State>(
-  store: AnyStore<State>,
-): store is AnyActionStore<State> => store.tag[0] === "w";

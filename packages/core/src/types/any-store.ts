@@ -24,6 +24,3 @@ export type AnyStoreState<SomeStore extends AnyStore> =
 export type AnyStoresStates<Stores extends AnyStore[]> = {
   [Index in keyof Stores]: AnyStoreState<Stores[Index]>;
 };
-
-export const isAnyStore = (v: any): v is AnyStore =>
-  "id" in v && "tag" in v && "off" in v && typeof v.off === "function";
