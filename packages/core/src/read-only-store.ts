@@ -1,10 +1,11 @@
-import { nextStoreId, type StoreID } from "./utils/id";
+import type { StoreID } from "./types/id";
 import type { AnyStoreName } from "./types/name";
 import type { ReadableTag } from "./types/tag";
 import { getWatchers } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
 import type { Unsubscribe } from "./types/core";
 
+let i: StoreID = 0;
 export const readOnlyStore = <State, TagType extends ReadableTag>(
   get: ReadOnlyStore<State>["get"],
   tag: TagType,
@@ -12,7 +13,7 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
   storeName: string,
   name: (storeID: StoreID) => AnyStoreName,
 ): ReadOnlyStore<State, TagType> => {
-  const storeID = nextStoreId();
+  const storeID: StoreID = i++;
   const watchers = getWatchers<State>(storeID);
 
   return {

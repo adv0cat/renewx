@@ -1,5 +1,5 @@
 import type { AnyTag, ReadableTag } from "./tag";
-import type { StoreID } from "../utils/id";
+import type { StoreID } from "./id";
 import type { Freeze } from "./freeze";
 import type { AnyStoreName } from "./name";
 

@@ -1,4 +1,4 @@
-import type { StoreID } from "../utils/id";
+import type { StoreID } from "../types/id";
 import type { AnyStore } from "../types/any-store";
 import type { Unsubscribe } from "../types/core";
 

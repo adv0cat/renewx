@@ -1,4 +1,4 @@
-import type { ActionID, StoreID } from "../utils/id";
+import type { ActionID, StoreID } from "./id";
 import type { JoinTag, WritableTag } from "./tag";
 import type { ActionFnJoinReturn, JoinState } from "./join";
 import type { Freeze, MaybeFreeze } from "./freeze";

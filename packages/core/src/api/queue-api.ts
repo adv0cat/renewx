@@ -1,7 +1,7 @@
 import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
 import type { Freeze } from "../types/freeze";
-import type { StoreID } from "../utils/id";
+import type { StoreID } from "../types/id";
 import type { Watcher } from "../types/watch";
 
 type Notify<State> = (
