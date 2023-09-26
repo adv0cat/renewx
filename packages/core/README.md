@@ -1,6 +1,6 @@
 # @renewx/core
 
-[![npm version](https://img.shields.io/npm/v/@renewx/core.svg?style=flat)](https://www.npmjs.com/package/@renewx/core) [![npm version](https://deno.bundlejs.com/?q=@renewx/core&treeshake=[{+store,adapter,join+}]&badge=)](https://www.npmjs.com/package/@renewx/core) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@renewx/core.svg?style=flat)](https://www.npmjs.com/package/@renewx/core) [![npm version](https://deno.bundlejs.com/?q=@renewx/core&treeshake=[{+store,adapter,watch+}]&badge=)](https://www.npmjs.com/package/@renewx/core) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
 
 ## Install
 
@@ -36,6 +36,9 @@ const unsubscribe = watch(urls, (state) => {
 // Let's call the action and pass the URL to it
 addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
 
+// You can also set the value using the default "set" action
+urls.set(["https://renewx.dev"]); // urls: ["https://renewx.dev"]
+
 // After use, you can unsubscribe.
 unsubscribe();
 ```
@@ -65,6 +68,9 @@ watch(element, (state) => {
 
 // After using the "first" element, we use the "second"
 nextElement(document.getElementById("second"));
+// or...
+// The same element change, but through the default "set" action
+element.set(document.getElementById("second"));
 ```
 
 #### Watching multiple state stores using _watch_ function:
@@ -75,17 +81,13 @@ import { store, watch } from "@renewx/core";
 const index = store(0);
 const add = index.newAction((state, num: number) => state + num, "add");
 const title = store("Title");
-const changeTitle = title.newAction(
-  (_, text: string) => `Title ${text}`,
-  "changeTitle",
-);
 
 watch([index, title], ([index, title]) => {
   console.log(`index: ${index}, title: "${title}"`);
 });
 
 add(2); // index: 2, title: "Title"
-changeTitle("of News"); // index: 2, title: "Title of News"
+title.set("Title of News"); // index: 2, title: "Title of News"
 add(40); // index: 42, title: "Title of News"
 ```
 
@@ -197,19 +199,16 @@ watch(loading, ({ isLoading, urls }) => {
   console.log("urls:", urls, "isLoading:", isLoading);
 });
 
-const startLoading = isLoading.newAction(() => true);
-const endLoading = isLoading.newAction(() => false);
-
 const addUrl = loading.newAction(({ isLoading, urls }, url: string) => {
   if (!isLoading) {
     return { urls: urls.concat(url) };
   }
 });
 
-startLoading(); // urls: [] isLoading: true
+isLoading.set(true); // urls: [] isLoading: true
 addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"] isLoading: true
 addUrl("https://google.com"); // urls: ["https://npmjs.com"] isLoading: true
-endLoading(); // urls: ["https://npmjs.com"] isLoading: false
+isLoading.set(false); // urls: ["https://npmjs.com"] isLoading: false
 addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
 ```
 
@@ -239,7 +238,6 @@ pageLoading.validator((old, state) => {
   return isLoadingTurnOn ? isPageChanged : false;
 });
 
-const endLoading = isLoading.newAction(() => false);
 const loadPrevPage = pageLoading.newAction(
   ({ pagination: { page, pageSize } }) => {
     return { isLoading: true, pagination: { page: page - 1, pageSize } };
@@ -256,7 +254,7 @@ watch(pageLoading, ({ pagination: { page } }) => console.log("page:", page));
 loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 loadNextPage(); // page: 2
 loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading validator
-endLoading(); // page: 2, because isLoading state changed
+isLoading.set(false); // page: 2, because isLoading state changed
 loadPrevPage(); // page: 1
 ```
 
