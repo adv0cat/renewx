@@ -112,12 +112,12 @@ index.toZero(); // index: 0
 index.minus(13); // index: -13
 ```
 
-#### Capturing mouse event type in store with _optimizeStateChange_:
+#### Capturing mouse event type in store with _stateCheck_:
 
 ```ts
 import { store } from "@renewx/core";
 
-const event = store<string>("", "event", { optimizeStateChange: false });
+const event = store<string>("", "event", { stateCheck: false });
 const onMouseEvent = event.newAction(
   (_, { type }: MouseEvent) => type,
   "onMouseEvent",
