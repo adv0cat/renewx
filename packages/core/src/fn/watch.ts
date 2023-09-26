@@ -4,7 +4,7 @@ import { isNotLastWatcher, getWatchers } from "../api/queue-api";
 import { getAddInfo } from "../api/action-api";
 import type { ActionInfo } from "../types/action";
 import { isStateChanged } from "../utils/is";
-import { type Config, configMerge } from "../types/config";
+import { type Config, mergeConfig } from "../types/config";
 import type { Watch, Watcher } from "../types/watch";
 
 const noop = () => {};
@@ -14,7 +14,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
   watcher: (states: any, info?: ActionInfo) => Unsubscribe | void,
   config: Partial<Config> = {},
 ): Unsubscribe => {
-  const { optimizeStateChange } = configMerge(config);
+  const { stateCheck } = mergeConfig(config);
 
   const isSingleStore = !Array.isArray(store);
   const stores = isSingleStore ? [store] : store;
@@ -36,7 +36,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
     const watchers = getWatchers<any>(storeID);
 
     const storeWatcher: Watcher<any> = (newState, info): Unsubscribe | void => {
-      if (!optimizeStateChange) {
+      if (!stateCheck) {
         fromStates[index] = newState;
         return watcher(isSingleStore ? newState : fromStates, info);
       } else if (isStateChanged(fromStates[index], newState)) {

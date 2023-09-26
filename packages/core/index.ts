@@ -5,7 +5,7 @@ export { adapter } from "./src/adapter";
 export { watch } from "./src/fn/watch";
 export { actions } from "./src/fn/actions";
 
-export { globalConfig } from "./src/types/config";
+export { mainConfig } from "./src/types/config";
 
 export { StoreAPI } from "./src/api/store-api";
 export { ActionAPI } from "./src/api/action-api";

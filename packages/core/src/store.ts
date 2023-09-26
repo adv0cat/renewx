@@ -5,7 +5,7 @@ import type { StoreTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { StoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { configMerge } from "./types/config";
+import { mergeConfig } from "./types/config";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
@@ -17,7 +17,7 @@ export const store = <State>(
   storeName: string = "",
   config: Partial<Config> = {},
 ): Store<State> => {
-  const { optimizeStateChange } = configMerge(config);
+  const { stateCheck } = mergeConfig(config);
 
   let state = initState as Freeze<State>;
 
@@ -38,7 +38,7 @@ export const store = <State>(
     info = setInfo,
   ) =>
     !isNotifyEnabled ||
-    !(!optimizeStateChange || isStateChanged(state, newState)) ||
+    !(!stateCheck || isStateChanged(state, newState)) ||
     !_actionStore.isValid(state, newState)
       ? false
       : notify((state = newState), info, true);

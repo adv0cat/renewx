@@ -5,7 +5,7 @@ import type { AdapterTag } from "./types/tag";
 import type { Freeze } from "./types/freeze";
 import type { AdapterStoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { configMerge } from "./types/config";
+import { mergeConfig } from "./types/config";
 import type { ReadOnlyStore } from "./types/read-only-store";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
@@ -18,8 +18,7 @@ export const adapter: Adapter = <ToState>(
   storeName: string = "",
   config: Partial<Config> = {},
 ): ReadOnlyStore<ToState, AdapterTag> => {
-  const mergedConfig = configMerge(config);
-  const { optimizeStateChange } = mergedConfig;
+  const { stateCheck } = mergeConfig(config);
 
   const isSingleStore = !Array.isArray(stores);
   let state = (
@@ -46,11 +45,11 @@ export const adapter: Adapter = <ToState>(
       const newState = (
         isSingleStore ? adapt(newStates) : adapt(...newStates)
       ) as Freeze<ToState>;
-      if (!optimizeStateChange || isStateChanged(state, newState)) {
+      if (!stateCheck || isStateChanged(state, newState)) {
         notify((state = newState), info);
       }
     },
-    mergedConfig,
+    config,
   );
 
   return saveStore(_readOnlyStore);

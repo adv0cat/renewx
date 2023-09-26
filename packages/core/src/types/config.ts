@@ -1,10 +1,10 @@
 export interface Config {
-  optimizeStateChange: boolean;
+  stateCheck: boolean;
 }
 
-export const globalConfig: Config = {
-  optimizeStateChange: true,
+export const mainConfig: Config = {
+  stateCheck: true,
 };
 
-export const configMerge = (config: Partial<Config> = {}): Config =>
-  Object.assign({}, globalConfig, config);
+export const mergeConfig = (config: Partial<Config> = {}): Config =>
+  Object.assign(config, mainConfig);

@@ -6,23 +6,22 @@ import type { ActionFnJoinReturn, JoinState, JoinStore } from "./types/join";
 import type { Freeze } from "./types/freeze";
 import type { JoinStoreName } from "./types/name";
 import type { Config } from "./types/config";
-import { configMerge } from "./types/config";
+import { mergeConfig } from "./types/config";
 import type { ActionInfo } from "./types/action";
 import { readOnlyStore } from "./read-only-store";
 import { getNotify } from "./api/queue-api";
 import { newActionInfo } from "./api/action-api";
 import { watch } from "./fn/watch";
 import type { ActionStore, KeysOfActionStores } from "./types/action-store";
-import { actionStore } from "./action-store";
 import { isActionStore } from "./types/action-store";
+import { actionStore } from "./action-store";
 
 export const join = <Stores extends Record<string, AnyStore>>(
   stores: Stores,
   storeName: string = "",
   config: Partial<Config> = {},
 ): JoinStore<Stores> => {
-  const mergedConfig = configMerge(config);
-  const { optimizeStateChange } = mergedConfig;
+  const { stateCheck } = mergeConfig(config);
 
   const nameList = Object.keys(stores) as (string & keyof Stores)[];
   const storeList = nameList.map((name) => stores[name]);
@@ -71,7 +70,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
       }
     }
     if (
-      !(!optimizeStateChange || isStateChanged(states, newStates)) ||
+      !(!stateCheck || isStateChanged(states, newStates)) ||
       !_actionStore.isValid(states, newStates)
     ) {
       return false;
@@ -108,7 +107,7 @@ export const join = <Stores extends Record<string, AnyStore>>(
         }
       }
     },
-    mergedConfig,
+    config,
   );
 
   _actionStore.validator((oldState, newState) => {
