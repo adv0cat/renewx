@@ -1,71 +1,71 @@
 import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
-import type { Freeze } from "../types/freeze";
 import type { StoreID } from "../types/id";
 import type { Watcher } from "../types/watch";
 
-type Notify<State> = (
-  state: Freeze<State>,
-  info?: ActionInfo,
-  set?: boolean,
-) => boolean;
-
-const stores: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
+const watchers: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
 
 let lastWatcher: Watcher<any> | undefined = undefined;
 export const isNotLastWatcher = (v: Watcher<any>) =>
-  lastWatcher !== v ? true : !!(lastWatcher = undefined);
+  lastWatcher !== v || (lastWatcher = undefined);
 
+const noop = () => {};
+export const getFn = (fn: any): Unsubscribe =>
+  typeof fn === "function" ? fn : noop;
+
+/**
+ * queue[i] - state: any
+ * queue[i + 1] - unWatchList: Map<Watcher<any>, Unsubscribe>
+ * queue[i + 2] - info?: ActionInfo
+ */
+let queue = [] as any[];
+let queueStart = 0;
+let queueLength = 0;
 let isQueueRunning = false;
-let queue = [] as [any, StoreID, ActionInfo | undefined][];
-const runQueue = (start = 0) => {
+
+export const runQueue = (isInsideRun = false): void => {
+
+  if (!isInsideRun && isQueueRunning) {
+    return;
+  }
   isQueueRunning = true;
-  const currentQueue = queue.slice(start);
-  for (let i = currentQueue.length - 1; i >= 0; --i) {
-    const [state, id, info] = currentQueue[i];
-    const unsubscribes = stores[id];
-    for (const [watcher, unsubscribe] of unsubscribes) {
-      unsubscribe();
+
+  const queueEnd = queue.length;
+  for (let i = queueStart; i < queueEnd; i += 3) {
+    const unWatchList = queue[i + 1];
+    for (const [watcher, unWatch] of unWatchList) {
+      unWatch();
       lastWatcher = watcher;
-      const newUnsubscribe = watcher(state, info) || (() => {});
+      const newUnWatch = getFn(watcher(queue[i], queue[i + 2]));
       if (lastWatcher !== undefined) {
-        unsubscribes.set(watcher, newUnsubscribe);
+        unWatchList.set(watcher, newUnWatch);
       } else {
-        newUnsubscribe();
+        newUnWatch();
       }
     }
   }
   lastWatcher = undefined;
 
-  const newStart = start + currentQueue.length;
-  if (queue.length - newStart > 0) {
-    runQueue(newStart);
-    return;
+  if (queueLength - (queueStart = queueEnd) > 0) {
+    return runQueue(true);
   }
   queue = [];
+  queueStart = 0;
+  queueLength = 0;
   isQueueRunning = false;
 };
 
-export const getNotify =
-  <State>(id: StoreID): Notify<State> =>
-  (state, info, set = false): boolean => {
-    queue.push([
-      state,
-      id,
-      info && {
-        id: info.id,
-        path: info.path.concat(id),
-        set,
-      },
-    ]);
-    if (!isQueueRunning) {
-      runQueue();
-    }
+export const notify = (
+  state: any,
+  unWatchList: Map<Watcher<any>, Unsubscribe>,
+  info?: ActionInfo,
+) => {
+  if (unWatchList.size !== 0) {
+    queueLength = queue.push(state, unWatchList, info);
+  }
+};
 
-    return true;
-  };
-
-export const getWatchers = <State>(
+export const getUnWatchList = <State>(
   id: StoreID,
 ): Map<Watcher<State>, Unsubscribe> =>
-  (stores[id] ??= new Map<Watcher<State>, Unsubscribe>());
+  (watchers[id] ??= new Map<Watcher<State>, Unsubscribe>());

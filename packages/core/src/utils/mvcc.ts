@@ -9,34 +9,25 @@ export interface MVCC<T> {
 
 export const mvcc = <T>(state: T): MVCC<T> => {
   let id = 0;
-  let committed = 0;
-
-  const versions = new Map<Version, T>([[id, state]]);
+  const versions: Record<Version, T> = {};
 
   return {
-    get: (version = committed): T => {
-      // TODO: simplify, when integrate
-      if (versions.has(version)) {
-        return versions.get(version)!;
-      }
-      throw new Error(`[MVCC] No state version "${version}"`);
-    },
+    get: (version = -1): T => (~version ? versions[version] : state),
     set: (
       value: T,
       version = id === Number.MAX_SAFE_INTEGER
         ? (id = Number.MIN_SAFE_INTEGER)
         : ++id,
     ): Version => {
-      versions.set(version, value);
+      versions[version] = value;
       return version;
     },
     commit: (version: Version): void => {
-      const expired = committed;
-      committed = version;
-      versions.delete(expired);
+      state = versions[version];
+      delete versions[version];
     },
     rollback: (version: Version): void => {
-      versions.delete(version);
+      delete versions[version];
     },
   };
 };

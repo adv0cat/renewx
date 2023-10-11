@@ -1,5 +1,4 @@
 export { store } from "./src/store";
-export { join } from "./src/join";
 export { adapter } from "./src/adapter";
 
 export { watch } from "./src/fn/watch";
@@ -17,14 +16,14 @@ export type { ReadOnlyStore } from "./src/types/read-only-store";
 export type { ActionStore } from "./src/types/action-store";
 export type { Store } from "./src/types/store";
 export type { AdapterStore } from "./src/types/adapter";
-export type { JoinStore } from "./src/types/join";
+// TODO: export JoinStore after update join store
 
 export type { Unsubscribe } from "./src/types/core";
 export type { Freeze } from "./src/types/freeze";
 
 export type {
   ToReadOnly,
-  JoinTag,
+  // TODO: export JoinTag after update join store
   StoreTag,
   AdapterTag,
   AnyTag,

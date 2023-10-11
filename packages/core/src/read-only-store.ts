@@ -1,30 +1,38 @@
 import type { StoreID } from "./types/id";
 import type { AnyStoreName } from "./types/name";
 import type { ReadableTag } from "./types/tag";
-import { getWatchers } from "./api/queue-api";
+import { getUnWatchList } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
 import type { Unsubscribe } from "./types/core";
+import type { Freeze } from "./types/freeze";
+import { createAdjacency } from "./api/directed-acyclic-graph";
+import { allStates } from "./api/new-state-api";
 
 let i: StoreID = 0;
 export const readOnlyStore = <State, TagType extends ReadableTag>(
-  get: ReadOnlyStore<State>["get"],
-  tag: TagType,
-  off: Unsubscribe,
+  initState: Freeze<State>,
   storeName: string,
   name: (storeID: StoreID) => AnyStoreName,
+  tag: TagType,
+  off?: Unsubscribe,
 ): ReadOnlyStore<State, TagType> => {
   const storeID: StoreID = i++;
-  const watchers = getWatchers<State>(storeID);
+  allStates[storeID] = initState;
+  const watchers = getUnWatchList<State>(storeID);
+  createAdjacency(storeID);
 
-  return {
+  const _store: ReadOnlyStore<State, TagType> = {
     id: storeID,
     tag,
-    get,
+    get: () => allStates[storeID],
     name: (): AnyStoreName => (storeName ||= name(storeID)),
+    isOff: false,
     off: () => {
-      off();
+      _store.isOff = true;
+      off?.();
       watchers.forEach((fn) => fn());
       watchers.clear();
     },
   };
+  return _store;
 };

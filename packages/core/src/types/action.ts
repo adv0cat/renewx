@@ -20,5 +20,4 @@ export type ActionFnReturn<
 export interface ActionInfo {
   id: ActionID;
   path: StoreID[];
-  set?: boolean;
 }
