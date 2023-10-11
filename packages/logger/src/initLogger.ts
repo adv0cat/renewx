@@ -19,10 +19,8 @@ export const initLogger = (log: (...data: any[]) => void): Unsubscribe => {
             return;
           }
 
-          const { id: actionID, path: storeIDList, set } = info;
-          if (actionID === -1) {
-            log(`${storeName}.#init:`, v);
-          } else {
+          const { id: actionID, path: storeIDList } = info;
+          if (~actionID) {
             const actionName = ActionAPI.nameById(actionID);
             if (storeIDList.length === 1) {
               log(`${storeName}.${actionName}:`, v);
@@ -34,8 +32,10 @@ export const initLogger = (log: (...data: any[]) => void): Unsubscribe => {
                     (index === 0 ? `.${actionName}` : ""),
                 )
                 .join(" --> ");
-              log(`${pathOfAction}.#${set ? "set" : "up"}:`, v);
+              log(`${pathOfAction}.#up:`, v);
             }
+          } else {
+            log(`${storeName}.#init:`, v);
           }
         },
         { stateCheck: false },
