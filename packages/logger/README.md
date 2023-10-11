@@ -15,5 +15,5 @@ npm i @renewx/logger
 ```ts
 import { initLogger } from "@renewx/logger";
 
-initLogger();
+initLogger(console.log);
 ```

@@ -115,13 +115,19 @@ index.minus(13); // index: -13
 #### Capturing mouse event type in store with _stateCheck_:
 
 ```ts
-import { store } from "@renewx/core";
+import { store, watch } from "@renewx/core";
 
+// First, we add a config for the store
+// so that it can change the state without checking.
 const event = store<string>("", "event", { stateCheck: false });
 const onMouseEvent = event.newAction(
   (_, { type }: MouseEvent) => type,
   "onMouseEvent",
 );
+
+// Secondly, we add a config for the watch function
+// so that it can look at the state without checking it.
+watch(event, (event) => console.log("event:", event), { stateCheck: false });
 
 document.addEventListener("click", onMouseEvent);
 ```
@@ -161,7 +167,7 @@ console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 
 #### Combined stores for use in an adapter:
 
 ```ts
-import { adapter, watch } from "@renewx/core";
+import { store, adapter, watch } from "@renewx/core";
 
 const pageSize = store(10);
 const page = store(1);
@@ -184,40 +190,12 @@ nextPage(); // pagination: { offset: 10, limit: 20 }
 nextPage(); // pagination: { offset: 20, limit: 30 }
 ```
 
-### Join
-
-#### Joining multiple stores for convenient use:
-
-```ts
-import { store, join, watch } from "@renewx/core";
-
-const isLoading = store(false);
-const urls = store<string[]>([]);
-const loading = join({ isLoading, urls });
-
-watch(loading, ({ isLoading, urls }) => {
-  console.log("urls:", urls, "isLoading:", isLoading);
-});
-
-const addUrl = loading.newAction(({ isLoading, urls }, url: string) => {
-  if (!isLoading) {
-    return { urls: urls.concat(url) };
-  }
-});
-
-isLoading.set(true); // urls: [] isLoading: true
-addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"] isLoading: true
-addUrl("https://google.com"); // urls: ["https://npmjs.com"] isLoading: true
-isLoading.set(false); // urls: ["https://npmjs.com"] isLoading: false
-addUrl("https://google.com"); // urls: ["https://npmjs.com", "https://google.com"] isLoading: true
-```
-
 ### Validator
 
 #### Validation of different stores with multiple levels
 
 ```ts
-import { store, join, watch } from "@renewx/core";
+import { store, watch } from "@renewx/core";
 
 interface Pagination {
   pageSize: number;
@@ -228,34 +206,36 @@ const pagination = store<Pagination>({
   pageSize: 10,
   page: 1,
 });
-const isLoading = store(false);
-const pageLoading = join({ pagination, isLoading });
+const isLoading = store("not loading");
 
-pagination.validator((old, state) => state.page > 0);
-pageLoading.validator((old, state) => {
-  const isLoadingTurnOn = !old.isLoading && !!state?.isLoading;
-  const isPageChanged = old.pagination.page != state?.pagination?.page;
-  return isLoadingTurnOn ? isPageChanged : false;
+pagination.validator((_, state) => state.page > 0);
+isLoading.validator(
+  (old, state) =>
+    (old === "loading" && state === "not loading") ||
+    (old === "not loading" && state === "loading"),
+);
+
+watch([pagination, isLoading], ([{ page }, isLoading]) => {
+  console.log(`page: ${page}, isLoading: "${isLoading}"`);
 });
 
-const loadPrevPage = pageLoading.newAction(
-  ({ pagination: { page, pageSize } }) => {
-    return { isLoading: true, pagination: { page: page - 1, pageSize } };
-  },
-);
-const loadNextPage = pageLoading.newAction(
-  ({ pagination: { page, pageSize } }) => {
-    return { isLoading: true, pagination: { page: page + 1, pageSize } };
-  },
-);
+isLoading.set("loading"); // isLoading: "loading" - changed, because from "not loading" to "loading"
+isLoading.set("not loading"); // isLoading: "not loading" - changed, because from "loading" to "not loading"
+isLoading.set("wrong value"); // not changed, because from "not loading" to "wrong value"
 
-watch(pageLoading, ({ pagination: { page } }) => console.log("page:", page));
+const loadPrevPage = pagination.newAction(({ page, pageSize }) => ({
+  page: page - 1,
+  pageSize,
+}));
+const loadNextPage = pagination.newAction(({ page, pageSize }) => ({
+  page: page + 1,
+  pageSize,
+}));
 
 loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 loadNextPage(); // page: 2
-loadPrevPage(); // not changed, because isLoadingTurnOn=false in pageLoading validator
-isLoading.set(false); // page: 2, because isLoading state changed
 loadPrevPage(); // page: 1
+loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 ```
 
 ### ReadOnly
@@ -268,8 +248,7 @@ import { store, watch } from "@renewx/core";
 const count = store(0, "count");
 const add = count.newAction((count, num: number) => count + num, "add");
 
-const readOnlyCount = count.readOnly();
-watch(readOnlyCount, (state) => {
+watch(count.readOnly, (state) => {
   console.log("count state:", state);
 });
 
