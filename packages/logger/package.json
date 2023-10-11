@@ -1,6 +1,6 @@
 {
   "name": "@renewx/logger",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": false,
   "sideEffects": false,
   "description": "Simple logger for RenewX",
@@ -12,7 +12,7 @@
     "build:lib": "esbuild ./index.ts --bundle --external:@renewx/core --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
   },
   "peerDependencies": {
-    "@renewx/core": ">=0.0.36"
+    "@renewx/core": ">=0.0.39"
   },
   "author": "adv0cat",
   "license": "MIT",
