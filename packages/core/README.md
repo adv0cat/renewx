@@ -256,3 +256,42 @@ watch(count.readOnly, (state) => {
 add(10); // count state: 10
 add(3); // count state: 13
 ```
+
+### Batch
+
+#### Using batching for adapter store creation
+
+```ts
+import { store, adapter, batch } from "@renewx/core";
+
+let start: number;
+let end: number;
+
+// Generating an array of numbers from 0 to 1000
+const base = Array(1000)
+  .fill(0)
+  .map((_, i) => i);
+
+// Initial state
+const entry = store(0);
+
+// Function for creating adapters
+const createAdapter = (v: number) => adapter(entry, (state) => state + v);
+
+// Without batching
+start = performance.now();
+base.map(createAdapter);
+end = performance.now();
+
+console.log(end - start); // 1178ms
+
+// or...
+// With batching
+start = performance.now();
+batch.stores.start();
+base.map(createAdapter);
+batch.stores.end();
+end = performance.now();
+
+console.log(end - start); // 25ms
+```
