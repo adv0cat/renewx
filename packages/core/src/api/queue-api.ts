@@ -42,11 +42,15 @@ export const runQueue = (): void => {
     for (const [watcher, unWatch] of unWatchList) {
       unWatch();
       lastWatcher = watcher;
-      newUnWatch = getFn(watcher(queue[queueIndex], queue[queueIndex + 2]));
-      if (lastWatcher !== undefined) {
-        unWatchList.set(watcher, newUnWatch);
-      } else {
-        newUnWatch();
+      try {
+        newUnWatch = getFn(watcher(queue[queueIndex], queue[queueIndex + 2]));
+        if (lastWatcher !== undefined) {
+          unWatchList.set(watcher, newUnWatch);
+        } else {
+          newUnWatch();
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
   }
