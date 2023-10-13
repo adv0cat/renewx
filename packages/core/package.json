@@ -1,6 +1,6 @@
 {
   "name": "@renewx/core",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "Lightweight state management library with validation support",
   "type": "module",
   "main": "dist/index.js",
