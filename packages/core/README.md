@@ -257,6 +257,20 @@ add(10); // count state: 10
 add(3); // count state: 13
 ```
 
+### Unsafe
+
+#### Unsafe get a state without Freeze
+
+```ts
+import { store, watch } from "@renewx/core";
+
+const user = store({ name: "Jack", age: 42 }, "user");
+const freezeState = user.get(); // Freeze<{ name: string, age: number }>
+// IMPORTANT!!! This is indeed unsafe, as if you alter the state,
+// it will lead to an Undefined Behaviour (UB)!!!
+const unsafeState = user.unsafe(); // { name: string, age: number }
+```
+
 ### Batch
 
 #### Using batching for adapter store creation
