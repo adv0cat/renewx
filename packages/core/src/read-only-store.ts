@@ -25,6 +25,7 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
     id: storeID,
     tag,
     get: () => allStates[storeID],
+    unsafe: () => allStates[storeID],
     name: (): AnyStoreName => (storeName ||= name(storeID)),
     isOff: false,
     off: () => {

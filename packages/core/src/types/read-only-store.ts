@@ -6,6 +6,7 @@ import type { AnyStoreName } from "./name";
 export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
   id: StoreID;
   get(): Freeze<State>;
+  unsafe(): State;
   name(): AnyStoreName;
   isOff: boolean;
   off(): void;
