@@ -9,6 +9,13 @@ let lastWatcher: Watcher<any> | undefined = undefined;
 export const isNotLastWatcher = (v: Watcher<any>) =>
   lastWatcher !== v || (lastWatcher = undefined);
 
+let batching = false;
+export const batchQueueStart = () => (batching = true);
+export const batchQueueEnd = () => {
+  batching = false;
+  runQueue();
+};
+
 const noop = () => {};
 export const getFn = (fn: any): Unsubscribe =>
   typeof fn === "function" ? fn : noop;
@@ -19,24 +26,23 @@ export const getFn = (fn: any): Unsubscribe =>
  * queue[i + 2] - info?: ActionInfo
  */
 let queue = [] as any[];
-let queueStart = 0;
+let queueIndex = 0;
 let queueLength = 0;
 let isQueueRunning = false;
+let newUnWatch: Unsubscribe;
 
-export const runQueue = (isInsideRun = false): void => {
-
-  if (!isInsideRun && isQueueRunning) {
+export const runQueue = (): void => {
+  if (isQueueRunning || batching) {
     return;
   }
   isQueueRunning = true;
 
-  const queueEnd = queue.length;
-  for (let i = queueStart; i < queueEnd; i += 3) {
-    const unWatchList = queue[i + 1];
+  for (; queueIndex < queueLength; queueIndex += 3) {
+    const unWatchList = queue[queueIndex + 1];
     for (const [watcher, unWatch] of unWatchList) {
       unWatch();
       lastWatcher = watcher;
-      const newUnWatch = getFn(watcher(queue[i], queue[i + 2]));
+      newUnWatch = getFn(watcher(queue[queueIndex], queue[queueIndex + 2]));
       if (lastWatcher !== undefined) {
         unWatchList.set(watcher, newUnWatch);
       } else {
@@ -44,13 +50,9 @@ export const runQueue = (isInsideRun = false): void => {
       }
     }
   }
-  lastWatcher = undefined;
 
-  if (queueLength - (queueStart = queueEnd) > 0) {
-    return runQueue(true);
-  }
   queue = [];
-  queueStart = 0;
+  queueIndex = 0;
   queueLength = 0;
   isQueueRunning = false;
 };
@@ -61,7 +63,13 @@ export const notify = (
   info?: ActionInfo,
 ) => {
   if (unWatchList.size !== 0) {
-    queueLength = queue.push(state, unWatchList, info);
+    let index = 0;
+    if (batching && ~(index = queue.indexOf(unWatchList, queueIndex))) {
+      queue[index - 1] = state;
+      queue[index + 1] = info;
+    } else {
+      queueLength = queue.push(state, unWatchList, info);
+    }
   }
 };
 

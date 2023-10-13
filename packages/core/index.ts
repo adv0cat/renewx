@@ -6,6 +6,7 @@ export { actions } from "./src/fn/actions";
 
 export { mainConfig } from "./src/main-config";
 
+export { batch } from "./src/api/batch-api";
 export { StoreAPI } from "./src/api/store-api";
 export { ActionAPI } from "./src/api/action-api";
 
