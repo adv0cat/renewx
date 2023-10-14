@@ -5,10 +5,6 @@ import type { Watcher } from "../types/watch";
 
 const watchers: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
 
-let lastWatcher: Watcher<any> | undefined = undefined;
-export const isNotLastWatcher = (v: Watcher<any>) =>
-  lastWatcher !== v || (lastWatcher = undefined);
-
 let batching = false;
 export const batchQueueStart = () => (batching = true);
 export const batchQueueEnd = () => {
@@ -41,10 +37,9 @@ export const runQueue = (): void => {
     const unWatchList = queue[queueIndex + 1];
     for (const [watcher, unWatch] of unWatchList) {
       unWatch();
-      lastWatcher = watcher;
       try {
         newUnWatch = getFn(watcher(queue[queueIndex], queue[queueIndex + 2]));
-        if (lastWatcher !== undefined) {
+        if (unWatchList.has(watcher)) {
           unWatchList.set(watcher, newUnWatch);
         } else {
           newUnWatch();

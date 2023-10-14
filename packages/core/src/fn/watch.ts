@@ -1,6 +1,6 @@
 import type { AnyStore } from "../types/any-store";
 import type { Unsubscribe } from "../types/core";
-import { getFn, getUnWatchList, isNotLastWatcher } from "../api/queue-api";
+import { getFn, getUnWatchList } from "../api/queue-api";
 import { getAddInfo } from "../api/action-api";
 import type { ActionInfo } from "../types/action";
 import { isStateChanged } from "../utils/is";
@@ -16,51 +16,58 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
   const { stateCheck } = mergeConfig(config);
 
   const isSingleStore = !Array.isArray(store);
-  const stores = isSingleStore ? [store] : store;
+  const stores = (isSingleStore ? [store] : store) as AnyStore[];
 
   let fromStates = stores.map((store) => store.get());
 
-  let unsubscribes = stores.map((store, index) => {
-    const storeID = store.id;
-    const unWatchList = getUnWatchList<any>(storeID);
-
-    const storeWatcher: Watcher<any> = (newState, info): Unsubscribe | void => {
-      if (!stateCheck) {
-        fromStates[index] = newState;
-        return watcher(isSingleStore ? newState : fromStates, info);
-      } else if (isStateChanged(fromStates[index], newState)) {
-        return watcher(
-          isSingleStore
-            ? (fromStates[index] = newState)
-            : (fromStates = stores.map(({ get }) => get())),
-          info,
-        );
-      }
-    };
-
-    // First run watcher here
-    unWatchList.set(
-      storeWatcher,
-      getFn(
-        watcher(
-          isSingleStore ? fromStates[0] : fromStates,
-          getAddInfo()
-            ? ({ id: -1, path: isSingleStore ? [storeID] : [] } as ActionInfo)
-            : undefined,
-        ),
-      ),
-    );
-
-    return (() => {
-      if (isNotLastWatcher(storeWatcher)) {
-        unWatchList.get(storeWatcher)!();
-      }
-      unWatchList.delete(storeWatcher);
-    }) as Unsubscribe;
-  });
-
-  return () => {
-    unsubscribes.forEach((unsubscribe) => unsubscribe());
-    unsubscribes = [];
+  let unWatch: any;
+  const mainUnWatch = () => {
+    const fn = getFn(unWatch);
+    unWatch = 0;
+    fn();
   };
+
+  const watchers = stores.map<[Watcher<any>, Map<Watcher<any>, Unsubscribe>]>(
+    ({ id }, index) => {
+      const storeWatch: Watcher<any> = (newState, info): Unsubscribe => {
+        if (!stateCheck) {
+          fromStates[index] = newState;
+          unWatch = watcher(isSingleStore ? newState : fromStates, info);
+        } else if (isStateChanged(fromStates[index], newState)) {
+          unWatch = watcher(
+            isSingleStore
+              ? (fromStates[index] = newState)
+              : (fromStates = stores.map(({ get }) => get())),
+            info,
+          );
+        }
+
+        return mainUnWatch;
+      };
+
+      return [storeWatch, getUnWatchList(id).set(storeWatch, mainUnWatch)];
+    },
+  );
+
+  try {
+    // First run watcher here
+    unWatch = watcher(
+      isSingleStore ? fromStates[0] : fromStates,
+      getAddInfo()
+        ? ({
+            id: -1,
+            path: isSingleStore ? [store.id] : [],
+          } as ActionInfo)
+        : undefined,
+    );
+  } catch (e) {
+    console.error(e);
+  }
+
+  return () =>
+    watchers
+      .splice(0, watchers.length)
+      .some(([storeWatcher, unWatchList]) =>
+        unWatchList.delete(storeWatcher),
+      ) && mainUnWatch();
 };
