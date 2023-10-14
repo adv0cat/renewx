@@ -15,7 +15,7 @@ npm i @renewx/core
 #### Managing an array of URLs:
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 const urls = store<string[]>([]);
 
@@ -23,7 +23,7 @@ const urls = store<string[]>([]);
 // and adds it to the array,
 // returning a new array from the function,
 // thereby changing the state
-const addUrl = urls.newAction((state, url: string) => {
+const addUrl = action(urls, (state, url: string) => {
   return state.concat(url);
 });
 
@@ -46,13 +46,13 @@ unsubscribe();
 #### Managing DOM state and event handling:
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 const element = store(document.getElementById("first"));
 
 // Let's create an action that will take an nextElement
 // and replace the current one with it
-const nextElement = element.newAction((_, nextElement: HTMLElement) => {
+const nextElement = action(element, (_, nextElement: HTMLElement) => {
   return nextElement;
 });
 
@@ -76,10 +76,10 @@ element.set(document.getElementById("second"));
 #### Watching multiple state stores using _watch_ function:
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 const index = store(0);
-const add = index.newAction((state, num: number) => state + num, "add");
+const add = action(index, (state, num: number) => state + num, "add");
 const title = store("Title");
 
 watch([index, title], ([index, title]) => {
@@ -115,12 +115,13 @@ index.minus(13); // index: -13
 #### Capturing mouse event type in store with _stateCheck_:
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 // First, we add a config for the store
 // so that it can change the state without checking.
-const event = store<string>("", "event", { stateCheck: false });
-const onMouseEvent = event.newAction(
+const event = store("", "event", { stateCheck: false });
+const onMouseEvent = action(
+  event,
   (_, { type }: MouseEvent) => type,
   "onMouseEvent",
 );
@@ -167,7 +168,7 @@ console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 
 #### Combined stores for use in an adapter:
 
 ```ts
-import { store, adapter, watch } from "@renewx/core";
+import { store, adapter, action, watch } from "@renewx/core";
 
 const pageSize = store(10);
 const page = store(1);
@@ -179,7 +180,7 @@ const pagination = adapter([pageSize, page], (pageSize, page) => {
   };
 });
 
-const nextPage = page.newAction((state) => state + 1);
+const nextPage = action(page, (state) => state + 1);
 
 watch(pagination, (state) => {
   console.log("pagination:", state);
@@ -195,7 +196,7 @@ nextPage(); // pagination: { offset: 20, limit: 30 }
 #### Validation of different stores with multiple levels
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 interface Pagination {
   pageSize: number;
@@ -223,11 +224,11 @@ isLoading.set("loading"); // isLoading: "loading" - changed, because from "not l
 isLoading.set("not loading"); // isLoading: "not loading" - changed, because from "loading" to "not loading"
 isLoading.set("wrong value"); // not changed, because from "not loading" to "wrong value"
 
-const loadPrevPage = pagination.newAction(({ page, pageSize }) => ({
+const loadPrevPage = action(pagination, ({ page, pageSize }) => ({
   page: page - 1,
   pageSize,
 }));
-const loadNextPage = pagination.newAction(({ page, pageSize }) => ({
+const loadNextPage = action(pagination, ({ page, pageSize }) => ({
   page: page + 1,
   pageSize,
 }));
@@ -243,10 +244,10 @@ loadPrevPage(); // not changed, because state.page === 0 in pagination validator
 #### Returning a read-only store
 
 ```ts
-import { store, watch } from "@renewx/core";
+import { store, action, watch } from "@renewx/core";
 
 const count = store(0, "count");
-const add = count.newAction((count, num: number) => count + num, "add");
+const add = action(count, (count, num: number) => count + num, "add");
 
 watch(count.readOnly, (state) => {
   console.log("count state:", state);
