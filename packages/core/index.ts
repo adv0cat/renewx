@@ -2,7 +2,7 @@ export { store } from "./src/store";
 export { adapter } from "./src/adapter";
 
 export { watch } from "./src/fn/watch";
-export { actions } from "./src/fn/actions";
+export { action, actions } from "./src/fn/actions";
 
 export { mainConfig } from "./src/main-config";
 

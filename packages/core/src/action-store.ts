@@ -3,7 +3,7 @@ import type { ReadOnlyStore } from "./types/read-only-store";
 import type { Validator } from "./types/validator";
 import type { Freeze } from "./types/freeze";
 import type { ActionStore } from "./types/action-store";
-import { getSetInfo, newActionInfo } from "./api/action-api";
+import { getSetInfo } from "./api/action-api";
 import { isStateChanged } from "./utils/is";
 import type { Config } from "./types/config";
 import { allStates, setNewState } from "./api/new-state-api";
@@ -49,11 +49,6 @@ export const actionStore = <State, TagType extends WritableTag>(
       return () => {
         validators.splice(validators.indexOf(fn), 1);
       };
-    },
-    newAction: (action, name) => {
-      const info = newActionInfo(name);
-      return (...args) =>
-        !(readOnly.isOff || !set(action(allStates[id], ...args), info));
     },
   };
 };

@@ -2,17 +2,12 @@ import type { AnyActionStore } from "./any-store";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
 import type { IsChanged, OmitFirstArg } from "./core";
 
-export type ActionsFn<Store extends AnyActionStore> =
-  Store extends AnyActionStore<infer State, infer TagType>
-    ? Record<string, ActionFn<State, TagType>>
-    : never;
-
 export type Actions<
   Store extends AnyActionStore,
-  PreActions extends ActionsFn<Store>,
+  PreActions extends Record<string, ActionFn<Store>>,
 > = {
   [Index in keyof PreActions]: (
-    ...args: OmitFirstArg<PreActions[Index]>
+    ...v: OmitFirstArg<PreActions[Index]>
   ) => IsChanged;
 };
 
