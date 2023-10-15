@@ -7,7 +7,7 @@ import type { Freeze } from "../types/freeze";
 import type { ActionInfo } from "../types/action";
 import { getUnWatchList, notify, runQueue } from "./queue-api";
 
-type Process = () => void;
+type Process = (states: any[]) => void;
 const processList: Process[] = [];
 
 export const allStates: any[] = [];
@@ -27,7 +27,7 @@ export const setNewState = <State>(
   );
 
   for (const storeId of getDeepAdjacencyList(primaryId)) {
-    processList[storeId]();
+    processList[storeId](allStates);
 
     notify(
       allStates[storeId],
@@ -62,16 +62,16 @@ export const addProcessNewState = <ToState>(
   let index = 0;
   const buffer = new Array(dependsOn.length);
 
-  processList[id] = () => {
+  processList[id] = (states) => {
     if (!store.isOff) {
       index = 0;
       for (const storeId of dependsOn) {
-        buffer[index++] = allStates[storeId];
+        buffer[index++] = states[storeId];
       }
 
       const newState = getNewState(buffer);
-      if (!stateCheck || isStateChanged(allStates[id], newState)) {
-        allStates[id] = newState;
+      if (!stateCheck || isStateChanged(states[id], newState)) {
+        states[id] = newState;
       }
     }
   };
