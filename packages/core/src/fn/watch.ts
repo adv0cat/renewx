@@ -1,6 +1,6 @@
 import type { AnyStore } from "../types/any-store";
 import type { Unsubscribe } from "../types/core";
-import { getFn, getUnWatchList } from "../api/queue-api";
+import { getFn, getUnWatchList, globalUnWatch } from "../api/queue-api";
 import { getAddInfo } from "../api/action-api";
 import type { ActionInfo } from "../types/action";
 import { isStateChanged } from "../utils/is";
@@ -67,7 +67,9 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
   return () =>
     watchers
       .splice(0, watchers.length)
-      .some(([storeWatcher, unWatchList]) =>
-        unWatchList.delete(storeWatcher),
-      ) && mainUnWatch();
+      .map(
+        ([storeWatcher, unWatchList]) =>
+          globalUnWatch(storeWatcher) && unWatchList.delete(storeWatcher),
+      )
+      .some((v) => v) && mainUnWatch();
 };

@@ -16,6 +16,10 @@ const noop = () => {};
 export const getFn = (fn: any): Unsubscribe =>
   typeof fn === "function" ? fn : noop;
 
+let watcherInQueue: any;
+export const globalUnWatch = (watcher: Watcher<any>): true =>
+  watcherInQueue !== watcher || !(watcherInQueue = 0); // We always need to return true
+
 /**
  * queue[i] - state: any
  * queue[i + 1] - unWatchList: Map<Watcher<any>, Unsubscribe>
@@ -36,10 +40,11 @@ export const runQueue = (): void => {
   for (; queueIndex < queueLength; queueIndex += 3) {
     const unWatchList = queue[queueIndex + 1];
     for (const [watcher, unWatch] of unWatchList) {
-      unWatch();
+      watcherInQueue = watcher;
       try {
+        unWatch();
         newUnWatch = getFn(watcher(queue[queueIndex], queue[queueIndex + 2]));
-        if (unWatchList.has(watcher)) {
+        if (watcherInQueue === watcher) {
           unWatchList.set(watcher, newUnWatch);
         } else {
           newUnWatch();
@@ -53,6 +58,7 @@ export const runQueue = (): void => {
   queue = [];
   queueIndex = 0;
   queueLength = 0;
+  watcherInQueue = 0;
   isQueueRunning = false;
 };
 
