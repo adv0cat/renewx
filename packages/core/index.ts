@@ -3,6 +3,7 @@ export { adapter } from "./src/adapter";
 
 export { watch } from "./src/fn/watch";
 export { action, actions } from "./src/fn/actions";
+export { tx } from "./src/utils/tx";
 
 export { mainConfig } from "./src/main-config";
 

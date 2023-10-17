@@ -18,7 +18,7 @@ export const saveStore = <SomeStore extends AnyStore>(
 
 export const StoreAPI = {
   storeById: (storeID: StoreID): AnyStore | undefined => stores[storeID],
-  storeList: () => stores.slice(),
+  storeList: () => stores.slice(0),
   watch: (watcher: StoreApiWatcher): Unsubscribe => {
     watchers.push(watcher);
     return () => {

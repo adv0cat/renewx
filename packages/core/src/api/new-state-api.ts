@@ -43,6 +43,8 @@ export const setNewState = <State>(
   return true;
 };
 
+export const getProcess = (id: StoreID): Process => processList[id];
+
 /**
  * Defines a new state for a store based on dependencies to other stores.
  * @param store - The store for which a new state is being calculated.
