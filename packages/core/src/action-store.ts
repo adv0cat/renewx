@@ -12,30 +12,26 @@ export const actionStore = <State, TagType extends WritableTag>(
   readOnly: ReadOnlyStore<State, ToReadOnly<TagType>>,
   config: Config,
 ): ActionStore<State, TagType> => {
-  const { stateCheck } = config;
-
   const validators = [] as Validator<State>[];
   const isValid: ActionStore<State, TagType>["isValid"] = (
     oldState,
     newState,
   ) => validators.every((fn) => fn(oldState, newState));
 
+  const { stateCheck } = config;
   const { id } = readOnly;
   const set: ActionStore<State, TagType>["set"] = (
     returned,
     info = getSetInfo(),
   ) => {
     const state = allStates[id];
-    if (!readOnly.isOff) {
-      if (
-        (!stateCheck || isStateChanged(state, returned)) &&
-        isValid(state, returned as Freeze<State>)
-      ) {
-        return setNewState(id, returned as Freeze<State>, info);
-      }
+    if (
+      !readOnly.isOff &&
+      (!stateCheck || isStateChanged(state, returned)) &&
+      isValid(state, returned as Freeze<State>)
+    ) {
+      setNewState(id, returned as Freeze<State>, info);
     }
-
-    return false;
   };
 
   return {

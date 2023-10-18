@@ -1,4 +1,3 @@
-export type IsChanged = boolean;
 export type IsValid = boolean;
 export type Unsubscribe = () => void;
 export type Fn<Result = any> = (...v: any[]) => Result;

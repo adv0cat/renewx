@@ -1,14 +1,12 @@
 import type { AnyActionStore } from "./any-store";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
-import type { IsChanged, OmitFirstArg } from "./core";
+import type { OmitFirstArg } from "./core";
 
 export type Actions<
   Store extends AnyActionStore,
   PreActions extends Record<string, ActionFn<Store>>,
 > = {
-  [Index in keyof PreActions]: (
-    ...v: OmitFirstArg<PreActions[Index]>
-  ) => IsChanged;
+  [Index in keyof PreActions]: (...v: OmitFirstArg<PreActions[Index]>) => void;
 };
 
 export interface StoreActions<Store extends AnyActionStore> {
@@ -18,5 +16,5 @@ export interface StoreActions<Store extends AnyActionStore> {
       ? ActionFnReturn<State, TagType>
       : never,
     info?: ActionInfo,
-  ): IsChanged;
+  ): void;
 }

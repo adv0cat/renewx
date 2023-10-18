@@ -1,4 +1,4 @@
-import type { IsChanged, IsValid, KeysOfObject, Unsubscribe } from "./core";
+import type { IsValid, KeysOfObject, Unsubscribe } from "./core";
 import type { AnyActionStore, AnyStore } from "./any-store";
 import type { ToReadOnly, WritableTag } from "./tag";
 import type { ReadOnlyStore } from "./read-only-store";
@@ -19,5 +19,5 @@ export interface ActionStore<State, TagType extends WritableTag>
   readonly readOnly: ReadOnlyStore<State, ToReadOnly<TagType>>;
   validator(fn: Validator<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: Freeze<State>): IsValid;
-  set(newState: ActionFnReturn<State, TagType>, info?: ActionInfo): IsChanged;
+  set(newState: ActionFnReturn<State, TagType>, info?: ActionInfo): void;
 }

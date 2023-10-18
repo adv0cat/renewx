@@ -3,14 +3,14 @@ import type { JoinTag, WritableTag } from "./tag";
 import type { ActionFnJoinReturn, JoinState } from "./join";
 import type { Freeze, MaybeFreeze } from "./freeze";
 import type { AnyActionStore } from "./any-store";
-import type { IsChanged, OmitFirstArg } from "./core";
+import type { OmitFirstArg } from "./core";
 
 export interface Action {
   <Store extends AnyActionStore, NewActionFn extends ActionFn<Store>>(
     store: Store,
     fn: NewActionFn,
     name?: string,
-  ): (...v: OmitFirstArg<NewActionFn>) => IsChanged;
+  ): (...v: OmitFirstArg<NewActionFn>) => void;
 }
 
 export type ActionFn<Store extends AnyActionStore> =

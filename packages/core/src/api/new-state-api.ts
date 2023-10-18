@@ -7,7 +7,8 @@ import type { Freeze } from "../types/freeze";
 import type { ActionInfo } from "../types/action";
 import { getUnWatchList, notify, runQueue } from "./queue-api";
 
-type Process = (states: any[]) => void;
+export type Process = (states: any[]) => void;
+
 const processList: Process[] = [];
 
 export const allStates: any[] = [];
@@ -16,7 +17,7 @@ export const setNewState = <State>(
   primaryId: StoreID,
   newState: Freeze<State>,
   info?: ActionInfo,
-): boolean => {
+) => {
   notify(
     (allStates[primaryId] = newState),
     getUnWatchList<any>(primaryId),
@@ -40,10 +41,9 @@ export const setNewState = <State>(
   }
 
   runQueue();
-  return true;
 };
 
-export const getProcess = (id: StoreID): Process => processList[id];
+export const getProcess = (id: StoreID): Process | undefined => processList[id];
 
 /**
  * Defines a new state for a store based on dependencies to other stores.

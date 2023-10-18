@@ -7,7 +7,7 @@ import { allStates } from "../api/new-state-api";
 export const action: Action = (store, fn, name) => {
   const info = newActionInfo(name);
   const { id, set } = store;
-  return (...v) => !(store.isOff || !set(fn(allStates[id], ...v), info));
+  return (...v) => set(fn(allStates[id], ...v), info);
 };
 
 export const actions = <

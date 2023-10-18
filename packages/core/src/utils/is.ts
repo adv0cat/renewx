@@ -1,8 +1,7 @@
-import type { IsChanged } from "../types/core";
 import type { AnyActionStore, AnyStore } from "../types/any-store";
 
 const OBJECT = "object";
-export const isStateChanged = (oldState: any, newState: any): IsChanged => {
+export const isStateChanged = (oldState: any, newState: any): boolean => {
   if (oldState === newState) {
     return false;
   } else if (

@@ -21,11 +21,12 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
   const watchers = getUnWatchList<State>(storeID);
   createAdjacency(storeID);
 
+  const get = () => allStates[storeID];
   const _store: ReadOnlyStore<State, TagType> = {
     id: storeID,
     tag,
-    get: () => allStates[storeID],
-    unsafe: () => allStates[storeID],
+    get,
+    unsafe: get,
     name: (): AnyStoreName => (storeName ||= name(storeID)),
     isOff: false,
     off: () => {
