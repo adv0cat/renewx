@@ -5,6 +5,7 @@ import type { AnyStore } from "./any-store";
 
 export interface ReadOnlyTxState<State> {
   get(): Freeze<State>;
+  unsafe(): State;
 }
 
 export interface TxState<State, TagType extends WritableTag>

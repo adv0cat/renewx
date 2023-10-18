@@ -1,7 +1,6 @@
-import type { Freeze, MaybeFreeze } from "../types/freeze";
 import type { OmitFirstArg } from "../types/core";
 import type { AnyStore } from "../types/any-store";
-import { allStates, getProcess } from "../api/new-state-api";
+import { allStates, getProcess, Process } from "../api/new-state-api";
 import type { WritableTag } from "../types/tag";
 import { isActionStore } from "./is";
 import { getDeepAdjacencyList } from "../api/directed-acyclic-graph";
@@ -17,50 +16,59 @@ export const tx = <
   stores: [...Stores],
   txFn: SomeTxFn,
 ): ((...args: OmitFirstArg<SomeTxFn>) => Promise<ToState>) => {
-  const snapshot = allStates.slice(0);
-  const txStates = [] as ReadOnlyTxState<any>[];
-
   let ids = [] as number[];
-  let newStates = [] as any[];
+  let processList = [] as Process[][];
 
   for (const store of stores) {
     const { id } = store;
     const deepAdjacencyList = getDeepAdjacencyList(id);
-    const processList = deepAdjacencyList.map(getProcess);
 
     ids = ids.concat(id, deepAdjacencyList);
-
-    const get = (): Freeze<any> => newStates[id];
-    const set = (v: MaybeFreeze<any>): void => {
-      newStates[id] = v;
-      for (const process of processList) {
-        process(newStates);
-      }
-    };
-
-    txStates.push(
-      isActionStore(store)
-        ? ({ get, set } as TxState<any, WritableTag>)
-        : ({ get } as ReadOnlyTxState<any>),
-    );
+    processList[id] = deepAdjacencyList.map(getProcess) as Process[];
   }
 
   ids = [...new Set(ids)].sort();
-  for (const storeId of ids) {
-    newStates[storeId] = snapshot[storeId];
-  }
 
   return async (...args) => {
     let error;
-    try {
-      const result = await txFn(txStates as TxStates<Stores>, ...args);
+    let newStates = [] as any[];
 
+    const snapshot = allStates.slice(0);
+    for (const storeId of ids) {
+      newStates[storeId] = snapshot[storeId];
+    }
+
+    const txStates = stores.map((store) => {
+      const { id } = store;
+      const get = () => newStates[id];
+      return isActionStore(store)
+        ? ({
+            get,
+            unsafe: get,
+            set: (newState) => {
+              if (store.canSet(newState)) {
+                newStates[id] = newState;
+                for (const process of processList[id]) {
+                  process(newStates);
+                }
+              }
+            },
+          } as TxState<any, WritableTag>)
+        : ({ get, unsafe: get } as ReadOnlyTxState<any>);
+    }) as TxStates<Stores>;
+
+    try {
+      const result = await txFn(txStates, ...args);
+
+      // Optimistic Concurrency Control (OCC)
       if (
-        ids.every(
-          (id) =>
-            Object.is(snapshot[id], allStates[id]) ||
-            Object.is(snapshot[id], newStates[id]),
-        )
+        ids.every((id) => {
+          const firstState = snapshot[id];
+          return (
+            Object.is(firstState, allStates[id]) ||
+            Object.is(firstState, newStates[id])
+          );
+        })
       ) {
         Object.assign(allStates, newStates);
         newStates = [];
