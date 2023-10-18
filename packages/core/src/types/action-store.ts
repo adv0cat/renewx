@@ -19,5 +19,6 @@ export interface ActionStore<State, TagType extends WritableTag>
   readonly readOnly: ReadOnlyStore<State, ToReadOnly<TagType>>;
   validator(fn: Validator<State>): Unsubscribe;
   isValid(oldState: Freeze<State>, newState: Freeze<State>): IsValid;
+  canSet(newState: ActionFnReturn<State, TagType>): boolean;
   set(newState: ActionFnReturn<State, TagType>, info?: ActionInfo): void;
 }

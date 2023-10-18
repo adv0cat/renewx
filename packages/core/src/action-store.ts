@@ -20,6 +20,15 @@ export const actionStore = <State, TagType extends WritableTag>(
 
   const { stateCheck } = config;
   const { id } = readOnly;
+  const canSet: ActionStore<State, TagType>["canSet"] = (returned) => {
+    const state = allStates[id];
+    return (
+      !readOnly.isOff &&
+      (!stateCheck || isStateChanged(state, returned)) &&
+      isValid(state, returned as Freeze<State>)
+    );
+  };
+
   const set: ActionStore<State, TagType>["set"] = (
     returned,
     info = getSetInfo(),
@@ -38,6 +47,7 @@ export const actionStore = <State, TagType extends WritableTag>(
     ...readOnly,
     tag: ("w" + readOnly.tag.slice(1)) as TagType,
     set,
+    canSet,
     isValid,
     readOnly,
     validator: (fn) => {
