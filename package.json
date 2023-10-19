@@ -26,6 +26,7 @@
     "state",
     "action",
     "validation",
+    "transaction",
     "reactive",
     "reactivity",
     "state-management",
