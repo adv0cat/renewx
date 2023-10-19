@@ -1,312 +1,422 @@
 # RenewX
 
-[![npm version](https://img.shields.io/npm/v/@renewx/core.svg?style=flat)](https://www.npmjs.com/package/@renewx/core) [![npm version](https://deno.bundlejs.com/?q=@renewx/core&treeshake=[{+store,adapter,watch+}]&badge=)](https://www.npmjs.com/package/@renewx/core) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/%40renewx/core)](https://www.npmjs.com/package/@renewx/core)
+[![downloads](https://img.shields.io/npm/dw/%40renewx/core)](https://www.npmjs.com/package/@renewx/core)
+[![bundle size](https://img.shields.io/bundlejs/size/%40renewx/core?exports=store%2Caction%2Cadapter%2Cwatch&label=bundlejs%20(gzip))](https://github.com/adv0cat/renewx)
+![npm type definitions](https://img.shields.io/npm/types/%40renewx%2Fcore)
+![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Install
+`RenewX` is a TypeScript state management library offering transaction and validation support for reliable data integrity. Its lightweight nature and straightforward setup make it a solid choice for seamless state handling in your projects.
 
-```shell
-npm i @renewx/core
+## Features
+
+- 🚀 **High Performance**: RenewX is engineered for speed, ensuring highly optimized data handling and minimal performance overhead. Experience lightning-fast state management, whether you're working with simple or complex data structures.
+- ❄️ **Freeze State**: All states are encapsulated with a Freeze type at the type level, ensuring immutability and preventing unintended mutations. This immutability facilitates efficient and swift data processing.
+- ✅ **Validation Support**: Maintain data integrity by utilizing built-in validation support for your state changes, allowing for custom validation logic.
+- 💯 **Transaction Handling**: Ensure reliable state updates with transaction support, implementing MVCC (Multiversion concurrency control), Snapshot Isolation, and Optimistic Concurrency Control (OCC) for safe concurrent modifications.
+- 🪶 **Lightweight**: A minimalistic and efficient solution for state management, keeping your project slim.
+- ♻️ **Zero Dependencies**: The library is self-contained with no external dependencies, making it a reliable and lightweight choice.
+- 📚 **Typescript Native**: Fully written in TypeScript, providing excellent type safety and developer experience.
+
+These features provide a solid foundation for building scalable and maintainable applications, ensuring your state management logic remains clean and understandable as your project grows.
+
+## Installation
+
+Install RenewX via npm:
+
+```bash
+npm install @renewx/core
 ```
+
+Or via yarn:
+
+```bash
+yarn add @renewx/core
+```
+
+## Quick Start
+
+In this quick start guide, we'll create a simple counter application to demonstrate the basic usage of `RenewX`. We will use a `store` to manage the state, an `action` to update the state, an `adapter` to compute derived state, and `watch` to respond to state changes.
+
+```typescript
+import { store, action, adapter, watch } from "@renewx/core";
+
+// 1. Create a store to hold the state of our counter
+const counter = store(0);
+
+// 2. Set a new value to the counter directly
+counter.set(5);
+
+// 3. Create an action to increment the counter
+const increment = action(counter, (state, amount: number) => state + amount);
+
+// 4. Create an adapter to compute the message to display based on the counter value
+const message = adapter(counter, (count) => `The counter is at: ${count}`);
+
+// 5. Watch for changes in the message and log them
+watch(message, (msg) => {
+  console.log(msg);
+});
+
+// Now, let's use the action to increment the counter:
+increment(1); // Console: The counter is at: 6
+increment(2); // Console: The counter is at: 8
+```
+
+In this updated example:
+
+- After creating a `store`, we use `set` to update the counter value directly.
+- The rest of the steps remain the same: create an `action`, an `adapter`, and use `watch` to log the message to the console whenever the message changes.
+- By running the `increment` action, we trigger a chain of updates that flows through the `action`, `adapter`, and `watch`, demonstrating the core features of `RenewX` in a simple scenario.
 
 ## Usage
 
-### Store
+Detailed examples for each functionality will be provided shortly. The core concepts include defining a store, creating actions to update the store, utilizing adapters for computed values, and setting up watchers to observe changes.
 
-#### Managing an array of URLs:
+### Defining a Store
 
-```ts
-import { store, action, watch } from "@renewx/core";
+Demonstration of creating a simple `store` to manage state.
 
-const urls = store<string[]>([]);
+```typescript
+import { store } from "@renewx/core";
 
-// Let's create an action that takes a URL
-// and adds it to the array,
-// returning a new array from the function,
-// thereby changing the state
-const addUrl = action(urls, (state, url: string) => {
-  return state.concat(url);
-});
-
-// Watching state changes returns an "unsubscribe" function;
-// invoking it will stop the watching
-const unsubscribe = watch(urls, (state) => {
-  console.log("urls:", state);
-});
-
-// Let's call the action and pass the URL to it
-addUrl("https://npmjs.com"); // urls: ["https://npmjs.com"]
-
-// You can also set the value using the default "set" action
-urls.set(["https://renewx.dev"]); // urls: ["https://renewx.dev"]
-
-// After use, you can unsubscribe.
-unsubscribe();
+const userData = store({ userId: 1, userName: "LeBron James", userScore: 0 });
 ```
 
-#### Managing DOM state and event handling:
+### Updating Store State
 
-```ts
-import { store, action, watch } from "@renewx/core";
+Illustration of updating `store` state using the store's `set` function.
 
-const element = store(document.getElementById("first"));
+```typescript
+// Updating the user data after a 5 second delay
+setTimeout(() => {
+  // Assume we have some new data to update
+  userData.set({ userId: 2, userName: "Kevin Durant", userScore: 30 });
+}, 5000);
+```
 
-// Let's create an action that will take an nextElement
-// and replace the current one with it
-const nextElement = action(element, (_, nextElement: HTMLElement) => {
-  return nextElement;
+### Creating and Using Action
+
+The difference between `set` and `action`:
+
+- `set` is used to update the entire state with a new object.
+- `action` is used to create a transformation for the state, which can be invoked later with semantic naming and additional parameters, allowing partial updates to the state.
+
+```typescript
+import { action } from "@renewx/core";
+
+const incrementScore = action(userData, (state, additionalScore) => {
+  return { userScore: state.userScore + additionalScore };
 });
+
+// Call the action with a value of 10
+incrementScore(10);
+```
+
+### Utilizing Adapters
+
+Creating an `adapter` to compute derived state based on the store’s state.
+
+```typescript
+import { adapter } from "@renewx/core";
+
+const userLevel = adapter(userData, (state) => {
+  return { level: state.userScore >= 100 ? "Advanced" : "Beginner" };
+});
+```
+
+### Watching Changes
+
+Setting up a `watch` to respond to state changes and log them to the console.
+
+```typescript
+import { watch } from "@renewx/core";
+
+watch([userData, userLevel], (state, levelState) => {
+  console.log("User Score:", state.userScore);
+  console.log("User Level:", levelState.level);
+});
+```
+
+### Setting Up Validations
+
+Implementing a `validator` to ensure only valid state updates are committed to the store.
+
+```typescript
+userData.validator((oldValue, newValue) => {
+  // Ensure the userScore is non-negative
+  return newValue.userScore >= 0;
+});
+
+// Now if a set operation tries to set a negative userScore, the state will not change
+userData.set({ userScore: -10 }); // The userData's state will remain unchanged due to the validator
+```
+
+### Implementing Transactions
+
+Executing a `transaction` that demonstrates `async` functionality.
+
+```typescript
+import { tx } from "@renewx/core";
+
+const updateScore = tx([userData], async ([userTxState], bonusScore) => {
+  const currentScore = userTxState.get().userScore;
+
+  // The Promise here simulates an asynchronous operation, like fetching data from a server.
+  // It demonstrates the ability to handle async operations within a transaction.
+  const bonus = await new Promise((resolve) =>
+    setTimeout(() => resolve(bonusScore), 2000),
+  );
+
+  const newScore = currentScore + bonus;
+  userTxState.set({ userScore: newScore });
+  return { newScore };
+});
+
+// Execute the transaction with additional arguments
+updateScore(50)
+  .then((result) => {
+    console.log("Transaction committed with result:", result);
+  })
+  .catch((reason) => {
+    console.error("Transaction rolled back due to:", reason);
+  });
+```
+
+### Grouping `action` with `actions` function
+
+The `actions` function helps group multiple actions for a store into a single semantic object, making it convenient to manage related actions together. This function takes a `store` and an object of `action` functions, returning an object that encapsulates all these `actions` for easy usage.
+
+```typescript
+import { store, actions } from "@renewx/core";
+
+const teamScore = store({ homeTeamScore: 0, awayTeamScore: 0 });
+
+const scoreActions = actions(teamScore, {
+  incrementHome: (state, points: number) => ({
+    homeTeamScore: state.homeTeamScore + points,
+    awayTeamScore: state.awayTeamScore,
+  }),
+  incrementAway: (state, points: number) => ({
+    homeTeamScore: state.homeTeamScore,
+    awayTeamScore: state.awayTeamScore + points,
+  }),
+  reset: () => ({
+    homeTeamScore: 0,
+    awayTeamScore: 0,
+  }),
+});
+
+// Initial: { homeTeamScore: 0, awayTeamScore: 0 }
+scoreActions.incrementHome(3); // { homeTeamScore: 3, awayTeamScore: 0 }
+scoreActions.incrementAway(2); // { homeTeamScore: 3, awayTeamScore: 2 }
+scoreActions.reset(); // { homeTeamScore: 0, awayTeamScore: 0 }
+```
+
+## Advanced Example
+
+### Subscribing and Unsubscribing to updates with `watch`
+
+Demonstration of returning an unsubscribe function in a `watch` callback to manage event listeners.
+
+```typescript
+import { watch } from "@renewx/core";
+
+const gameStatus = store({ isLive: false });
+
+// Assume there's an event emitter that emits game updates
+const gameUpdatesEmitter = new EventEmitter();
+
+// Function to handle game updates
+const handleGameUpdate = (update) => {
+  console.log("Game Update:", update);
+};
 
 // If you return a function in the "watch" callback,
 // it will be invoked as an unsubscribe function when the state changes.
-watch(element, (state) => {
-  const onClick = () => console.log("click");
-  state.addEventListener("click", onClick);
-  return () => {
-    state.removeEventListener("click", onClick);
-  };
+watch(gameStatus, (state) => {
+  if (state.isLive) {
+    console.log("Game is live!");
+
+    // Subscribing to game updates...
+    gameUpdatesEmitter.on("update", handleGameUpdate);
+
+    // Returning a function to unsubscribe when the game is no longer live
+    return () => {
+      // Unsubscribing from game updates...
+      gameUpdatesEmitter.off("update", handleGameUpdate);
+    };
+  } else {
+    console.log("Game is not live anymore!");
+  }
 });
 
-// After using the "first" element, we use the "second"
-nextElement(document.getElementById("second"));
-// or...
-// The same element change, but through the default "set" action
-element.set(document.getElementById("second"));
+// Simulating the game going live and then ending
+gameStatus.set({ isLive: true }); // Console: 'Game is live!'
+setTimeout(() => {
+  gameStatus.set({ isLive: false }); // Console: 'Game is not live anymore!'
+}, 1000);
 ```
 
-#### Watching multiple state stores using _watch_ function:
+### Utilizing Adapter with Multi-Stores
 
-```ts
-import { store, action, watch } from "@renewx/core";
+Illustrates how to create an `adapter` that derives data from multiple stores, showcasing the aggregation of data from different sources into a single computed value.
 
-const index = store(0);
-const add = action(index, (state, num: number) => state + num, "add");
-const title = store("Title");
-
-watch([index, title], ([index, title]) => {
-  console.log(`index: ${index}, title: "${title}"`);
-});
-
-add(2); // index: 2, title: "Title"
-title.set("Title of News"); // index: 2, title: "Title of News"
-add(40); // index: 42, title: "Title of News"
-```
-
-#### Grouping multiple actions into a typed _Actions_ object for easier usage:
-
-```ts
-import { store, actions, watch } from "@renewx/core";
-
-const index = actions(store(100), {
-  add: (state, b: number) => state + b,
-  minus: (state, b: number) => state - b,
-  toZero: () => 0,
-});
-
-watch(index.store, (state) => {
-  console.log("index:", state);
-});
-
-// index: 100
-index.add(42); // index: 142
-index.toZero(); // index: 0
-index.minus(13); // index: -13
-```
-
-#### Capturing mouse event type in store with _stateCheck_:
-
-```ts
-import { store, action, watch } from "@renewx/core";
-
-// First, we add a config for the store
-// so that it can change the state without checking.
-const event = store("", "event", { stateCheck: false });
-const onMouseEvent = action(
-  event,
-  (_, { type }: MouseEvent) => type,
-  "onMouseEvent",
-);
-
-// Secondly, we add a config for the watch function
-// so that it can look at the state without checking it.
-watch(event, (event) => console.log("event:", event), { stateCheck: false });
-
-document.addEventListener("click", onMouseEvent);
-```
-
-### Adapter
-
-#### Converting page-based pagination to API pagination format:
-
-```ts
+```typescript
 import { store, adapter } from "@renewx/core";
 
-interface PagePagination {
-  pageSize: number;
-  page: number;
-}
-interface ApiPagination {
-  offset: number;
-  limit: number;
-}
+const initialGameScore = { homeTeamScore: 0, awayTeamScore: 0 };
+const gameScore = store(initialGameScore);
 
-const pagePagination = store<PagePagination>({
-  pageSize: 10,
-  page: 1,
-});
-
-const apiPagination = adapter(pagePagination, ({ pageSize, page }) => {
-  const limit = page * pageSize;
-  return {
-    offset: limit - pageSize,
-    limit,
-  } as ApiPagination;
-});
-
-console.log("apiPagination:", apiPagination.get()); // apiPagination: { offset: 0, limit: 10 }
+const combinedData = adapter(
+  [userData, gameScore],
+  (userState, gameScoreState) => {
+    return {
+      userName: userState.userName,
+      homeTeamScore: gameScoreState.homeTeamScore,
+      awayTeamScore: gameScoreState.awayTeamScore,
+      totalScore:
+        userState.userScore +
+        gameScoreState.homeTeamScore +
+        gameScoreState.awayTeamScore,
+    };
+  },
+);
 ```
 
-#### Combined stores for use in an adapter:
+### Unsafe get a state without Freeze
 
-```ts
-import { store, adapter, action, watch } from "@renewx/core";
+Demonstration of obtaining a store's state without a `Freeze`, emphasizing the potential undefined behavior (UB) that may arise if the state is altered.
 
-const pageSize = store(10);
-const page = store(1);
-const pagination = adapter([pageSize, page], (pageSize, page) => {
-  const limit = page * pageSize;
-  return {
-    offset: limit - pageSize,
-    limit,
-  };
-});
+```typescript
+import { store } from "@renewx/core";
 
-const nextPage = action(page, (state) => state + 1);
-
-watch(pagination, (state) => {
-  console.log("pagination:", state);
-});
-
-// pagination: { offset: 0, limit: 10 }
-nextPage(); // pagination: { offset: 10, limit: 20 }
-nextPage(); // pagination: { offset: 20, limit: 30 }
+const player = store({ name: "LeBron James", age: 36 });
+const freezeState = player.get(); // Freeze<{ name: string, age: number }>
+// IMPORTANT!!! This is indeed unsafe, as if you alter the state,
+// it will lead to Undefined Behavior (UB)!!!
+const unsafeState = player.unsafe(); // { name: string, age: number }
 ```
 
-### Validator
+### Combining Features
 
-#### Validation of different stores with multiple levels
+Combining various features of `RenewX` to manage and derive state in a more complex scenario.
 
-```ts
-import { store, action, watch } from "@renewx/core";
+```typescript
+import { store, action, watch, tx } from "@renewx/core";
 
-interface Pagination {
-  pageSize: number;
-  page: number;
-}
+// Assume we have another store for managing teams
+const initialTeamData = { teamId: 1, teamName: "Lakers", teamScore: 0 };
+const teamData = store(initialTeamData);
 
-const pagination = store<Pagination>({
-  pageSize: 10,
-  page: 1,
+// Create an action to update team score based on individual user scores
+const updateTeamScore = action(teamData, (state, additionalScore) => {
+  return { teamScore: state.teamScore + additionalScore };
 });
-const isLoading = store("not loading");
 
-pagination.validator((_, state) => state.page > 0);
-isLoading.validator(
-  (old, state) =>
-    (old === "loading" && state === "not loading") ||
-    (old === "not loading" && state === "loading"),
+// Create a transaction to reset user score and update team score
+const resetAndUpdate = tx(
+  [userData, teamData],
+  async ([userTxState, teamTxState], bonusScore, penaltyScore) => {
+    // Reset user score
+    userTxState.set({ userScore: 0 });
+
+    // Simulate async operation, e.g., fetching data from server
+    const teamBonusScore = await new Promise((resolve) =>
+      setTimeout(() => resolve(bonusScore), 2000),
+    );
+
+    // Apply penalty if any
+    const currentTeamScore = teamTxState.get().teamScore;
+    const newTeamScore = currentTeamScore + teamBonusScore - penaltyScore;
+    teamTxState.set({ teamScore: newTeamScore });
+
+    return { newTeamScore };
+  },
 );
 
-watch([pagination, isLoading], ([{ page }, isLoading]) => {
-  console.log(`page: ${page}, isLoading: "${isLoading}"`);
+// Watch the team score
+watch(teamData, (state) => {
+  console.log("Team Score:", state.teamScore);
 });
 
-isLoading.set("loading"); // isLoading: "loading" - changed, because from "not loading" to "loading"
-isLoading.set("not loading"); // isLoading: "not loading" - changed, because from "loading" to "not loading"
-isLoading.set("wrong value"); // not changed, because from "not loading" to "wrong value"
-
-const loadPrevPage = action(pagination, ({ page, pageSize }) => ({
-  page: page - 1,
-  pageSize,
-}));
-const loadNextPage = action(pagination, ({ page, pageSize }) => ({
-  page: page + 1,
-  pageSize,
-}));
-
-loadPrevPage(); // not changed, because state.page === 0 in pagination validator
-loadNextPage(); // page: 2
-loadPrevPage(); // page: 1
-loadPrevPage(); // not changed, because state.page === 0 in pagination validator
+// Execute the transaction with additional arguments
+resetAndUpdate(100, 20) // bonusScore = 100, penaltyScore = 20
+  .then((result) => {
+    console.log("Transaction committed with result:", result);
+  })
+  .catch((reason) => {
+    console.error("Transaction rolled back due to:", reason);
+  });
 ```
 
-### ReadOnly
+### Accessing a Read-Only Version of Store
 
-#### Returning a read-only store
+In this example, we showcase how to access a read-only version of a store using the `readOnly` property. This allows for monitoring state changes without the ability to modify the state through actions. This can be particularly useful in scenarios where you want to ensure that certain parts of your code are only able to read the state, not modify it.
 
-```ts
+```typescript
 import { store, action, watch } from "@renewx/core";
 
-const count = store(0, "count");
-const add = action(count, (count, num: number) => count + num, "add");
+// Initial state for team score
+const teamScore = store(0);
 
-watch(count.readOnly, (state) => {
-  console.log("count state:", state);
+// Action to update team score
+const updateScore = action(
+  teamScore,
+  (currentScore, points: number) => currentScore + points,
+  "updateScore",
+);
+
+// Accessing a read-only version of the store
+watch(teamScore.readOnly, (score) => {
+  console.log("Team score:", score);
 });
 
-// count state: 0
-add(10); // count state: 10
-add(3); // count state: 13
+// Initial Team score: 0
+updateScore(10); // Team score: 10
+updateScore(3); // Team score: 13
 ```
 
-### Unsafe
+### Optimizing Adapter Creation with Batch
 
-#### Unsafe get a state without Freeze
+This example demonstrates how to optimize the creation of adapters for a store using the `batch` method. By batching the creation of adapters, you significantly reduce the time it takes to process, especially when dealing with a large number of adapters. The adapters are stored in `totalScoreAdapters` and `optimizedTotalScoreAdapters` arrays for further use.
 
-```ts
-import { store, watch } from "@renewx/core";
-
-const user = store({ name: "Jack", age: 42 }, "user");
-const freezeState = user.get(); // Freeze<{ name: string, age: number }>
-// IMPORTANT!!! This is indeed unsafe, as if you alter the state,
-// it will lead to an Undefined Behaviour (UB)!!!
-const unsafeState = user.unsafe(); // { name: string, age: number }
-```
-
-### Batch
-
-#### Using batching for adapter store creation
-
-```ts
+```typescript
 import { store, adapter, batch } from "@renewx/core";
 
 let start: number;
 let end: number;
 
-// Generating an array of numbers from 0 to 1000
-const base = Array(1000)
+// Assume we have a list of players with their respective scores
+const players = Array(1000)
   .fill(0)
-  .map((_, i) => i);
+  .map((_, i) => ({ id: i, score: i * 2 }));
 
 // Initial state
-const entry = store(0);
+const teamScore = store(0);
 
-// Function for creating adapters
-const createAdapter = (v: number) => adapter(entry, (state) => state + v);
+// Function for creating adapters to calculate the total score, considering both player and team scores
+const createTotalScoreAdapter = (player) =>
+  adapter(teamScore, (state) => state + player.score);
 
 // Without batching
 start = performance.now();
-base.map(createAdapter);
+const totalScoreAdapters = players.map(createTotalScoreAdapter);
 end = performance.now();
 
-console.log(end - start); // 1178ms
+console.log(end - start); // Hypothetical time: 1178ms
 
 // or...
 // With batching
 start = performance.now();
 batch.stores.start();
-base.map(createAdapter);
+const optimizedTotalScoreAdapters = players.map(createTotalScoreAdapter);
 batch.stores.end();
 end = performance.now();
 
-console.log(end - start); // 25ms
+console.log(end - start); // Hypothetical time: 25ms
 ```
+
+## Documentation
+
+Currently, the documentation is being developed. However, you can find a couple of examples for each module within the library to get started. More comprehensive documentation will be provided in the near future.
