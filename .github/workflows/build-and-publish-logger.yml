@@ -11,7 +11,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - name: NPM install
         run: npm ci
@@ -37,6 +37,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,7 +48,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           registry-url: https://registry.npmjs.org/
 
       - name: Download build artifacts
@@ -53,6 +57,6 @@ jobs:
           name: logger-package-artifacts
 
       - name: Publish NPM package
-        run: npm publish --access=public
+        run: npm publish --provenance --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLIC }}
