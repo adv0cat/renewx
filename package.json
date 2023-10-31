@@ -9,6 +9,7 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "update": "npx npm-check-updates -u",
+    "core:minor": "npm version minor --workspace @renewx/core",
     "core:patch": "npm version patch --workspace @renewx/core",
     "core:publish": "npm run build; npm pack --workspace @renewx/core",
     "logger:patch": "npm version patch --workspace @renewx/logger",
