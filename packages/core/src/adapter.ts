@@ -1,10 +1,8 @@
 import type { AnyStore } from "./types/any-store";
-import type { Adapter } from "./types/adapter";
-import type { AdapterTag } from "./types/tag";
+import { Adapter, AdapterStore } from "./types/adapter";
 import type { Freeze } from "./types/freeze";
 import type { AdapterStoreName } from "./types/name";
 import type { Config } from "./types/config";
-import type { ReadOnlyStore } from "./types/read-only-store";
 import { readOnlyStore } from "./read-only-store";
 import { saveStore } from "./api/store-api";
 import { addAdjacency } from "./api/directed-acyclic-graph";
@@ -16,7 +14,7 @@ export const adapter: Adapter = <ToState>(
   adapt: (...state: any[]) => ToState,
   storeName: string = "",
   config: Partial<Config> = {},
-): ReadOnlyStore<ToState, AdapterTag> => {
+): AdapterStore<ToState> => {
   const storeList = Array.isArray(stores) ? stores : [stores];
   const dependsOn = storeList.map(({ id }) => id);
   const getNewState = (states: any[]) => adapt(...states) as Freeze<ToState>;
