@@ -3,7 +3,6 @@ import type { AnyStoreName } from "./types/name";
 import type { ReadableTag } from "./types/tag";
 import { getUnWatchList } from "./api/queue-api";
 import type { ReadOnlyStore } from "./types/read-only-store";
-import type { Unsubscribe } from "./types/core";
 import type { Freeze } from "./types/freeze";
 import { createAdjacency } from "./api/directed-acyclic-graph";
 import { allStates } from "./api/new-state-api";
@@ -14,7 +13,6 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
   storeName: string,
   name: (storeID: StoreID) => AnyStoreName,
   tag: TagType,
-  off?: Unsubscribe,
 ): ReadOnlyStore<State, TagType> => {
   const storeID: StoreID = i++;
   allStates[storeID] = initState;
@@ -31,7 +29,6 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
     isOff: false,
     off: () => {
       _store.isOff = true;
-      off?.();
       watchers.forEach((fn) => fn());
       watchers.clear();
     },
