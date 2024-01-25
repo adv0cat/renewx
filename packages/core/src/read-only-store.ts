@@ -20,18 +20,18 @@ export const readOnlyStore = <State, TagType extends ReadableTag>(
   createAdjacency(storeID);
 
   const get = () => allStates[storeID];
-  const _store: ReadOnlyStore<State, TagType> = {
+  let isOff = false;
+  return {
     id: storeID,
     tag,
     get,
     unsafe: get,
     name: (): AnyStoreName => (storeName ||= name(storeID)),
-    isOff: false,
+    isOff: () => isOff,
     off: () => {
-      _store.isOff = true;
+      isOff = true;
       watchers.forEach((fn) => fn());
       watchers.clear();
     },
   };
-  return _store;
 };

@@ -8,7 +8,7 @@ export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag> {
   get(): Freeze<State>;
   unsafe(): State;
   name(): AnyStoreName;
-  isOff: boolean;
   off(): void;
+  isOff(): boolean;
   tag: TagType;
 }

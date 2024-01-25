@@ -65,7 +65,7 @@ export const addProcessNewState = <ToState>(
   const buffer = new Array(dependsOn.length);
 
   processList[id] = (states) => {
-    if (!store.isOff) {
+    if (!store.isOff()) {
       index = 0;
       for (const storeId of dependsOn) {
         buffer[index++] = states[storeId];
