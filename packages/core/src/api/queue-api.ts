@@ -68,7 +68,7 @@ export const notify = (
   info?: ActionInfo,
 ) => {
   if (unWatchList.size !== 0) {
-    let index = 0;
+    let index;
     if (batching && ~(index = queue.indexOf(unWatchList, queueIndex))) {
       queue[index - 1] = state;
       queue[index + 1] = info;

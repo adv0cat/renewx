@@ -1,5 +1,5 @@
 import type { AnyStore } from "./types/any-store";
-import { Adapter, AdapterStore } from "./types/adapter";
+import type { Adapter, AdapterStore } from "./types/adapter";
 import type { Freeze } from "./types/freeze";
 import type { AdapterStoreName } from "./types/name";
 import type { Config } from "./types/config";
