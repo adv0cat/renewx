@@ -22,5 +22,5 @@ export const actions = <
       result[key] = action(store, actions[key], key as string);
       return result;
     },
-    { store, set: store.set } as Actions<Store, ActionsFn>,
+    { store, set: store.set, off: store.off } as Actions<Store, ActionsFn>,
   ) as Actions<Store, ActionsFn> & StoreActions<Store>;

@@ -17,4 +17,5 @@ export interface StoreActions<Store extends AnyActionStore> {
       : never,
     info?: ActionInfo,
   ): void;
+  off(): void;
 }
