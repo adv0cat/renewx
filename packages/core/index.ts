@@ -22,6 +22,7 @@ export type { AdapterStore } from "./src/types/adapter";
 
 export type { Unsubscribe } from "./src/types/core";
 export type { Freeze } from "./src/types/freeze";
+export type { Off } from "./src/types/off";
 
 export type {
   ToReadOnly,
