@@ -13,7 +13,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
   watcher: (states: any, info?: ActionInfo) => Unsubscribe | void,
   config: Partial<Config> = {},
 ): Unsubscribe => {
-  const { stateCheck } = mergeConfig(config);
+  const stateCheck = mergeConfig(config).stateCheck;
 
   const isSingleStore = !Array.isArray(store);
   const stores = (isSingleStore ? [store] : store) as AnyStore[];

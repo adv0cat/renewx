@@ -20,7 +20,7 @@ export const tx = <
   let processList = [] as Process[][];
 
   for (const store of stores) {
-    const { id } = store;
+    const id = store.id;
     const deepAdjacencyList = getDeepAdjacencyList(id);
 
     ids = ids.concat(id, deepAdjacencyList);
@@ -39,7 +39,7 @@ export const tx = <
     }
 
     const txStates = stores.map((store) => {
-      const { id } = store;
+      const id = store.id;
       const get = () => newStates[id];
       return isActionStore(store)
         ? ({

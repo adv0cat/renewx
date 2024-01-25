@@ -18,8 +18,8 @@ export const actionStore = <State, TagType extends WritableTag>(
     newState,
   ) => validators.every((fn) => fn(oldState, newState));
 
-  const { stateCheck } = config;
-  const { id } = readOnly;
+  const stateCheck = config.stateCheck;
+  const id = readOnly.id;
   const canSet: ActionStore<State, TagType>["canSet"] = (returned) => {
     const state = allStates[id];
     return (

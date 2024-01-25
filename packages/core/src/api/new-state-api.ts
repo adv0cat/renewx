@@ -58,8 +58,8 @@ export const addProcessNewState = <ToState>(
   getNewState: (states: any[]) => Freeze<ToState>,
   config: Config,
 ) => {
-  const { stateCheck } = config;
-  const { id } = store;
+  const stateCheck = config.stateCheck;
+  const id = store.id;
 
   let index = 0;
   const buffer = new Array(dependsOn.length);
