@@ -4,6 +4,7 @@
   "description": "Lightweight state management library with validation support",
   "workspaces": [
     "packages/core",
+    "packages/vue3",
     "packages/logger"
   ],
   "scripts": {
@@ -12,6 +13,8 @@
     "core:minor": "npm version minor --workspace @renewx/core",
     "core:patch": "npm version patch --workspace @renewx/core",
     "core:publish": "npm run build; npm pack --workspace @renewx/core",
+    "vue3:patch": "npm version patch --workspace @renewx/vue3",
+    "vue3:publish": "npm run build --workspace @renewx/vue3; npm pack --workspace @renewx/vue3",
     "logger:patch": "npm version patch --workspace @renewx/logger",
     "logger:publish": "npm run build; npm pack --workspace @renewx/logger"
   },

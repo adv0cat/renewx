@@ -1,0 +1,31 @@
+{
+  "name": "@renewx/vue3",
+  "version": "0.0.1",
+  "private": false,
+  "sideEffects": false,
+  "description": "Vue 3 bindings for RenewX",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist; npm run build:lib -- --analyze=verbose; tsc --emitDeclarationOnly",
+    "build:lib": "esbuild ./index.ts --bundle --external:@renewx/core --external:vue --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
+  },
+  "peerDependencies": {
+    "@renewx/core": ">=0.1.1",
+    "vue": ">=3.3.1"
+  },
+  "devDependencies": {
+    "vue": ">=3.4.15"
+  },
+  "author": "adv0cat",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adv0cat/renewx.git"
+  },
+  "files": [
+    "./dist/index.*",
+    "./dist/src"
+  ]
+}

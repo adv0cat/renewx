@@ -1,0 +1,62 @@
+name: Build and Publish @renewx/vue3
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: NPM install
+        run: npm ci
+
+      - name: Build NPM package
+        run: npm run build
+
+      - name: Copy LICENSE
+        run: cp LICENSE packages/vue3/LICENSE
+
+      - name: Save package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vue3-package-artifacts
+          path: |
+            packages/vue3/dist/index.*
+            packages/vue3/dist/src
+            packages/vue3/package.json
+            packages/vue3/LICENSE
+            packages/vue3/README.md
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vue3-package-artifacts
+
+      - name: Publish NPM package
+        run: npm publish --provenance --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLIC }}
