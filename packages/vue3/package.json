@@ -1,6 +1,6 @@
 {
   "name": "@renewx/vue3",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "sideEffects": false,
   "description": "Vue 3 bindings for RenewX",
