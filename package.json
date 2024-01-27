@@ -21,7 +21,7 @@
   "author": "adv0cat",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "0.19.12",
+    "esbuild": "0.20.0",
     "prettier": "^3.2.4",
     "typescript": "^5.3.3",
     "vue": "^3.4.15"
