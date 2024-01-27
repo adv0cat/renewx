@@ -16,7 +16,7 @@
     "vue3:patch": "npm version patch --workspace @renewx/vue3",
     "vue3:publish": "npm run build --workspace @renewx/vue3; npm pack --workspace @renewx/vue3",
     "logger:patch": "npm version patch --workspace @renewx/logger",
-    "logger:publish": "npm run build; npm pack --workspace @renewx/logger"
+    "logger:publish": "npm run build --workspace @renewx/logger; npm pack --workspace @renewx/logger"
   },
   "author": "adv0cat",
   "license": "MIT",
