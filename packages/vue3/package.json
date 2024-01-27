@@ -1,6 +1,6 @@
 {
   "name": "@renewx/vue3",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Vue 3 bindings for RenewX",
   "type": "module",
   "main": "dist/index.js",
