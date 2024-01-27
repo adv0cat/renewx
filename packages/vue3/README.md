@@ -1,11 +1,19 @@
 # @renewx/vue3
 
-[![npm version](https://img.shields.io/npm/v/@renewx/vue3.svg?style=flat)](https://www.npmjs.com/package/@renewx/vue3) [![npm version](https://deno.bundlejs.com/?q=@renewx/vue3&treeshake=[{+useStore+}]&badge=)](https://www.npmjs.com/package/@renewx/vue3) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@renewx/vue3.svg?style=flat)](https://www.npmjs.com/package/@renewx/vue3) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
 
-## Install
+## Installation
 
-```shell
+Install via npm:
+
+```bash
 npm i @renewx/vue3
+```
+
+Or via yarn:
+
+```bash
+yarn add @renewx/vue3
 ```
 
 ## Usage
