@@ -1,12 +1,12 @@
 {
   "name": "@renewx/vue3",
   "version": "0.0.2",
-  "private": false,
-  "sideEffects": false,
   "description": "Vue 3 bindings for RenewX",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "private": false,
+  "sideEffects": false,
   "scripts": {
     "build": "rm -rf dist; npm run build:lib -- --analyze=verbose; tsc --emitDeclarationOnly",
     "build:lib": "esbuild ./index.ts --bundle --external:@renewx/core --external:vue --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
@@ -15,15 +15,26 @@
     "@renewx/core": ">=0.1.1",
     "vue": ">=3.3.1"
   },
-  "devDependencies": {
-    "vue": ">=3.4.15"
-  },
-  "author": "adv0cat",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adv0cat/renewx.git"
   },
+  "keywords": [
+    "store",
+    "state",
+    "action",
+    "reactive",
+    "reactivity",
+    "state manager",
+    "vue",
+    "vue 3"
+  ],
+  "author": "adv0cat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adv0cat/renewx/issues"
+  },
+  "homepage": "https://github.com/adv0cat/renewx#readme",
   "files": [
     "./dist/index.*",
     "./dist/src"
