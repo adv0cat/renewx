@@ -25,3 +25,7 @@ import { initLogger } from "@renewx/logger";
 
 initLogger(console.log);
 ```
+
+## Docs
+
+Read full docs **[here](https://github.com/adv0cat/renewx#readme)**.
