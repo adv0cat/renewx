@@ -1,8 +1,15 @@
-import { customRef, getCurrentScope, onScopeDispose, type Ref } from "vue";
+import {
+  customRef,
+  getCurrentScope,
+  onScopeDispose,
+  type ShallowRef,
+} from "vue";
 import { type AnyStore, type Freeze, isActionStore, watch } from "@renewx/core";
 
-export function useStore<T>(store: AnyStore<T>): Ref<Freeze<T>> {
-  return customRef(
+const CACHE: ShallowRef<Freeze<any>>[] = [];
+
+export function useStore<T>(store: AnyStore<T>): ShallowRef<Freeze<T>> {
+  return (CACHE[store.id] ??= customRef(
     (track, trigger) =>
       (getCurrentScope() && onScopeDispose(watch(store, trigger))) || {
         get: () => {
@@ -11,5 +18,5 @@ export function useStore<T>(store: AnyStore<T>): Ref<Freeze<T>> {
         },
         set: isActionStore(store) ? store.set : trigger,
       },
-  );
+  ));
 }
