@@ -1,11 +1,19 @@
 # @renewx/logger
 
-[![npm version](https://img.shields.io/npm/v/@renewx/logger.svg?style=flat)](https://www.npmjs.com/package/@renewx/logger) [![npm version](https://deno.bundlejs.com/?q=@renewx/logger&treeshake=[{+initLogger+}]&badge=)](https://www.npmjs.com/package/@renewx/logger) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@renewx/logger.svg?style=flat)](https://www.npmjs.com/package/@renewx/logger) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/adv0cat/renewx/blob/main/LICENSE)
 
-## Install
+## Installation
 
-```shell
+Install via npm:
+
+```bash
 npm i @renewx/logger
+```
+
+Or via yarn:
+
+```bash
+yarn add @renewx/logger
 ```
 
 ## Usage
