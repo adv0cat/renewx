@@ -14,7 +14,11 @@ export { ActionAPI } from "./src/api/action-api";
 
 export { isActionStore, isAnyStore } from "./src/utils/is";
 
-export type { AnyStore } from "./src/types/any-store";
+export type {
+  AnyStore,
+  AnyActionStore,
+  AnyStoreState,
+} from "./src/types/any-store";
 export type { ReadOnlyStore } from "./src/types/read-only-store";
 export type { ActionStore } from "./src/types/action-store";
 export type { Store } from "./src/types/store";
