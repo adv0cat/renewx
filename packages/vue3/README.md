@@ -18,6 +18,12 @@ yarn add @renewx/vue3
 
 ## Usage
 
+### Store state
+
+Subscribe to store changes and use reactive store state
+
+> ⚠️ But remember that `useStore` returns `ShallowRef<Freeze<T>>`
+
 ```vue
 <template>
   <h1 v-if="isShow">{{ User.nickname }}</h1>
@@ -32,3 +38,7 @@ yarn add @renewx/vue3
   const IsShow = useStore(isShow);
 </script>
 ```
+
+## Docs
+
+Read full docs **[here](https://github.com/adv0cat/renewx#readme)**.
