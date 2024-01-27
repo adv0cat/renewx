@@ -25,18 +25,22 @@ Subscribe to store changes and use reactive store state
 > ⚠️ But remember that `useStore` returns `ShallowRef<Freeze<T>>`
 
 ```vue
-<template>
-  <h1 v-if="isShow">{{ User.nickname }}</h1>
-  <button v-on:click="isShow = !isShow">Toggle me</button>
-</template>
-
 <script setup lang="ts">
   import { useStore } from "@renewx/vue3";
-  import { user, isShow } from "../stores/user";
+  import { title } from "../stores/title";
+  import { user } from "../stores/user";
+  import { isShow } from "../stores/isShow";
 
+  const Title = useStore(title);
   const User = useStore(user);
   const IsShow = useStore(isShow);
 </script>
+
+<template>
+  <h1 v-text="Title" />
+  <button v-on:click="IsShow = !IsShow">Toggle me</button>
+  <span v-if="IsShow">{{ User.nickname }}</span>
+</template>
 ```
 
 ## Docs
