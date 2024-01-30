@@ -1,7 +1,7 @@
 import type { Unsubscribe } from "./core";
-import type { Off } from "./off";
+import type { HasOff, Off } from "./off";
 
-export type Disposable = Off | Unsubscribe | undefined | null;
+export type Disposable = HasOff | Unsubscribe | undefined | null;
 
 export interface Cleaner extends Off {
   add(...items: Disposable[]): void;

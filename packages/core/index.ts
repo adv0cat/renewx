@@ -4,6 +4,7 @@ export { adapter } from "./src/adapter";
 export { watch } from "./src/fn/watch";
 export { action, actions } from "./src/fn/actions";
 export { cleaner } from "./src/fn/cleaner";
+export { addOff } from "./src/fn/add-off";
 export { tx } from "./src/utils/tx";
 
 export { mainConfig } from "./src/main-config";
@@ -24,6 +25,16 @@ export type { ActionStore } from "./src/types/action-store";
 export type { Store } from "./src/types/store";
 export type { AdapterStore } from "./src/types/adapter";
 // TODO: export JoinStore after update join store
+
+export type {
+  WithOff,
+  HasStore,
+  HasStoreWith,
+  HasReadOnlyStoreWith,
+} from "./src/types/add-off";
+export type { Cleaner } from "./src/types/cleaner";
+export type { Watcher } from "./src/types/watch";
+export type { StoreActions } from "./src/types/actions";
 
 export type { Unsubscribe } from "./src/types/core";
 export type { Freeze } from "./src/types/freeze";
