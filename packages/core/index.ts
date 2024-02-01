@@ -39,6 +39,7 @@ export type { StoreActions } from "./src/types/actions";
 export type { Unsubscribe } from "./src/types/core";
 export type { Freeze } from "./src/types/freeze";
 export type { Off } from "./src/types/off";
+export type { Config } from "./src/types/config";
 
 export type {
   ToReadOnly,
