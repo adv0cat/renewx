@@ -41,7 +41,7 @@ Subscribe to store changes and use reactive store state
 
   const Title = useStore(title);
   const User = useStore(user);
-  const IsShow = useStore(store(false, "IS-SHOW"), true);
+  const IsShow = useStore(store(false, "IS-SHOW"), { withOff: true });
 </script>
 
 <template>
@@ -50,6 +50,13 @@ Subscribe to store changes and use reactive store state
   <span v-if="IsShow">{{ User.nickname }}</span>
 </template>
 ```
+
+In `useStore`, you can pass a configuration object with the following parameters:
+
+- `withOff: boolean` – when `true`, the store is automatically removed upon component unmount in Vue 3.
+- `stateCheck: boolean` – when `false`, state change checks are disabled.
+
+---
 
 ## Docs
 
