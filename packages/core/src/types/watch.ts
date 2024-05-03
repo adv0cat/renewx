@@ -18,6 +18,7 @@ export interface Watch {
   ): Unsubscribe;
 }
 
+// TODO: add isFirst to Watcher
 export type Watcher<State> = (
   state: Freeze<State>,
   info?: ActionInfo,

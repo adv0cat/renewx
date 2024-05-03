@@ -6,21 +6,27 @@ import type { Config } from "./types/config";
 import { readOnlyStore } from "./read-only-store";
 import { saveStore } from "./api/store-api";
 import { addAdjacency } from "./api/directed-acyclic-graph";
-import { addProcessNewState } from "./api/new-state-api";
+import { addProcessNewState, NewStateFn } from "./api/new-state-api";
 import { mergeConfig } from "./main-config";
 
 export const adapter: Adapter = <ToState>(
   stores: AnyStore | AnyStore[],
-  adapt: (...state: any[]) => ToState,
+  adapt: (states: any[] | any, isFirst: boolean) => ToState,
   storeName: string = "",
   config: Partial<Config> = {},
 ): AdapterStore<ToState> => {
-  const storeList = Array.isArray(stores) ? stores : [stores];
+  const isSingleStore = !Array.isArray(stores);
+  const storeList = (isSingleStore ? [stores] : stores) as AnyStore[];
   const dependsOn = storeList.map(({ id }) => id);
-  const getNewState = (states: any[]) => adapt(...states) as Freeze<ToState>;
+
+  const getNewState: NewStateFn<ToState> = (states, isFirst) =>
+    adapt(isSingleStore ? states[0] : states, isFirst) as Freeze<ToState>;
 
   const _readOnlyStore = readOnlyStore(
-    getNewState(storeList.map(({ get }) => get())),
+    getNewState(
+      storeList.map(({ get }) => get()),
+      true,
+    ),
     storeName,
     (storeID): AdapterStoreName => `${storeID}:[${dependsOn.join(",")}]`,
     "ra",
