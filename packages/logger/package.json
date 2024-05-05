@@ -12,7 +12,7 @@
     "build:lib": "esbuild ./index.ts --bundle --external:@renewx/core --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
   },
   "peerDependencies": {
-    "@renewx/core": ">=0.0.39"
+    "@renewx/core": ">=0.2.0"
   },
   "repository": {
     "type": "git",
