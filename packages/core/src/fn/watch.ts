@@ -29,7 +29,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
 
   const watchers = stores.map<
     [QueueWatcher<any>, Map<QueueWatcher<any>, Unsubscribe>]
-  >(({ id }, index) => {
+  >((s, index) => {
     const storeWatch: QueueWatcher<any> = (newState, info): Unsubscribe => {
       if (!stateCheck) {
         fromStates[index] = newState;
@@ -38,7 +38,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
         unWatch = watcher(
           isSingleStore
             ? (fromStates[index] = newState)
-            : (fromStates = stores.map(({ get }) => get())),
+            : (fromStates = stores.map((v) => v.get())),
           false,
           info,
         );
@@ -47,7 +47,7 @@ export const watch: Watch = <Stores extends AnyStore | AnyStore[]>(
       return mainUnWatch;
     };
 
-    return [storeWatch, getUnWatchList(id).set(storeWatch, mainUnWatch)];
+    return [storeWatch, getUnWatchList(s.id).set(storeWatch, mainUnWatch)];
   });
 
   try {

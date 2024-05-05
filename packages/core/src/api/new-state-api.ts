@@ -8,10 +8,6 @@ import type { ActionInfo } from "../types/action";
 import { getUnWatchList, notify, runQueue } from "./queue-api";
 
 export type Process = (states: any[]) => 1 | undefined;
-export type NewStateFn<ToState> = (
-  states: any[],
-  isFirst: boolean,
-) => Freeze<ToState>;
 
 const processList: Process[] = [];
 
@@ -58,7 +54,7 @@ export const getProcess = (id: StoreID): Process | undefined => processList[id];
 export const addProcessNewState = <ToState>(
   store: ReadOnlyStore<ToState>,
   dependsOn: StoreID[],
-  getNewState: NewStateFn<ToState>,
+  getNewState: (states: any[]) => Freeze<ToState>,
   config: Config,
 ) => {
   const stateCheck = config.stateCheck;
@@ -74,7 +70,7 @@ export const addProcessNewState = <ToState>(
         buffer[index++] = states[storeId];
       }
 
-      const newState = getNewState(buffer, false);
+      const newState = getNewState(buffer);
       if (!stateCheck || isStateChanged(states[id], newState)) {
         states[id] = newState;
         return 1;

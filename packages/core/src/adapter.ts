@@ -6,7 +6,7 @@ import type { Config } from "./types/config";
 import { readOnlyStore } from "./read-only-store";
 import { saveStore } from "./api/store-api";
 import { addAdjacency } from "./api/directed-acyclic-graph";
-import { addProcessNewState, NewStateFn } from "./api/new-state-api";
+import { addProcessNewState } from "./api/new-state-api";
 import { mergeConfig } from "./main-config";
 
 export const adapter: Adapter = <ToState>(
@@ -16,17 +16,13 @@ export const adapter: Adapter = <ToState>(
   config: Partial<Config> = {},
 ): AdapterStore<ToState> => {
   const isSingleStore = !Array.isArray(stores);
-  const storeList = (isSingleStore ? [stores] : stores) as AnyStore[];
-  const dependsOn = storeList.map(({ id }) => id);
-
-  const getNewState: NewStateFn<ToState> = (states, isFirst) =>
-    adapt(isSingleStore ? states[0] : states, isFirst) as Freeze<ToState>;
+  const dependsOn = isSingleStore ? [stores.id] : stores.map((v) => v.id);
 
   const _readOnlyStore = readOnlyStore(
-    getNewState(
-      storeList.map(({ get }) => get()),
+    adapt(
+      isSingleStore ? stores.get() : stores.map((v) => v.get()),
       true,
-    ),
+    ) as Freeze<ToState>,
     storeName,
     (storeID): AdapterStoreName => `${storeID}:[${dependsOn.join(",")}]`,
     "ra",
@@ -36,7 +32,9 @@ export const adapter: Adapter = <ToState>(
   addProcessNewState(
     _readOnlyStore,
     dependsOn,
-    getNewState,
+    isSingleStore
+      ? (states) => adapt(states[0], false) as Freeze<ToState>
+      : (states) => adapt(states, false) as Freeze<ToState>,
     mergeConfig(config),
   );
 
