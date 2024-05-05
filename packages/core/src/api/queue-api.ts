@@ -1,9 +1,9 @@
 import type { Unsubscribe } from "../types/core";
 import type { ActionInfo } from "../types/action";
 import type { StoreID } from "../types/id";
-import type { Watcher } from "../types/watch";
+import type { QueueWatcher } from "../types/watch";
 
-const watchers: Record<StoreID, Map<Watcher<any>, Unsubscribe>> = {};
+const watchers: Record<StoreID, Map<QueueWatcher<any>, Unsubscribe>> = {};
 
 let batching = false;
 export const batchQueueStart = () => (batching = true);
@@ -17,12 +17,12 @@ export const getFn = (fn: any): Unsubscribe =>
   typeof fn === "function" ? fn : noop;
 
 let watcherInQueue: any;
-export const globalUnWatch = (watcher: Watcher<any>): true =>
+export const globalUnWatch = (watcher: QueueWatcher<any>): true =>
   watcherInQueue !== watcher || !(watcherInQueue = 0); // We always need to return true
 
 /**
  * queue[i] - state: any
- * queue[i + 1] - unWatchList: Map<Watcher<any>, Unsubscribe>
+ * queue[i + 1] - unWatchList: Map<QueueWatcher<any>, Unsubscribe>
  * queue[i + 2] - info?: ActionInfo
  */
 let queue = [] as any[];
@@ -38,7 +38,10 @@ export const runQueue = (): void => {
   isQueueRunning = true;
 
   for (; queueIndex < queueLength; queueIndex += 3) {
-    const unWatchList = queue[queueIndex + 1];
+    const unWatchList = queue[queueIndex + 1] as Map<
+      QueueWatcher<any>,
+      Unsubscribe
+    >;
     for (const [watcher, unWatch] of unWatchList) {
       watcherInQueue = watcher;
       try {
@@ -64,7 +67,7 @@ export const runQueue = (): void => {
 
 export const notify = (
   state: any,
-  unWatchList: Map<Watcher<any>, Unsubscribe>,
+  unWatchList: Map<QueueWatcher<any>, Unsubscribe>,
   info?: ActionInfo,
 ) => {
   if (unWatchList.size !== 0) {
@@ -80,5 +83,5 @@ export const notify = (
 
 export const getUnWatchList = <State>(
   id: StoreID,
-): Map<Watcher<State>, Unsubscribe> =>
-  (watchers[id] ??= new Map<Watcher<State>, Unsubscribe>());
+): Map<QueueWatcher<State>, Unsubscribe> =>
+  (watchers[id] ??= new Map<QueueWatcher<State>, Unsubscribe>());
