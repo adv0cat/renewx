@@ -6,12 +6,12 @@ export const initLogger = (log: (...data: any[]) => void): Unsubscribe => {
     ActionAPI.setAddInfo(true);
     const unsubscribe = StoreAPI.watch((storeID) => {
       const store = StoreAPI.storeById(storeID);
-      if (store !== undefined) {
+      if (store) {
         const storeName = store.name();
         watch(
           store,
           (v, isFirst, info) => {
-            if (info !== undefined) {
+            if (info) {
               const { id: actionID, path: storeIDList } = info;
               if (isFirst) {
                 log(`${storeName}.#init:`, v);
