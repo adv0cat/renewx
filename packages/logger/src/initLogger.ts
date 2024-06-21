@@ -12,23 +12,23 @@ export const initLogger = (log: (...data: any[]) => void): Unsubscribe => {
           store,
           (v, isFirst, info) => {
             if (info) {
-              const { id: actionID, path: storeIDList } = info;
               if (isFirst) {
-                log(`${storeName}.#init:`, v);
+                log(storeName + ".#init:", v);
               } else {
-                const actionName = ActionAPI.nameById(actionID);
-                if (storeIDList.length === 1) {
-                  log(`${storeName}.${actionName}:`, v);
-                } else {
-                  const pathOfAction = storeIDList
-                    .map(
-                      (storeID, index) =>
-                        StoreAPI.storeById(storeID)?.name() +
-                        (index === 0 ? `.${actionName}` : ""),
-                    )
-                    .join(" --> ");
-                  log(`${pathOfAction}.#up:`, v);
-                }
+                const storeIDList = info.path;
+                const actionName = "." + ActionAPI.nameById(info.id);
+                log(
+                  storeIDList.length > 1
+                    ? storeIDList
+                        .map(
+                          (storeID, index) =>
+                            StoreAPI.storeById(storeID)?.name() +
+                            (index === 0 ? actionName : ""),
+                        )
+                        .join(" --> ") + ".#up:"
+                    : storeName + actionName + ":",
+                  v,
+                );
               }
             }
           },
