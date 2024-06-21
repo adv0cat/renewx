@@ -10,8 +10,6 @@ export const batchStoresEnd = () => {
   addAdjacency(adjacencyList.length - 1, []);
 };
 
-const isNotUndefined = (v?: StoreID): v is StoreID => v !== undefined;
-
 export const createAdjacency = (id: StoreID) =>
   (adjacencyList[id] = deepAdjacencyList[id] = []);
 
@@ -36,7 +34,7 @@ export const addAdjacency = (primaryId: StoreID, dependsOn: StoreID[]) => {
       deepAdjacency(id);
 
       list[id] = undefined;
-      deepAdjacencyList[id] = list.filter(isNotUndefined);
+      deepAdjacencyList[id] = list.filter((v) => v !== undefined);
     }
   }
 };
