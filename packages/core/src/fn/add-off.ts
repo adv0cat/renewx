@@ -1,21 +1,15 @@
-import type { HasOff } from "../types/off";
-import type { Cleaner } from "../types/cleaner";
-import type { HasStore, WithOff } from "../types/add-off";
+import type { Cleaner, Off } from "../types/cleaner";
+import type { HasStore } from "../types/add-off";
 import { cleaner } from "./cleaner";
 
 export const addOff =
   <Args extends unknown[], Type extends HasStore>(
     factory: (cleaner: Cleaner, ...v: Args) => Type,
-  ): ((...v: Args) => WithOff<Type>) =>
+  ): ((...v: Args) => Type & Off) =>
   (...args) => {
     const _cleaner = cleaner();
+    const instance = factory(_cleaner, ...args);
 
-    const result = factory(_cleaner, ...args);
-    _cleaner.add(result.store);
-
-    const _off = (result as Partial<HasOff>).off;
-    (result as Partial<HasOff>).off = _off
-      ? (...offArgs: any[]) => (_cleaner.off() as undefined) || _off(...offArgs)
-      : _cleaner.off;
-    return result as WithOff<Type>;
+    _cleaner.add(instance.store);
+    return Object.assign(instance, { off: _cleaner.off });
   };

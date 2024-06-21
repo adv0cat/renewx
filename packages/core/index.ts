@@ -27,18 +27,16 @@ export type { AdapterStore } from "./src/types/adapter";
 // TODO: export JoinStore after update join store
 
 export type {
-  WithOff,
   HasStore,
   HasStoreWith,
   HasReadOnlyStoreWith,
 } from "./src/types/add-off";
-export type { Cleaner } from "./src/types/cleaner";
+export type { Cleaner, Off, Disposable } from "./src/types/cleaner";
 export type { Watcher } from "./src/types/watch";
 export type { StoreActions } from "./src/types/actions";
 
 export type { Unsubscribe } from "./src/types/core";
 export type { Freeze } from "./src/types/freeze";
-export type { Off } from "./src/types/off";
 export type { Config } from "./src/types/config";
 
 export type {

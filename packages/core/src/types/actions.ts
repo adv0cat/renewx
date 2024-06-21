@@ -1,7 +1,7 @@
 import type { AnyActionStore } from "./any-store";
 import type { ActionFn, ActionFnReturn, ActionInfo } from "./action";
 import type { OmitFirstArg } from "./core";
-import type { Off } from "./off";
+import type { Off } from "./cleaner";
 
 export type Actions<
   Store extends AnyActionStore,

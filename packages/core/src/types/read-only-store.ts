@@ -2,7 +2,7 @@ import type { AnyTag, ReadableTag } from "./tag";
 import type { StoreID } from "./id";
 import type { Freeze } from "./freeze";
 import type { AnyStoreName } from "./name";
-import type { Off } from "./off";
+import type { Off } from "./cleaner";
 
 export interface ReadOnlyStore<State, TagType extends AnyTag = ReadableTag>
   extends Off {
