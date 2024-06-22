@@ -1,4 +1,5 @@
 ### Simple example:
+
 ```mermaid
 graph LR
   entry --> 1;
@@ -16,6 +17,7 @@ graph LR
 ```
 
 ### Complicate example:
+
 ```mermaid
 graph LR
     0 --> 5;

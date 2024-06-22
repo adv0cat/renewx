@@ -1,4 +1,8 @@
 {
   "files": [],
-  "references": [{ "path": "packages/core" }, { "path": "packages/logger" }, { "path": "packages/vue3" }]
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/logger" },
+    { "path": "packages/vue3" }
+  ]
 }

@@ -8,9 +8,5 @@ export type AnyTag = Tag<string, boolean>;
 export type AdapterTag = Tag<"a">;
 export type StoreTag = Tag<"s", true>;
 export type JoinTag = Tag<"j", true>;
-export type ToReadOnly<SomeTag extends WritableTag> = SomeTag extends Tag<
-  infer TagType,
-  true
->
-  ? Tag<TagType>
-  : never;
+export type ToReadOnly<SomeTag extends WritableTag> =
+  SomeTag extends Tag<infer TagType, true> ? Tag<TagType> : never;

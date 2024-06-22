@@ -26,13 +26,12 @@ Subscribe to store changes and use reactive store state
 
 > ⚠️ If you're utilizing dynamically created `store` or `adapter`,
 > it's important to pass `true` as the second parameter in `useStore`.
-> 
+>
 > > This indicates that upon exiting the `scope`, not only will
 > the change listener be cleared, but `store.off()` will also be invoked,
 > ensuring proper cleanup.
 
 ```vue
-
 <script setup lang="ts">
   import { store } from "@renewx/core";
   import { useStore } from "@renewx/vue3";
