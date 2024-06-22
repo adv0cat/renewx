@@ -5,7 +5,6 @@ import type { ReadOnlyStore } from "./read-only-store";
 
 export type HasStore<Store extends AnyActionStore | AnyStore = AnyStore> = {
   store: Store;
-  readonly off?: never;
 };
 export type HasStoreWith<
   State,
