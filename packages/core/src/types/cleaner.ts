@@ -1,5 +1,6 @@
 import type { Unsubscribe } from "./core";
 
+export type WithOff<Type> = Omit<Type, "off"> & Off;
 export interface Off {
   off(): void;
 }
