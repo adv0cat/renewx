@@ -132,7 +132,7 @@ Setting up a `watch` to respond to state changes and log them to the console.
 ```typescript
 import { watch } from "@renewx/core";
 
-watch([userData, userLevel], (state, levelState) => {
+watch([userData, userLevel], ([state, levelState]) => {
   console.log("User Score:", state.userScore);
   console.log("User Level:", levelState.level);
 });
@@ -159,7 +159,7 @@ Executing a `transaction` that demonstrates `async` functionality.
 ```typescript
 import { tx } from "@renewx/core";
 
-const updateScore = tx([userData], async ([userTxState], bonusScore) => {
+const updateScore = tx([userData], async ([userTxState], bonusScore: number) => {
   const currentScore = userTxState.get().userScore;
 
   // The Promise here simulates an asynchronous operation, like fetching data from a server.
@@ -270,7 +270,7 @@ const gameScore = store(initialGameScore);
 
 const combinedData = adapter(
   [userData, gameScore],
-  (userState, gameScoreState) => {
+  ([userState, gameScoreState]) => {
     return {
       userName: userState.userName,
       homeTeamScore: gameScoreState.homeTeamScore,
@@ -317,7 +317,7 @@ const updateTeamScore = action(teamData, (state, additionalScore) => {
 // Create a transaction to reset user score and update team score
 const resetAndUpdate = tx(
   [userData, teamData],
-  async ([userTxState, teamTxState], bonusScore, penaltyScore) => {
+  async ([userTxState, teamTxState], bonusScore: number, penaltyScore: number) => {
     // Reset user score
     userTxState.set({ userScore: 0 });
 
