@@ -1,14 +1,14 @@
 import type { Cleaner, Off } from "../types/cleaner";
-import type { HasStore } from "../types/add-off";
+import type { HasStore } from "../types/has-store";
 import { cleaner } from "./cleaner";
 
-export const addOff =
+export const creator =
   <Args extends unknown[], Type extends HasStore>(
-    factory: (cleaner: Cleaner, ...v: Args) => Type & { readonly off?: never },
+    fn: (cleaner: Cleaner, ...v: Args) => Type & { readonly off?: never },
   ): ((...v: Args) => Type & Off) =>
   (...args) => {
     const _cleaner = cleaner();
-    const instance = factory(_cleaner, ...args);
+    const instance = fn(_cleaner, ...args);
 
     _cleaner.add(instance.store);
     return Object.assign(instance, { off: _cleaner.off });

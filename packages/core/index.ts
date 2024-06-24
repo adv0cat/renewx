@@ -4,7 +4,8 @@ export { adapter } from "./src/adapter";
 export { watch } from "./src/fn/watch";
 export { action, actions } from "./src/fn/actions";
 export { cleaner } from "./src/fn/cleaner";
-export { addOff } from "./src/fn/add-off";
+export { creator } from "./src/fn/creator";
+export { setup } from "./src/fn/setup";
 export { tx } from "./src/utils/tx";
 
 export { mainConfig } from "./src/main-config";
@@ -30,7 +31,7 @@ export type {
   HasStore,
   HasStoreWith,
   HasReadOnlyStoreWith,
-} from "./src/types/add-off";
+} from "./src/types/has-store";
 export type { Cleaner, Off, Disposable } from "./src/types/cleaner";
 export type { Watcher } from "./src/types/watch";
 export type { StoreActions } from "./src/types/actions";
