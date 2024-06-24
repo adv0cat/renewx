@@ -38,15 +38,15 @@ Subscribe to store changes and use reactive store state
   import { title } from "../stores/title";
   import { user } from "../stores/user";
 
-  const Title = useStore(title);
-  const User = useStore(user);
-  const IsShow = useStore(store(false, "IS-SHOW"), { withOff: true });
+  const $title = useStore(title);
+  const $user = useStore(user);
+  const $isShow = useStore(store(false, "IS-SHOW"), { withOff: true });
 </script>
 
 <template>
-  <h1 v-text="Title" />
-  <button v-on:click="IsShow = !IsShow">Toggle me</button>
-  <span v-if="IsShow">{{ User.nickname }}</span>
+  <h1 v-text="$title" />
+  <button v-on:click="$isShow = !$isShow">Toggle me</button>
+  <span v-if="$isShow">{{ $user.nickname }}</span>
 </template>
 ```
 
