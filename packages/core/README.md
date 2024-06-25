@@ -477,6 +477,54 @@ counterActions.reset();
 console.log(counter.get()); // 0
 ```
 
+### Cleaner Utility
+
+RenewX provides a `cleaner` utility for managing disposable resources. This is particularly useful for grouping multiple unsubscribe functions or `off` methods, making resource cleanup more manageable.
+
+```typescript
+import { cleaner } from "@renewx/core";
+
+const resourceCleaner = cleaner();
+
+// Adding disposables
+const unsubscribe1 = resourceCleaner.add(() => console.log("Resource 1 cleaned"));
+const unsubscribe2 = resourceCleaner.add(() => console.log("Resource 2 cleaned"));
+
+// Removing a specific disposable
+resourceCleaner.remove(unsubscribe1);
+
+// Cleaning up all remaining resources
+resourceCleaner.off();
+```
+
+The `cleaner` function accepts any number of disposable items. A disposable can be:
+- An object with an `off` method
+- A function that performs cleanup when called
+- `undefined` or `null` (which are ignored)
+
+You can add disposables at any time using the `add` method, remove specific disposables with the `remove` method, and clean up all resources at once with the `off` method.
+
+Here's an example of using `cleaner` with watchers:
+
+```typescript
+import { store, watch, cleaner } from "@renewx/core";
+
+const userStore = store({ name: "John", age: 30 }, "USER");
+const taskStore = store([], "TASKS");
+
+const appCleaner = cleaner();
+
+appCleaner.add(
+  watch(userStore, (user) => console.log("User updated:", user)),
+  watch(taskStore, (tasks) => console.log("Tasks updated:", tasks))
+);
+
+// Later, when you want to clean up all watchers:
+appCleaner.off();
+```
+
+Using the `cleaner` utility helps prevent memory leaks by ensuring all resources are properly disposed of when they're no longer needed.
+
 ### Read-Only Store Access
 
 In some cases, you might want to provide read-only access to a store. RenewX offers a `readOnly` property for this purpose.
