@@ -97,11 +97,13 @@ const createTodoList = creator((cleaner): TodoList => {
 });
 
 // Use setup to create a reusable watch setup
-const setupTodoWatch = setup((todoList: TodoList) =>
-  watch(todoList.store, (state) => {
-    console.log(`Total todos: ${state.length}`);
-    console.log(`Incomplete todos: ${todoList.getIncomplete().length}`);
-  }),
+const setupTodoWatch = setup((cleaner, todoList: TodoList) =>
+  cleaner.add(
+    watch(todoList.store, (state) => {
+      console.log(`Total todos: ${state.length}`);
+      console.log(`Incomplete todos: ${todoList.getIncomplete().length}`);
+    }),
+  ),
 );
 
 // Usage
@@ -210,16 +212,17 @@ const userActivity = store<UserActivity>(
 );
 
 const setupUserMonitor = setup(
-  (profile: Store<UserProfile>, activity: Store<UserActivity>) => [
-    watch(profile, ({ name, age }) => {
-      console.log(`Profile updated: ${name}, ${age} years old`);
-    }),
-    watch(activity, ({ lastLogin, loginCount }) => {
-      console.log(
-        `Last login: ${lastLogin.toLocaleString()}, Total logins: ${loginCount}`,
-      );
-    }),
-  ],
+  (cleaner, profile: Store<UserProfile>, activity: Store<UserActivity>) =>
+    cleaner.add(
+      watch(profile, ({ name, age }) => {
+        console.log(`Profile updated: ${name}, ${age} years old`);
+      }),
+      watch(activity, ({ lastLogin, loginCount }) => {
+        console.log(
+          `Last login: ${lastLogin.toLocaleString()}, Total logins: ${loginCount}`,
+        );
+      }),
+    ),
 );
 
 // Usage

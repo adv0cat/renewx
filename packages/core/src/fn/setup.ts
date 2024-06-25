@@ -1,11 +1,12 @@
-import type { Disposable, Off } from "../types/cleaner";
+import type { Cleaner, Off } from "../types/cleaner";
 import { cleaner } from "./cleaner";
 
 export const setup =
   <Args extends unknown[]>(
-    fn: (...v: Args) => Disposable[] | Disposable,
+    fn: (cleaner: Cleaner, ...v: Args) => void,
   ): ((...v: Args) => Off) =>
   (...args) => {
-    const items = fn(...args);
-    return cleaner(...(Array.isArray(items) ? items : [items]));
+    const _cleaner = cleaner();
+    fn(_cleaner, ...args);
+    return _cleaner;
   };
