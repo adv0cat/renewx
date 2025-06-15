@@ -21,10 +21,10 @@
   "author": "adv0cat",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "0.21.5",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.2",
-    "vue": "^3.4.29"
+    "esbuild": "^0.25.5",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vue": "^3.5.16"
   },
   "keywords": [
     "store",
