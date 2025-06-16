@@ -6,6 +6,7 @@ export { action, actions } from "./src/fn/actions";
 export { cleaner } from "./src/fn/cleaner";
 export { creator } from "./src/fn/creator";
 export { setup } from "./src/fn/setup";
+export { setDiffUnInterval } from "./src/fn/set-diff-un-interval";
 export { setUnTimeout } from "./src/fn/set-un-timeout";
 export { unsubscribe } from "./src/fn/unsubscribe";
 export { tx } from "./src/utils/tx";
