@@ -1,6 +1,9 @@
-import type { Unsubscribe } from '@renewx/core';
+import type { Unsubscribe } from "../types/core";
 
-export const setDiffUnInterval = (tick: (diff: number) => void, timeout = 100): Unsubscribe => {
+export const setDiffUnInterval = (
+  tick: (diff: number) => void,
+  timeout = 100,
+): Unsubscribe => {
   // If startTime is 0, the interval is stopped forever
   let startTime = Date.now();
   let isOnTick = false;
@@ -13,7 +16,7 @@ export const setDiffUnInterval = (tick: (diff: number) => void, timeout = 100): 
         // NOTE: If we set isOnTick to false in unsubscribe function, then we should set startTime to 0 here
         startTime = isOnTick ? newTime : 0;
       } catch (e) {
-        console.error('Diff interval tick error:', e);
+        console.error("Diff interval tick error:", e);
       }
       isOnTick = false;
     }

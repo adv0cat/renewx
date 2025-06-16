@@ -1,4 +1,4 @@
-import type { Unsubscribe } from "@renewx/core";
+import type { Unsubscribe } from "../types/core";
 
 export const setUnTimeout = (
   callback: (...args: any) => void,
