@@ -6,6 +6,7 @@ export { action, actions } from "./src/fn/actions";
 export { cleaner } from "./src/fn/cleaner";
 export { creator } from "./src/fn/creator";
 export { setup } from "./src/fn/setup";
+export { unsubscribe } from "./src/fn/unsubscribe";
 export { tx } from "./src/utils/tx";
 
 export { mainConfig } from "./src/main-config";
