@@ -16,14 +16,19 @@
     "vue3:patch": "npm version patch --workspace @renewx/vue3",
     "vue3:publish": "npm run build --workspace @renewx/vue3; npm pack --workspace @renewx/vue3",
     "logger:patch": "npm version patch --workspace @renewx/logger",
-    "logger:publish": "npm run build --workspace @renewx/logger; npm pack --workspace @renewx/logger"
+    "logger:publish": "npm run build --workspace @renewx/logger; npm pack --workspace @renewx/logger",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "author": "adv0cat",
   "license": "MIT",
   "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "esbuild": "^0.25.5",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
     "vue": "^3.5.16"
   },
   "keywords": [
