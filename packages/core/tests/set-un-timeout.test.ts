@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { setUnTimeout } from '@renewx/core';
+import { describe, it, expect, vi } from "vitest";
+import { setUnTimeout } from "../src/fn/set-un-timeout";
 
-describe('setUnTimeout', () => {
-  it('executes callback immediately when unsubscribed before timeout', () => {
+describe("setUnTimeout", () => {
+  it("executes callback immediately when unsubscribed before timeout", () => {
     vi.useFakeTimers();
     const fn = vi.fn();
     const un = setUnTimeout(fn, 100);
@@ -13,7 +13,7 @@ describe('setUnTimeout', () => {
     vi.useRealTimers();
   });
 
-  it('executes callback after timeout if not unsubscribed', () => {
+  it("executes callback after timeout if not unsubscribed", () => {
     vi.useFakeTimers();
     const fn = vi.fn();
     const un = setUnTimeout(fn, 50);

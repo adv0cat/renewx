@@ -12,7 +12,7 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      exclude: [...configDefaults.exclude],
+      exclude: [...configDefaults.exclude, "**/types/*.ts", "**/join.ts"],
     },
   },
 });

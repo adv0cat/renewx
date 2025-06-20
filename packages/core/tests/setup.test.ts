@@ -1,11 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import { store, watch, setup } from '@renewx/core';
+import { describe, it, expect } from "vitest";
+import { store, watch, setup, type Store } from "@renewx/core";
 
-describe('setup', () => {
-  it('creates reusable watcher with cleanup', () => {
+describe("setup", () => {
+  it("creates reusable watcher with cleanup", () => {
     const values: number[] = [];
-    const setupWatcher = setup((cleaner, s: ReturnType<typeof store>) => {
-      cleaner.add(watch(s, (v) => values.push(v)));
+    const setupWatcher = setup((cleaner, s: Store<number>) => {
+      cleaner.add(
+        watch(s, (v) => {
+          values.push(v);
+        }),
+      );
     });
 
     const s = store(0);

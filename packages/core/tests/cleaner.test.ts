@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { cleaner } from '@renewx/core';
+import { describe, it, expect, vi } from "vitest";
+import { cleaner } from "@renewx/core";
 
-describe('cleaner', () => {
-  it('cleans up added disposables', () => {
+describe("cleaner", () => {
+  it("cleans up added disposables", () => {
     const fn1 = vi.fn();
     const fn2 = vi.fn();
     const fn3 = vi.fn();

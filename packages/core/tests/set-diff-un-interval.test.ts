@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { setDiffUnInterval } from '@renewx/core';
+import { describe, it, expect, vi } from "vitest";
+import { setDiffUnInterval } from "../src/fn/set-diff-un-interval";
 
-describe('setDiffUnInterval', () => {
-  it('calls with time difference and stops on unsubscribe', () => {
+describe("setDiffUnInterval", () => {
+  it("calls with time difference and stops on unsubscribe", () => {
     vi.useFakeTimers();
     const diffs: number[] = [];
     const un = setDiffUnInterval((d) => diffs.push(d), 100);
@@ -14,7 +14,7 @@ describe('setDiffUnInterval', () => {
     vi.useRealTimers();
   });
 
-  it('handles unsubscribe during tick', () => {
+  it("handles unsubscribe during tick", () => {
     vi.useFakeTimers();
     const diffs: number[] = [];
     let un: () => void;

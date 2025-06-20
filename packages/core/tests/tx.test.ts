@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { store, tx } from '@renewx/core';
+import { describe, it, expect, vi } from "vitest";
+import { store, tx } from "@renewx/core";
 
-describe('tx', () => {
-  it('commits changes to multiple stores', async () => {
+describe("tx", () => {
+  it("commits changes to multiple stores", async () => {
     const a = store(1);
     const b = store(2);
     const update = tx([a, b], async ([at, bt], x: number, y: number) => {
@@ -17,7 +17,7 @@ describe('tx', () => {
     expect(b.get()).toBe(6);
   });
 
-  it('rolls back when state changes during transaction', async () => {
+  it("rolls back when state changes during transaction", async () => {
     vi.useFakeTimers();
     const s = store(0);
     const op = tx([s], async ([st], v: number) => {
