@@ -325,6 +325,72 @@ In this example, `createPortfolio` encapsulates all the logic related to managin
 
 These advanced concepts, `setup` and `creator`, provide powerful tools for structuring your application's state management in a clean and maintainable way. They allow you to create reusable patterns and encapsulate related functionality, leading to more organized and easier to understand code.
 
+### Additional Utilities
+
+RenewX includes helper functions for managing cleanup and timers.
+
+#### unsubscribe
+
+`unsubscribe` combines multiple disposables into a single function. It's handy for nested watchers.
+
+```typescript
+import { store, watch, unsubscribe } from "@renewx/core";
+
+const user = store({ id: 1 }, "USER");
+const notifications = store<string[]>([], "NOTIFICATIONS");
+const settings = store({ theme: "light" }, "SETTINGS");
+
+watch(user, (u) => {
+  console.log("current user:", u.id);
+
+  return unsubscribe(
+    watch(notifications, (n) => console.log("notifications:", n.length)),
+    watch(settings, (s) => console.log("theme:", s.theme)),
+  );
+});
+```
+
+#### setUnTimeout
+
+`setUnTimeout` returns a function that cancels the timeout. A common use is stopping a nested watcher after some delay.
+
+```typescript
+import { store, watch, setUnTimeout } from "@renewx/core";
+
+const user = store({ id: 1 }, "USER");
+const notifications = store<string[]>([], "NOTIFICATIONS");
+
+watch(user, (u) => {
+  console.log("current user:", u.id);
+
+  // start watching notifications but automatically stop after 5 seconds
+  return setUnTimeout(
+    watch(notifications, (n) => {
+      console.log("notifications:", n.length);
+    }),
+    5000,
+  );
+});
+```
+
+#### setDiffUnInterval
+
+`setDiffUnInterval` works like `setInterval` but passes the elapsed time between calls. This is useful for tracking running time.
+
+```typescript
+import { store, setDiffUnInterval } from "@renewx/core";
+
+const elapsed = store(0, "ELAPSED");
+
+const stop = setDiffUnInterval((diff) => {
+  elapsed.set(elapsed.get() + diff);
+  console.log(`elapsed ${elapsed.get()}ms`);
+}, 1000);
+
+// Later
+stop();
+```
+
 ## Advanced Usage
 
 ### Nested Watchers
