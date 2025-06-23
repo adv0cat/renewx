@@ -8,6 +8,7 @@
   "private": false,
   "sideEffects": false,
   "scripts": {
+    "test": "vitest run",
     "build": "rm -rf dist; npm run build:lib -- --analyze=verbose; tsc --emitDeclarationOnly",
     "build:lib": "esbuild ./index.ts --bundle --platform=neutral --outdir=dist --target=es2015 --minify --tree-shaking=true --sourcemap=external --format=esm"
   },
