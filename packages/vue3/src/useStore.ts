@@ -44,7 +44,7 @@ export const useStore = <T>(
   (CACHE[store.id] = customRef(
     (track, trigger) =>
       trackStore(store, config, (CACHE_TRACK[store.id] = trigger)) || {
-        get: () => (track() as undefined) || store.get(),
+        get: () => (track(), store.get()),
         set: (store as AnyActionStore).set || trigger,
       },
   ));
