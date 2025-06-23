@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { store, watch, setup, type Store } from "@renewx/core";
+import type { Store } from "../src/types/store";
+import { setup } from "../src/fn/setup";
+import { store } from "../src/store";
+import { watch } from "../src/fn/watch";
 
 describe("setup", () => {
   it("creates reusable watcher with cleanup", () => {

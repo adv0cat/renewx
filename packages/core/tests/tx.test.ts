@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { store, tx } from "@renewx/core";
+import { store } from "../src/store";
+import { tx } from "../src/utils/tx";
 
 describe("tx", () => {
   it("commits changes to multiple stores", async () => {

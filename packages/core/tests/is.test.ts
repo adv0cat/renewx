@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { store, isAnyStore, isActionStore } from "@renewx/core";
-import { isStateChanged } from "../src/utils/is";
+import { store } from "../src/store";
+import { isActionStore, isAnyStore, isStateChanged } from "../src/utils/is";
 
 describe("utils/is", () => {
   it("detects state changes correctly", () => {

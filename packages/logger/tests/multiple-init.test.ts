@@ -1,9 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { initLogger } from '@renewx/logger';
+import { describe, it, expect } from "vitest";
+import { initLogger } from "../src/initLogger";
 
-
-describe('initLogger multiple calls', () => {
-  it('returns same unsubscribe while active and new one after off', () => {
+describe("initLogger multiple calls", () => {
+  it("returns same unsubscribe while active and new one after off", () => {
     const un1 = initLogger(() => {});
     const un2 = initLogger(() => {});
     expect(un1).toBe(un2);

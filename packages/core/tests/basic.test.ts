@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { store, watch } from "@renewx/core";
+import { store } from "../src/store";
+import { watch } from "../src/fn/watch";
 
 describe("core store", () => {
   it("returns initial state", () => {

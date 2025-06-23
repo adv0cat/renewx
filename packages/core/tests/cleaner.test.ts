@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { cleaner } from "@renewx/core";
+import { cleaner } from "../src/fn/cleaner";
 
 describe("cleaner", () => {
   it("cleans up added disposables", () => {

@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { adapter, store, watch } from "@renewx/core";
+import { store } from "../src/store";
+import { adapter } from "../src/adapter";
+import { watch } from "../src/fn/watch";
 
 describe("adapter", () => {
   it("updates when base store changes", () => {

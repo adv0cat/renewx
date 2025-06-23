@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { store, action, actions } from "@renewx/core";
+import { store } from "../src/store";
+import { action, actions } from "../src/fn/actions";
 
 describe("actions", () => {
   it("creates single action that updates store", () => {

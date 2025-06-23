@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { store, creator } from "@renewx/core";
+import { creator } from "../src/fn/creator";
+import { store } from "../src/store";
 
 describe("creator", () => {
   it("wraps initialization and cleanup", () => {
